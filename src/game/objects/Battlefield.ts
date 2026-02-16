@@ -36,6 +36,10 @@ export class Battlefield {
   }
 
   public createGrid(config: CreateGridConfig): number {
+    return this.drawGrid(config);
+  }
+
+  public drawGrid(config: CreateGridConfig): number {
     this.slots.length = 0;
     this.cells.length = 0;
     this.cellByBodyId.clear();
@@ -51,7 +55,10 @@ export class Battlefield {
     const columns = Math.max(1, Math.floor(availableWidth / cellSize));
     const rows = Math.max(1, Math.floor(availableHeight / cellSize) + 1);
     const gridWidth = columns * cellSize;
-    const startX = config.playfieldLeft + (config.playfieldWidth - gridWidth) / 2 + cellSize / 2;
+    const startX =
+      config.playfieldLeft +
+      (config.playfieldWidth - gridWidth) / 2 +
+      cellSize / 2;
     const colliderWidth = cellSize;
 
     const eligibleCatCageIndices: number[] = [];
@@ -67,7 +74,9 @@ export class Battlefield {
       eligibleCatCageIndices[i] = eligibleCatCageIndices[j];
       eligibleCatCageIndices[j] = tmp;
     }
-    const catCageIndices = new Set(eligibleCatCageIndices.slice(0, catCagesPerLevel));
+    const catCageIndices = new Set(
+      eligibleCatCageIndices.slice(0, catCagesPerLevel),
+    );
     let cellIndex = 0;
 
     for (let row = 0; row < rows; row += 1) {
@@ -77,20 +86,36 @@ export class Battlefield {
         const slotIndex = this.slots.length;
         const slot: BattlefieldSlot = { x, y, size: cellSize, row, col };
         this.slots.push(slot);
-        const type = catCageIndices.has(cellIndex) ? CellType.CAT_CAGE : CellType.BASIC;
+        const type = catCageIndices.has(cellIndex)
+          ? CellType.CAT_CAGE
+          : CellType.BASIC;
         if (type === CellType.BASIC && Math.random() < config.emptyCellChance) {
           cellIndex += 1;
           continue;
         }
-        const hasResource = type !== CellType.CAT_CAGE && Math.random() < config.resourceDropChance;
+        const hasResource =
+          type !== CellType.CAT_CAGE &&
+          Math.random() < config.resourceDropChance;
         const resourceAmount = hasResource ? Phaser.Math.Between(0, 100) : null;
-        this.spawnCellInSlot(slotIndex, type, Phaser.Math.Between(1, 4), colliderWidth, resourceAmount);
+        this.spawnCellInSlot(
+          slotIndex,
+          type,
+          Phaser.Math.Between(1, 4),
+          colliderWidth,
+          resourceAmount,
+        );
         cellIndex += 1;
       }
     }
 
     if (this.cells.length === 0 && this.slots.length > 0) {
-      this.spawnCellInSlot(Math.floor(this.slots.length / 2), CellType.BASIC, 2, colliderWidth, null);
+      this.spawnCellInSlot(
+        Math.floor(this.slots.length / 2),
+        CellType.BASIC,
+        2,
+        colliderWidth,
+        null,
+      );
     }
 
     return catCagesPerLevel;
@@ -144,7 +169,10 @@ export class Battlefield {
     return this.slots;
   }
 
-  public destroyCellByBodyId(bodyId: number, callbacks?: DestroyCellCallbacks): void {
+  public destroyCellByBodyId(
+    bodyId: number,
+    callbacks?: DestroyCellCallbacks,
+  ): void {
     const cell = this.cellByBodyId.get(bodyId);
     if (!cell) {
       return;
@@ -186,27 +214,47 @@ export class Battlefield {
       return { x: fallbackNormalX, y: fallbackNormalY };
     }
 
-    const hasHorizontalNeighbor = this.hasCellAt(slot.row, slot.col - 1) || this.hasCellAt(slot.row, slot.col + 1);
-    const hasVerticalNeighbor = this.hasCellAt(slot.row - 1, slot.col) || this.hasCellAt(slot.row + 1, slot.col);
+    const hasHorizontalNeighbor =
+      this.hasCellAt(slot.row, slot.col - 1) ||
+      this.hasCellAt(slot.row, slot.col + 1);
+    const hasVerticalNeighbor =
+      this.hasCellAt(slot.row - 1, slot.col) ||
+      this.hasCellAt(slot.row + 1, slot.col);
 
     if (hasHorizontalNeighbor && !hasVerticalNeighbor) {
-      const y = fallbackNormalY !== 0 ? Math.sign(fallbackNormalY) : -Math.sign(velocityY || 1);
+      const y =
+        fallbackNormalY !== 0
+          ? Math.sign(fallbackNormalY)
+          : -Math.sign(velocityY || 1);
       return { x: 0, y };
     }
     if (hasVerticalNeighbor && !hasHorizontalNeighbor) {
-      const x = fallbackNormalX !== 0 ? Math.sign(fallbackNormalX) : -Math.sign(velocityX || 1);
+      const x =
+        fallbackNormalX !== 0
+          ? Math.sign(fallbackNormalX)
+          : -Math.sign(velocityX || 1);
       return { x, y: 0 };
     }
 
     if (Math.abs(velocityX) >= Math.abs(velocityY)) {
-      const x = fallbackNormalX !== 0 ? Math.sign(fallbackNormalX) : -Math.sign(velocityX || 1);
+      const x =
+        fallbackNormalX !== 0
+          ? Math.sign(fallbackNormalX)
+          : -Math.sign(velocityX || 1);
       return { x, y: 0 };
     }
-    const y = fallbackNormalY !== 0 ? Math.sign(fallbackNormalY) : -Math.sign(velocityY || 1);
+    const y =
+      fallbackNormalY !== 0
+        ? Math.sign(fallbackNormalY)
+        : -Math.sign(velocityY || 1);
     return { x: 0, y };
   }
 
-  private destroyCell(cell: Cell, bodyId: number, callbacks?: DestroyCellCallbacks): void {
+  private destroyCell(
+    cell: Cell,
+    bodyId: number,
+    callbacks?: DestroyCellCallbacks,
+  ): void {
     this.cellByBodyId.delete(bodyId);
     const slotIndex = this.cellSlotByBodyId.get(bodyId);
     if (slotIndex !== undefined) {
@@ -226,6 +274,8 @@ export class Battlefield {
   }
 
   private hasCellAt(row: number, col: number): boolean {
-    return this.slots.some((slot) => slot.row === row && slot.col === col && !!slot.cell);
+    return this.slots.some(
+      (slot) => slot.row === row && slot.col === col && !!slot.cell,
+    );
   }
 }

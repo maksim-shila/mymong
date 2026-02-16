@@ -81,7 +81,10 @@ export class DropSystem {
   }
 
   public createCatDrop(x: number, y: number, textureKey: string): void {
-    const sprite = this.scene.add.image(x, y, textureKey).setDisplaySize(20, 20).setDepth(52);
+    const sprite = this.scene.add
+      .image(x, y, textureKey)
+      .setDisplaySize(20, 20)
+      .setDepth(52);
     this.catDrops.push({
       sprite,
       collected: false,

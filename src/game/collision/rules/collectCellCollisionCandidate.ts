@@ -27,7 +27,9 @@ export const collectCellCollisionCandidate = <CellT>({
   normalY,
   velocityX,
   velocityY,
-}: CollectCellCollisionCandidateParams<CellT>): CellCollisionCandidate<CellT> | undefined => {
+}: CollectCellCollisionCandidateParams<CellT>):
+  | CellCollisionCandidate<CellT>
+  | undefined => {
   if (!cell) {
     return current;
   }

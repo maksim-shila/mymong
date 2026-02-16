@@ -34,7 +34,9 @@ export class CollisionOrchestrator {
     this.deps = deps;
   }
 
-  public handleCollisionStart(event: Phaser.Physics.Matter.Events.CollisionStartEvent): void {
+  public handleCollisionStart(
+    event: Phaser.Physics.Matter.Events.CollisionStartEvent,
+  ): void {
     let explosionX = this.deps.ball.x;
     let explosionY = this.deps.ball.y;
     let shouldTriggerExplosion = false;
@@ -73,9 +75,12 @@ export class CollisionOrchestrator {
         normalX,
         normalY,
         ball: this.deps.ball,
-        onBreakBuildSite: (site) => this.deps.moleBase.breakBuildSite(site, this.deps.battlefield),
-        onRollbackBuildSite: (site) => this.deps.moleBase.applyBuildRollback(site),
-        shouldBreakOnNormalHit: (site) => site.targetLives <= 1 || site.builtLives <= 0,
+        onBreakBuildSite: (site) =>
+          this.deps.moleBase.breakBuildSite(site, this.deps.battlefield),
+        onRollbackBuildSite: (site) =>
+          this.deps.moleBase.applyBuildRollback(site),
+        shouldBreakOnNormalHit: (site) =>
+          site.targetLives <= 1 || site.builtLives <= 0,
       });
       this.deps.setBallCellHitCooldownMs(buildSiteResolution.nextCooldownMs);
       if (buildSiteResolution.handled) {
@@ -143,7 +148,10 @@ export class CollisionOrchestrator {
     this.deps.ball.applyCollisionDamping(0.36);
     this.deps.ball.constrainBounceByNormal(resolvedNormal.x, resolvedNormal.y);
     const damage = this.deps.ball.consumePushEmpoweredHit() ? 2 : 1;
-    const hitResult = selectedCandidate.cell.handleBallHit(this.deps.ball, damage);
+    const hitResult = selectedCandidate.cell.handleBallHit(
+      this.deps.ball,
+      damage,
+    );
     if (hitResult.destroy) {
       this.deps.onDestroyCellByBodyId(selectedCandidate.body.id);
       this.deps.setBallCellHitCooldownMs(45);

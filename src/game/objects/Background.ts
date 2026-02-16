@@ -14,6 +14,10 @@ export class Background {
   }
 
   public create(width: number, height: number): void {
+    this.draw(width, height);
+  }
+
+  public draw(width: number, height: number): void {
     const columns = Math.ceil(width / this.tileSize);
     const rows = Math.ceil(height / this.tileSize);
 

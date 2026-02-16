@@ -20,9 +20,8 @@ export class Ball extends Phaser.GameObjects.Arc {
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, 10, 0, 360, false, 0xffffff);
-    this.setStrokeStyle(1, 0x1f2d3d, 0.75);
     scene.add.existing(this);
-    this.setDepth(10);
+    this.draw();
 
     this.matterBody = scene.matter.body;
     this.physicsBody = scene.matter.add.circle(x, y, this.ballRadius, {
@@ -31,7 +30,10 @@ export class Ball extends Phaser.GameObjects.Arc {
       frictionAir: 0,
       frictionStatic: 0,
     });
-    this.matterBody.setVelocity(this.physicsBody, { x: 0, y: -this.targetSpeed });
+    this.matterBody.setVelocity(this.physicsBody, {
+      x: 0,
+      y: -this.targetSpeed,
+    });
   }
 
   get bodyRef(): MatterJS.BodyType {
@@ -56,9 +58,14 @@ export class Ball extends Phaser.GameObjects.Arc {
   }
 
   launchFromPaddle(paddleAngleDeg: number, pushStrength = 0): void {
-    const launchAngleDeg = Phaser.Math.Clamp(-90 + paddleAngleDeg * 0.6, -145, -35);
+    const launchAngleDeg = Phaser.Math.Clamp(
+      -90 + paddleAngleDeg * 0.6,
+      -145,
+      -35,
+    );
     const launchAngleRad = Phaser.Math.DegToRad(launchAngleDeg);
-    const pushBonus = Phaser.Math.Clamp(pushStrength, 0, 1) * this.maxPushSpeedBonus;
+    const pushBonus =
+      Phaser.Math.Clamp(pushStrength, 0, 1) * this.maxPushSpeedBonus;
     this.pushEmpoweredHit = pushStrength > 0.05;
     this.speedBonus = Math.max(this.speedBonus, pushBonus);
     const speed = this.targetSpeed + this.speedBonus;
@@ -74,6 +81,12 @@ export class Ball extends Phaser.GameObjects.Arc {
     this.normalizeVelocity(delta);
     this.updateBoostTint();
     this.setPosition(this.physicsBody.position.x, this.physicsBody.position.y);
+  }
+
+  public draw(): void {
+    this.setStrokeStyle(1, 0x1f2d3d, 0.75);
+    this.setFillStyle(this.baseColor, 1);
+    this.setDepth(10);
   }
 
   bounceFromPaddle(paddleAngleDeg: number, pushStrength = 0): void {
@@ -94,7 +107,10 @@ export class Ball extends Phaser.GameObjects.Arc {
     const reflectedLength = Math.hypot(reflectedX, reflectedY);
 
     if (reflectedLength < 0.0001) {
-      this.matterBody.setVelocity(this.physicsBody, { x: 0, y: -this.targetSpeed });
+      this.matterBody.setVelocity(this.physicsBody, {
+        x: 0,
+        y: -this.targetSpeed,
+      });
       return;
     }
 
@@ -121,7 +137,8 @@ export class Ball extends Phaser.GameObjects.Arc {
       dirY *= -1;
     }
 
-    const pushBonus = Phaser.Math.Clamp(pushStrength, 0, 1) * this.maxPushSpeedBonus;
+    const pushBonus =
+      Phaser.Math.Clamp(pushStrength, 0, 1) * this.maxPushSpeedBonus;
     if (pushStrength > 0.05) {
       this.pushEmpoweredHit = true;
     }
@@ -150,7 +167,11 @@ export class Ball extends Phaser.GameObjects.Arc {
       dirY *= -1;
     }
 
-    const targetAngleDeg = Phaser.Math.Clamp(-90 + paddleAngleDeg * 0.75, -155, -25);
+    const targetAngleDeg = Phaser.Math.Clamp(
+      -90 + paddleAngleDeg * 0.75,
+      -155,
+      -25,
+    );
     const targetAngleRad = Phaser.Math.DegToRad(targetAngleDeg);
     const targetX = Math.cos(targetAngleRad);
     const targetY = Math.sin(targetAngleRad);
@@ -174,7 +195,8 @@ export class Ball extends Phaser.GameObjects.Arc {
       dirY *= -1;
     }
 
-    const pushBonus = Phaser.Math.Clamp(pushStrength, 0, 1) * this.maxPushSpeedBonus;
+    const pushBonus =
+      Phaser.Math.Clamp(pushStrength, 0, 1) * this.maxPushSpeedBonus;
     this.pushEmpoweredHit = true;
     this.speedBonus = Math.max(this.speedBonus, pushBonus);
     const boostedSpeed = this.targetSpeed + this.speedBonus;
@@ -190,7 +212,11 @@ export class Ball extends Phaser.GameObjects.Arc {
 
   applyImpactPulse(multiplier = 1): void {
     const pulse = this.impactPulseBonus * Phaser.Math.Clamp(multiplier, 0, 2);
-    this.speedBonus = Phaser.Math.Clamp(this.speedBonus + pulse, 0, this.maxPushSpeedBonus);
+    this.speedBonus = Phaser.Math.Clamp(
+      this.speedBonus + pulse,
+      0,
+      this.maxPushSpeedBonus,
+    );
   }
 
   consumePushEmpoweredHit(): boolean {
@@ -210,7 +236,8 @@ export class Ball extends Phaser.GameObjects.Arc {
 
     let vx = velocity.x;
     let vy = velocity.y;
-    const minComponent = Math.sin(Phaser.Math.DegToRad(this.minCollisionAngleDeg)) * speed;
+    const minComponent =
+      Math.sin(Phaser.Math.DegToRad(this.minCollisionAngleDeg)) * speed;
 
     if (Math.abs(normalY) >= Math.abs(normalX)) {
       if (Math.abs(vy) < minComponent) {
@@ -232,7 +259,10 @@ export class Ball extends Phaser.GameObjects.Arc {
     const speed = Math.hypot(velocity.x, velocity.y);
     const effectiveSpeed = this.targetSpeed + this.speedBonus;
     if (speed < 0.0001) {
-      this.matterBody.setVelocity(this.physicsBody, { x: 0, y: -effectiveSpeed });
+      this.matterBody.setVelocity(this.physicsBody, {
+        x: 0,
+        y: -effectiveSpeed,
+      });
       return;
     }
 
@@ -240,11 +270,15 @@ export class Ball extends Phaser.GameObjects.Arc {
     let normalizedY = velocity.y / speed;
 
     if (normalizedY > 0) {
-      const minDownY = Math.sin(Phaser.Math.DegToRad(this.downAssistMinAngleDeg));
+      const minDownY = Math.sin(
+        Phaser.Math.DegToRad(this.downAssistMinAngleDeg),
+      );
       if (normalizedY < minDownY) {
         const blend = 1 - Math.exp(-this.downAssistRate * (delta / 1000));
         normalizedY = Phaser.Math.Linear(normalizedY, minDownY, blend);
-        const horizontal = Math.sqrt(Math.max(0, 1 - normalizedY * normalizedY));
+        const horizontal = Math.sqrt(
+          Math.max(0, 1 - normalizedY * normalizedY),
+        );
         normalizedX = Math.sign(normalizedX || 1) * horizontal;
       }
     }
@@ -295,8 +329,16 @@ export class Ball extends Phaser.GameObjects.Arc {
     const velocity = this.physicsBody.velocity;
     const speed = Math.hypot(velocity.x, velocity.y);
     const speedDeviation = Math.abs(speed - this.targetSpeed);
-    const tFromBonus = Phaser.Math.Clamp(this.speedBonus / this.maxPushSpeedBonus, 0, 1);
-    const tFromDeviation = Phaser.Math.Clamp(speedDeviation / this.maxPushSpeedBonus, 0, 1);
+    const tFromBonus = Phaser.Math.Clamp(
+      this.speedBonus / this.maxPushSpeedBonus,
+      0,
+      1,
+    );
+    const tFromDeviation = Phaser.Math.Clamp(
+      speedDeviation / this.maxPushSpeedBonus,
+      0,
+      1,
+    );
     const t = Math.max(tFromBonus, tFromDeviation);
     if (t <= 0.001) {
       this.setFillStyle(this.baseColor, 1);
@@ -316,6 +358,4 @@ export class Ball extends Phaser.GameObjects.Arc {
 
     this.setFillStyle(color, 1);
   }
-
 }
-

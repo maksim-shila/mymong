@@ -37,14 +37,15 @@ export class Cell extends Phaser.GameObjects.Rectangle {
     super(scene, x, y, width, height, 0xff7a33);
     this.type = type;
     this.lives =
-      type === CellType.CAT_CAGE ? 3 : Phaser.Math.Clamp(Math.floor(lives), 1, 4);
+      type === CellType.CAT_CAGE
+        ? 3
+        : Phaser.Math.Clamp(Math.floor(lives), 1, 4);
     this.resourceAmount =
-      resourceAmount === null ? null : Phaser.Math.Clamp(Math.floor(resourceAmount), 0, 100);
-    this.updateVisualByLives();
-    this.setStrokeStyle(1, 0x3b2f2f, 0.7);
-    this.setDepth(5);
+      resourceAmount === null
+        ? null
+        : Phaser.Math.Clamp(Math.floor(resourceAmount), 0, 100);
     scene.add.existing(this);
-    this.createTypeVisuals();
+    this.draw();
 
     this.matterWorld = scene.matter.world;
     this.physicsBody = scene.matter.add.rectangle(x, y, colliderWidth, height, {
@@ -98,6 +99,13 @@ export class Cell extends Phaser.GameObjects.Rectangle {
     });
   }
 
+  public draw(): void {
+    this.updateVisualByLives();
+    this.setStrokeStyle(1, 0x3b2f2f, 0.7);
+    this.setDepth(5);
+    this.createTypeVisuals();
+  }
+
   private updateVisualByLives(): void {
     if (this.type === CellType.CAT_CAGE) {
       this.setFillStyle(this.catCageColor, 1);
@@ -120,7 +128,11 @@ export class Cell extends Phaser.GameObjects.Rectangle {
       ),
     );
     const b = Math.round(
-      Phaser.Math.Linear(this.lowLivesColor & 0xff, this.highLivesColor & 0xff, t),
+      Phaser.Math.Linear(
+        this.lowLivesColor & 0xff,
+        this.highLivesColor & 0xff,
+        t,
+      ),
     );
     const color = (r << 16) | (g << 8) | b;
     this.setFillStyle(color, 1);
@@ -128,6 +140,9 @@ export class Cell extends Phaser.GameObjects.Rectangle {
 
   private createTypeVisuals(): void {
     if (this.type !== CellType.CAT_CAGE) {
+      return;
+    }
+    if (this.catSprite) {
       return;
     }
 

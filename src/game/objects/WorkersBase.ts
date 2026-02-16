@@ -12,6 +12,10 @@ type WorkersBaseConfig = {
   sceneHeight: number;
   workerCount: number;
   livesMax: number;
+  workerSpeed: number;
+  workerCooldownMs: number;
+  workerEnergyTaskDurationMs: number;
+  workerEnergyTaskMaxFill: number;
 };
 
 export type WorkersBaseCatPayload = {
@@ -33,12 +37,8 @@ type WorkersUpdateContext<
   ResourcePayload extends WorkersBaseResourcePayload,
 > = {
   deltaMs: number;
-  workerSpeed: number;
-  workerCooldownMs: number;
   energy: number;
   energyMax: number;
-  workerEnergyTaskDurationMs: number;
-  workerEnergyTaskMaxFill: number;
   paddleX: number;
   paddleY: number;
   paddleHeight: number;
@@ -65,6 +65,10 @@ export class WorkersBase<
   private readonly scene: Phaser.Scene;
   private readonly workerCount: number;
   private readonly livesMax: number;
+  private readonly workerSpeed: number;
+  private readonly workerCooldownMs: number;
+  private readonly workerEnergyTaskDurationMs: number;
+  private readonly workerEnergyTaskMaxFill: number;
   private displayedEnergy = 0;
   private energyTween?: Phaser.Tweens.Tween;
   private pendingBallDelivery = false;
@@ -80,6 +84,10 @@ export class WorkersBase<
     this.scene = scene;
     this.workerCount = config.workerCount;
     this.livesMax = config.livesMax;
+    this.workerSpeed = config.workerSpeed;
+    this.workerCooldownMs = config.workerCooldownMs;
+    this.workerEnergyTaskDurationMs = config.workerEnergyTaskDurationMs;
+    this.workerEnergyTaskMaxFill = config.workerEnergyTaskMaxFill;
     this.baseX = config.playfieldLeft * 0.45;
     this.baseY = config.sceneHeight - 70;
     this.baseDropX = this.baseX + 8;
@@ -87,6 +95,10 @@ export class WorkersBase<
   }
 
   public create(): void {
+    this.draw();
+  }
+
+  public draw(): void {
     this.scene.add
       .rectangle(this.baseX, this.baseY, 70, 70, 0x3e4252, 0.88)
       .setStrokeStyle(2, 0xc3cadf, 0.5)
@@ -185,7 +197,7 @@ export class WorkersBase<
           worker.targetX,
           worker.targetY,
           deltaSeconds,
-          context.workerSpeed,
+          this.workerSpeed,
         );
         if (reached) {
           this.onWorkerReachedTarget(worker, context);
@@ -197,7 +209,7 @@ export class WorkersBase<
         if (
           context.energy >= context.energyMax ||
           worker.energyTaskMs <= 0 ||
-          worker.energyTaskFilled >= context.workerEnergyTaskMaxFill
+          worker.energyTaskFilled >= this.workerEnergyTaskMaxFill
         ) {
           if (this.energyWorkerId === worker.id) {
             this.energyWorkerId = undefined;
@@ -209,9 +221,9 @@ export class WorkersBase<
           continue;
         }
         const amount = Math.min(
-          (context.workerEnergyTaskMaxFill * context.deltaMs) /
-            context.workerEnergyTaskDurationMs,
-          context.workerEnergyTaskMaxFill - worker.energyTaskFilled,
+          (this.workerEnergyTaskMaxFill * context.deltaMs) /
+            this.workerEnergyTaskDurationMs,
+          this.workerEnergyTaskMaxFill - worker.energyTaskFilled,
         );
         context.onEnergyGain(amount);
         worker.energyTaskMs -= context.deltaMs;
@@ -257,7 +269,11 @@ export class WorkersBase<
 
   public updateEnergy(currentEnergy: number, energyMax: number): void {
     if (!this.energyTween || !this.energyTween.isPlaying()) {
-      this.displayedEnergy = Phaser.Math.Linear(this.displayedEnergy, currentEnergy, 0.22);
+      this.displayedEnergy = Phaser.Math.Linear(
+        this.displayedEnergy,
+        currentEnergy,
+        0.22,
+      );
     }
     const t = Phaser.Math.Clamp(this.displayedEnergy / energyMax, 0, 1);
     const borderInset = 2;
@@ -584,7 +600,7 @@ export class WorkersBase<
 
     if (worker.task === 'to_energy') {
       worker.task = 'energy';
-      worker.energyTaskMs = context.workerEnergyTaskDurationMs;
+      worker.energyTaskMs = this.workerEnergyTaskDurationMs;
       worker.energyTaskFilled = 0;
       return;
     }
@@ -686,7 +702,7 @@ export class WorkersBase<
         slot.reservedByWorkerId = undefined;
       }
     }
-    worker.startCooldown(context.workerCooldownMs);
+    worker.startCooldown(this.workerCooldownMs);
     worker.targetCat = undefined;
     worker.targetResource = undefined;
     worker.targetCatSlotIndex = undefined;

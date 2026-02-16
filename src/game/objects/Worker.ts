@@ -43,6 +43,7 @@ export class Worker<CatPayload = unknown, ResourcePayload = unknown> {
       .circle(homeX, homeY - 10, 4, 0xfff4cc, 1)
       .setDepth(908) as Phaser.GameObjects.Arc;
     this.cargoBall.setVisible(false);
+    this.draw();
   }
 
   public tickCooldown(deltaMs: number): void {
@@ -91,5 +92,11 @@ export class Worker<CatPayload = unknown, ResourcePayload = unknown> {
     this.body.setDisplaySize(8, 16);
     this.cargoBall.setPosition(this.body.x, this.body.y - 11);
     this.cargoBall.setVisible(this.carryingBall);
+  }
+
+  public draw(): void {
+    this.body.setDepth(907);
+    this.cargoBall.setDepth(908);
+    this.setIdlePose();
   }
 }

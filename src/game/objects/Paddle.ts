@@ -50,9 +50,6 @@ export class Paddle extends Phaser.GameObjects.Rectangle {
 
   constructor(scene: Phaser.Scene, x: number, y: number, input: GameInput) {
     super(scene, x, y, 140, 20, 0xffffff);
-    this.setStrokeStyle(1, 0x1f2d3d, 0.75);
-    this.setDepth(10);
-
     scene.add.existing(this);
     this.shadow = scene.add.rectangle(
       x,
@@ -78,6 +75,7 @@ export class Paddle extends Phaser.GameObjects.Rectangle {
       ghost.setAlpha(0);
       this.boostTrail.push(ghost);
     }
+    this.draw();
     this.matterBody = scene.matter.body;
     this.physicsBody = scene.matter.add.rectangle(
       x,
@@ -215,6 +213,16 @@ export class Paddle extends Phaser.GameObjects.Rectangle {
     this.shadow.setAngle(this.angle);
     this.updateBoostTrail(delta, isBoostActive && direction !== 0);
     this.updatePushCooldownUi();
+  }
+
+  public draw(): void {
+    this.setStrokeStyle(1, 0x1f2d3d, 0.75);
+    this.setDepth(10);
+    this.shadow.setDepth(8);
+    this.pushCooldownUi.setDepth(1202);
+    for (let i = 0; i < this.boostTrail.length; i += 1) {
+      this.boostTrail[i].setStrokeStyle(1, 0x1f2d3d, 0.14);
+    }
   }
 
   private updatePush(

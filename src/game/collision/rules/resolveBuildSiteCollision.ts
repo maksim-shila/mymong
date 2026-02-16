@@ -23,7 +23,10 @@ export const resolveBuildSiteCollision = <BuildSite>({
   onBreakBuildSite,
   onRollbackBuildSite,
   shouldBreakOnNormalHit,
-}: ResolveBuildSiteCollisionParams<BuildSite>): { handled: boolean; nextCooldownMs: number } => {
+}: ResolveBuildSiteCollisionParams<BuildSite>): {
+  handled: boolean;
+  nextCooldownMs: number;
+} => {
   if (!buildSite) {
     return { handled: false, nextCooldownMs: ballCellHitCooldownMs };
   }

@@ -1,5 +1,8 @@
 import { CellType } from '@game/cells/Cell';
-import { type Battlefield, type BattlefieldSlot } from '@game/objects/Battlefield';
+import {
+  type Battlefield,
+  type BattlefieldSlot,
+} from '@game/objects/Battlefield';
 import { Mole } from '@game/objects/Mole';
 
 export type MoleBuildSite = {
@@ -17,10 +20,10 @@ export type MoleBuildSite = {
 
 type MoleBaseConfig = {
   moleCount: number;
-  enragedMoleCount: number;
-  moleSpeed: number;
-  moleCooldownMs: number;
-  moleWarningDurationMs: number;
+  enragedMoleCount?: number;
+  moleSpeed?: number;
+  moleCooldownMs?: number;
+  moleWarningDurationMs?: number;
   showDebugMarkers: boolean;
 };
 
@@ -59,10 +62,10 @@ export class MoleBase {
 
   constructor(scene: Phaser.Scene, config: MoleBaseConfig) {
     this.scene = scene;
-    this.moleSpeed = config.moleSpeed;
-    this.moleCooldownMs = config.moleCooldownMs;
-    this.moleWarningDurationMs = config.moleWarningDurationMs;
-    this.enragedMoleCount = config.enragedMoleCount;
+    this.moleSpeed = config.moleSpeed ?? 130 / 1.5;
+    this.moleCooldownMs = config.moleCooldownMs ?? 3000;
+    this.moleWarningDurationMs = config.moleWarningDurationMs ?? 2000;
+    this.enragedMoleCount = config.enragedMoleCount ?? 5;
     this.showDebugMarkers = config.showDebugMarkers;
     this.createMoles(config.moleCount);
   }
@@ -100,7 +103,10 @@ export class MoleBase {
   }
 
   public applyBuildRollback(site: MoleBuildSite): void {
-    site.remainingBuildMs = Math.min(site.totalBuildMs, site.remainingBuildMs + 1000);
+    site.remainingBuildMs = Math.min(
+      site.totalBuildMs,
+      site.remainingBuildMs + 1000,
+    );
     site.builtLives = this.getBuiltLives(site);
     this.redrawBuildSite(site);
     const mole = this.moles.find((item) => item.id === site.moleId);
@@ -116,9 +122,14 @@ export class MoleBase {
     for (const mole of this.moles) {
       if (mole.task === 'to_site') {
         const moveSpeed = this.moleSpeed * (this.rageActive ? 3 : 1);
-        if (mole.moveTowards(mole.targetX, mole.targetY, deltaSeconds, moveSpeed)) {
+        if (
+          mole.moveTowards(mole.targetX, mole.targetY, deltaSeconds, moveSpeed)
+        ) {
           const slotIndex = mole.slotIndex;
-          const slot = slotIndex === undefined ? undefined : context.battlefield.getSlot(slotIndex);
+          const slot =
+            slotIndex === undefined
+              ? undefined
+              : context.battlefield.getSlot(slotIndex);
           if (!slot || slot.cell || slot.reservedByMoleId !== mole.id) {
             this.resetMole(mole, context.battlefield);
             continue;
@@ -173,7 +184,10 @@ export class MoleBase {
         continue;
       }
 
-      mole.timerMs = Math.max(0, mole.timerMs - context.deltaMs * rageSpeedMultiplier);
+      mole.timerMs = Math.max(
+        0,
+        mole.timerMs - context.deltaMs * rageSpeedMultiplier,
+      );
       if (mole.task === 'warning') {
         if (mole.timerMs <= 0) {
           this.startBuilding(mole, context);
@@ -187,7 +201,10 @@ export class MoleBase {
           this.resetMole(mole, context.battlefield);
           continue;
         }
-        site.remainingBuildMs = Math.max(0, site.remainingBuildMs - context.deltaMs * rageSpeedMultiplier);
+        site.remainingBuildMs = Math.max(
+          0,
+          site.remainingBuildMs - context.deltaMs * rageSpeedMultiplier,
+        );
         site.builtLives = this.getBuiltLives(site);
         site.flickerPhase += context.deltaMs / 1000;
         this.redrawBuildSite(site);
@@ -212,12 +229,18 @@ export class MoleBase {
   }
 
   private tryStartTask(mole: Mole, context: MoleBaseUpdateContext): void {
-    if (context.endState !== 'none' || context.isPaused || !context.hasGameStarted) {
+    if (
+      context.endState !== 'none' ||
+      context.isPaused ||
+      !context.hasGameStarted
+    ) {
       return;
     }
     if (
       !this.rageActive &&
-      this.moles.some((item) => item.task === 'to_site' || item.task === 'warning')
+      this.moles.some(
+        (item) => item.task === 'to_site' || item.task === 'warning',
+      )
     ) {
       return;
     }
@@ -258,20 +281,31 @@ export class MoleBase {
       return;
     }
 
-    this.consumeDropsForBuild(mole, slot, context.resourceDrops, context.catDrops);
+    this.consumeDropsForBuild(
+      mole,
+      slot,
+      context.resourceDrops,
+      context.catDrops,
+    );
 
     mole.indicatorTween?.stop();
     mole.indicator?.destroy();
     mole.indicatorTween = undefined;
     mole.indicator = undefined;
 
-    const body = this.scene.matter.add.rectangle(slot.x, slot.y, slot.size, slot.size, {
-      isStatic: true,
-      restitution: 1,
-      friction: 0,
-      frictionStatic: 0,
-      frictionAir: 0,
-    });
+    const body = this.scene.matter.add.rectangle(
+      slot.x,
+      slot.y,
+      slot.size,
+      slot.size,
+      {
+        isStatic: true,
+        restitution: 1,
+        friction: 0,
+        frictionStatic: 0,
+        frictionAir: 0,
+      },
+    );
     const graphics = this.scene.add.graphics().setDepth(55);
     const totalBuildMs = mole.buildLives * 1000;
 
@@ -308,7 +342,13 @@ export class MoleBase {
 
     this.removeBuildSite(mole.id);
     slot.reservedByMoleId = undefined;
-    battlefield.spawnCellInSlot(slotIndex, mole.buildType, mole.buildLives, slot.size, null);
+    battlefield.spawnCellInSlot(
+      slotIndex,
+      mole.buildType,
+      mole.buildLives,
+      slot.size,
+      null,
+    );
     mole.task = 'to_home';
     mole.targetX = mole.homeX;
     mole.targetY = mole.homeY;
@@ -365,7 +405,9 @@ export class MoleBase {
   }
 
   private redrawBuildSite(site: MoleBuildSite): void {
-    const slot = this.battlefield?.getSlot(site.slotIndex) as BattlefieldSlot | undefined;
+    const slot = this.battlefield?.getSlot(site.slotIndex) as
+      | BattlefieldSlot
+      | undefined;
     if (!slot) {
       return;
     }
@@ -375,19 +417,43 @@ export class MoleBase {
     if (site.builtLives > 0) {
       const fillColor = this.getCellColorByLives(site.builtLives);
       site.graphics.fillStyle(fillColor, flickerAlpha);
-      site.graphics.fillRect(slot.x - half, slot.y - half, slot.size, slot.size);
+      site.graphics.fillRect(
+        slot.x - half,
+        slot.y - half,
+        slot.size,
+        slot.size,
+      );
     }
     site.graphics.lineStyle(1.5, 0xffffff, 0.65);
-    site.graphics.strokeRect(slot.x - half, slot.y - half, slot.size, slot.size);
+    site.graphics.strokeRect(
+      slot.x - half,
+      slot.y - half,
+      slot.size,
+      slot.size,
+    );
   }
 
   private getCellColorByLives(lives: number): number {
     const lowLivesColor = 0x12464f;
     const highLivesColor = 0xbefcf6;
     const t = 1 - Phaser.Math.Clamp((lives - 1) / 3, 0, 1);
-    const r = Math.round(Phaser.Math.Linear((lowLivesColor >> 16) & 0xff, (highLivesColor >> 16) & 0xff, t));
-    const g = Math.round(Phaser.Math.Linear((lowLivesColor >> 8) & 0xff, (highLivesColor >> 8) & 0xff, t));
-    const b = Math.round(Phaser.Math.Linear(lowLivesColor & 0xff, highLivesColor & 0xff, t));
+    const r = Math.round(
+      Phaser.Math.Linear(
+        (lowLivesColor >> 16) & 0xff,
+        (highLivesColor >> 16) & 0xff,
+        t,
+      ),
+    );
+    const g = Math.round(
+      Phaser.Math.Linear(
+        (lowLivesColor >> 8) & 0xff,
+        (highLivesColor >> 8) & 0xff,
+        t,
+      ),
+    );
+    const b = Math.round(
+      Phaser.Math.Linear(lowLivesColor & 0xff, highLivesColor & 0xff, t),
+    );
     return (r << 16) | (g << 8) | b;
   }
 
