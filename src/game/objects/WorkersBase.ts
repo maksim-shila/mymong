@@ -1,4 +1,5 @@
 import { Worker } from '@game/objects/Worker';
+import type { PaddleEnergyContext } from '@game/objects/Paddle';
 
 export type BaseCatSlot = {
   x: number;
@@ -10,12 +11,15 @@ export type BaseCatSlot = {
 type WorkersBaseConfig = {
   playfieldLeft: number;
   sceneHeight: number;
-  workerCount: number;
-  livesMax: number;
-  workerSpeed: number;
-  workerCooldownMs: number;
-  workerEnergyTaskDurationMs: number;
-  workerEnergyTaskMaxFill: number;
+  workerCount?: number;
+  livesMax?: number;
+  energyMax?: number;
+  pushEnergyCost?: number;
+  boostEnergyPerSecond?: number;
+  workerSpeed?: number;
+  workerCooldownMs?: number;
+  workerEnergyTaskDurationMs?: number;
+  workerEnergyTaskMaxFill?: number;
 };
 
 export type WorkersBaseCatPayload = {
@@ -37,15 +41,12 @@ type WorkersUpdateContext<
   ResourcePayload extends WorkersBaseResourcePayload,
 > = {
   deltaMs: number;
-  energy: number;
-  energyMax: number;
   paddleX: number;
   paddleY: number;
   paddleHeight: number;
   ballRadiusPx: number;
   resourceDrops: ResourcePayload[];
   catDrops: CatPayload[];
-  onEnergyGain: (amount: number) => void;
   onResourceDelivered: (amount: number) => void;
   onBallDelivered: () => void;
   onCatDelivered: () => void;
@@ -56,6 +57,14 @@ export class WorkersBase<
   ResourcePayload extends WorkersBaseResourcePayload =
     WorkersBaseResourcePayload,
 > {
+  private static readonly DEFAULT_WORKER_COUNT = 3;
+  private static readonly DEFAULT_LIVES_MAX = 4;
+  private static readonly DEFAULT_ENERGY_MAX = 160;
+  private static readonly DEFAULT_PUSH_ENERGY_COST = 32;
+  private static readonly DEFAULT_BOOST_ENERGY_PER_SECOND = 28;
+  private static readonly DEFAULT_WORKER_SPEED = 130;
+  private static readonly DEFAULT_WORKER_COOLDOWN_MS = 2000;
+  private static readonly DEFAULT_WORKER_ENERGY_TASK_DURATION_MS = 2000;
   public readonly workers: Worker<CatPayload, ResourcePayload>[] = [];
   public readonly catSlots: BaseCatSlot[] = [];
   public readonly baseX: number;
@@ -65,11 +74,16 @@ export class WorkersBase<
   private readonly scene: Phaser.Scene;
   private readonly workerCount: number;
   private readonly livesMax: number;
+  private readonly energyMax: number;
+  private readonly pushEnergyCost: number;
+  private readonly boostEnergyPerSecond: number;
   private readonly workerSpeed: number;
   private readonly workerCooldownMs: number;
   private readonly workerEnergyTaskDurationMs: number;
   private readonly workerEnergyTaskMaxFill: number;
   private displayedEnergy = 0;
+  private energy = 0;
+  private firstPushIsFree = true;
   private energyTween?: Phaser.Tweens.Tween;
   private pendingBallDelivery = false;
   private ballDeliveryWorkerId?: number;
@@ -82,12 +96,22 @@ export class WorkersBase<
 
   constructor(scene: Phaser.Scene, config: WorkersBaseConfig) {
     this.scene = scene;
-    this.workerCount = config.workerCount;
-    this.livesMax = config.livesMax;
-    this.workerSpeed = config.workerSpeed;
-    this.workerCooldownMs = config.workerCooldownMs;
-    this.workerEnergyTaskDurationMs = config.workerEnergyTaskDurationMs;
-    this.workerEnergyTaskMaxFill = config.workerEnergyTaskMaxFill;
+    this.workerCount = config.workerCount ?? WorkersBase.DEFAULT_WORKER_COUNT;
+    this.livesMax = config.livesMax ?? WorkersBase.DEFAULT_LIVES_MAX;
+    this.energyMax = config.energyMax ?? WorkersBase.DEFAULT_ENERGY_MAX;
+    this.pushEnergyCost =
+      config.pushEnergyCost ?? WorkersBase.DEFAULT_PUSH_ENERGY_COST;
+    this.boostEnergyPerSecond =
+      config.boostEnergyPerSecond ??
+      WorkersBase.DEFAULT_BOOST_ENERGY_PER_SECOND;
+    this.workerSpeed = config.workerSpeed ?? WorkersBase.DEFAULT_WORKER_SPEED;
+    this.workerCooldownMs =
+      config.workerCooldownMs ?? WorkersBase.DEFAULT_WORKER_COOLDOWN_MS;
+    this.workerEnergyTaskDurationMs =
+      config.workerEnergyTaskDurationMs ??
+      WorkersBase.DEFAULT_WORKER_ENERGY_TASK_DURATION_MS;
+    this.workerEnergyTaskMaxFill =
+      config.workerEnergyTaskMaxFill ?? this.energyMax * 0.05;
     this.baseX = config.playfieldLeft * 0.45;
     this.baseY = config.sceneHeight - 70;
     this.baseDropX = this.baseX + 8;
@@ -149,6 +173,30 @@ export class WorkersBase<
     return this.pendingBallDelivery;
   }
 
+  public getPaddleEnergyContext(
+    isBallLaunched: boolean,
+    isBallDeliveryPending: boolean,
+  ): PaddleEnergyContext {
+    const canUsePushNow =
+      isBallLaunched &&
+      !isBallDeliveryPending &&
+      (this.firstPushIsFree || this.energy >= this.pushEnergyCost);
+    return {
+      canBoost: isBallLaunched && !isBallDeliveryPending && this.energy > 0,
+      canPush: canUsePushNow,
+      spendBoost: (deltaMs: number) => this.spendBoostEnergy(deltaMs),
+      spendPush: () => this.spendPushEnergy(),
+    };
+  }
+
+  public resetFirstPushAllowance(): void {
+    this.firstPushIsFree = true;
+  }
+
+  public getEnergyMax(): number {
+    return this.energyMax;
+  }
+
   public requestBallDelivery(): void {
     this.pendingBallDelivery = true;
     this.ballDeliveryWorkerId = undefined;
@@ -207,7 +255,7 @@ export class WorkersBase<
 
       if (worker.task === 'energy') {
         if (
-          context.energy >= context.energyMax ||
+          this.energy >= this.energyMax ||
           worker.energyTaskMs <= 0 ||
           worker.energyTaskFilled >= this.workerEnergyTaskMaxFill
         ) {
@@ -225,7 +273,7 @@ export class WorkersBase<
             this.workerEnergyTaskDurationMs,
           this.workerEnergyTaskMaxFill - worker.energyTaskFilled,
         );
-        context.onEnergyGain(amount);
+        this.energy = Math.min(this.energyMax, this.energy + amount);
         worker.energyTaskMs -= context.deltaMs;
         worker.energyTaskFilled += amount;
         worker.setIdlePose();
@@ -242,7 +290,8 @@ export class WorkersBase<
       this.energyTween.stop();
       this.energyTween = undefined;
     }
-    this.displayedEnergy = energy;
+    this.energy = Phaser.Math.Clamp(energy, 0, this.energyMax);
+    this.displayedEnergy = this.energy;
   }
 
   public animateEnergyToTarget(targetEnergy: number, durationMs: number): void {
@@ -267,15 +316,15 @@ export class WorkersBase<
     };
   }
 
-  public updateEnergy(currentEnergy: number, energyMax: number): void {
+  public updateEnergyUi(): void {
     if (!this.energyTween || !this.energyTween.isPlaying()) {
       this.displayedEnergy = Phaser.Math.Linear(
         this.displayedEnergy,
-        currentEnergy,
+        this.energy,
         0.22,
       );
     }
-    const t = Phaser.Math.Clamp(this.displayedEnergy / energyMax, 0, 1);
+    const t = Phaser.Math.Clamp(this.displayedEnergy / this.energyMax, 0, 1);
     const borderInset = 2;
     const stripWidth = 16;
     const maxStripHeight = this.energyBarBg.height - borderInset * 2;
@@ -513,7 +562,7 @@ export class WorkersBase<
     }
 
     if (
-      context.energy < context.energyMax - 1 &&
+      this.energy < this.energyMax - 1 &&
       this.energyWorkerId === undefined
     ) {
       this.energyWorkerId = worker.id;
@@ -570,7 +619,7 @@ export class WorkersBase<
         drop.collected = false;
         drop.assignedWorkerId = undefined;
         drop.sprite.setVisible(true).setPosition(worker.body.x, worker.body.y);
-        this.finishWorkerTask(worker, context);
+        this.finishWorkerTask(worker);
         return;
       }
       this.catSlots[slotIndex].reservedByWorkerId = worker.id;
@@ -611,7 +660,7 @@ export class WorkersBase<
         if (this.shouldStartBallDeliveryNow(worker)) {
           this.startBallDeliveryNow(worker);
         } else {
-          this.finishWorkerTask(worker, context);
+          this.finishWorkerTask(worker);
         }
         return;
       }
@@ -621,7 +670,7 @@ export class WorkersBase<
         if (this.shouldStartBallDeliveryNow(worker)) {
           this.startBallDeliveryNow(worker);
         } else {
-          this.finishWorkerTask(worker, context);
+          this.finishWorkerTask(worker);
         }
         return;
       }
@@ -632,7 +681,7 @@ export class WorkersBase<
         if (this.shouldStartBallDeliveryNow(worker)) {
           this.startBallDeliveryNow(worker);
         } else {
-          this.finishWorkerTask(worker, context);
+          this.finishWorkerTask(worker);
         }
         return;
       }
@@ -666,7 +715,7 @@ export class WorkersBase<
         if (this.shouldStartBallDeliveryNow(worker)) {
           this.startBallDeliveryNow(worker);
         } else {
-          this.finishWorkerTask(worker, context);
+          this.finishWorkerTask(worker);
         }
         return;
       }
@@ -691,7 +740,6 @@ export class WorkersBase<
 
   private finishWorkerTask(
     worker: Worker<CatPayload, ResourcePayload>,
-    context: WorkersUpdateContext<CatPayload, ResourcePayload>,
   ): void {
     if (this.energyWorkerId === worker.id) {
       this.energyWorkerId = undefined;
@@ -713,5 +761,20 @@ export class WorkersBase<
     worker.returningAfterBallDelivery = false;
     worker.cargoBall.setVisible(false);
     worker.setIdlePose();
+  }
+
+  private spendPushEnergy(): void {
+    if (this.firstPushIsFree) {
+      this.firstPushIsFree = false;
+      return;
+    }
+
+    this.energy = Math.max(0, this.energy - this.pushEnergyCost);
+    this.animateEnergyToTarget(this.energy, 260);
+  }
+
+  private spendBoostEnergy(deltaMs: number): void {
+    const amount = this.boostEnergyPerSecond * (deltaMs / 1000);
+    this.energy = Math.max(0, this.energy - amount);
   }
 }

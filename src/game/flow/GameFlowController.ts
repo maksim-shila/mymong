@@ -1,17 +1,30 @@
-import type { GameHud } from '@game/objects/GameHud';
-import type { MoleBase } from '@game/objects/MoleBase';
-import type { SceneState, EndState } from '@game/state/SceneState';
+import type { GameHud, MoleBase } from '@game/objects';
+import type { EndState, SceneState } from '@game/state';
+
+type GameFlowControllerConfig = {
+  finalCountdownTotalMs?: number;
+};
 
 export class GameFlowController {
+  private static readonly DEFAULT_FINAL_COUNTDOWN_TOTAL_MS = 10000;
   private readonly scene: Phaser.Scene;
   private readonly hud: GameHud;
   private readonly state: SceneState;
+  private readonly finalCountdownTotalMs: number;
   private rageTransitionTween?: Phaser.Tweens.Tween;
 
-  constructor(scene: Phaser.Scene, hud: GameHud, state: SceneState) {
+  constructor(
+    scene: Phaser.Scene,
+    hud: GameHud,
+    state: SceneState,
+    config: GameFlowControllerConfig = {},
+  ) {
     this.scene = scene;
     this.hud = hud;
     this.state = state;
+    this.finalCountdownTotalMs =
+      config.finalCountdownTotalMs ??
+      GameFlowController.DEFAULT_FINAL_COUNTDOWN_TOTAL_MS;
   }
 
   public togglePause(): void {
@@ -71,11 +84,11 @@ export class GameFlowController {
     });
   }
 
-  public startFinalCountdown(totalMs: number): void {
+  public startFinalCountdown(): void {
     this.state.countdown.active = true;
-    this.state.countdown.ms = totalMs;
+    this.state.countdown.ms = this.finalCountdownTotalMs;
     this.state.countdown.lastShown = -1;
-    this.showCountdownValue(Math.ceil(totalMs / 1000));
+    this.showCountdownValue(Math.ceil(this.finalCountdownTotalMs / 1000));
   }
 
   public updateFinalCountdown(deltaMs: number): void {

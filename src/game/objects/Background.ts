@@ -1,5 +1,3 @@
-import backgroundImage from '@assets/background.jpg';
-
 export class Background {
   private static readonly imageKey = 'background';
 
@@ -8,10 +6,6 @@ export class Background {
     private readonly tileSize = 200,
     private readonly depth = -100,
   ) {}
-
-  public preload(): void {
-    this.scene.load.image(Background.imageKey, backgroundImage);
-  }
 
   public create(width: number, height: number): void {
     this.draw(width, height);

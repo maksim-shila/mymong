@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { Ball } from '@game/objects/Ball';
 
+export const CAT_TEXTURE_KEY = 'cat';
+
 export enum CellType {
   BASIC = 'basic',
   CAT_CAGE = 'cat_cage',
@@ -17,7 +19,7 @@ export class Cell extends Phaser.GameObjects.Rectangle {
   private readonly highLivesColor = 0xbefcf6;
   private readonly catCageColor = 0xf5e6a6;
   private readonly resourceAmount: number | null;
-  private readonly catTextureKey = 'cat';
+  private readonly catTextureKey = CAT_TEXTURE_KEY;
   private catSprite?: Phaser.GameObjects.Image;
   private isBreaking = false;
   private lives: number;

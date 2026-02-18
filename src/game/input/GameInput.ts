@@ -6,6 +6,7 @@ export enum Key {
   LAUNCH = 'LAUNCH',
   PUSH = 'PUSH',
   BOOST = 'BOOST',
+  PAUSE = 'PAUSE',
 }
 
 export class GameInput {
@@ -30,10 +31,9 @@ export class GameInput {
       [Key.LAUNCH]: [spaceKey],
       [Key.PUSH]: [spaceKey],
       [Key.BOOST]: [keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT)],
+      [Key.PAUSE]: [keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P)],
     };
   }
-
-  public bindKeys(): void {}
 
   keyDown(key: Key): boolean {
     return this.bindings[key].some((binding) => binding.isDown);

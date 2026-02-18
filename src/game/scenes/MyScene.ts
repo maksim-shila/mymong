@@ -1,21 +1,25 @@
-﻿import { CellType } from '@game/cells/Cell';
-import { GameInput, Key } from '@game/input/GameInput';
-import { Ball } from '@game/objects/Ball';
-import { Battlefield } from '@game/objects/Battlefield';
-import { Background } from '@game/objects/Background';
-import { CollisionOrchestrator } from '@game/collision/CollisionOrchestrator';
+import { CAT_TEXTURE_KEY, CellType } from '@game/cells';
+import { CollisionOrchestrator } from '@game/collision';
+import { GameInput, Key } from '@game/input';
 import {
-  DropSystem,
+  Background,
+  Ball,
+  Battlefield,
   type CatDrop,
+  DropSystem,
+  GameHud,
+  MoleBase,
+  Paddle,
   type ResourceDrop,
-} from '@game/objects/DropSystem';
-import { GameHud } from '@game/objects/GameHud';
-import { MoleBase } from '@game/objects/MoleBase';
-import { Paddle, type PaddleEnergyContext } from '@game/objects/Paddle';
-import { WorkersBase } from '@game/objects/WorkersBase';
-import { createSceneState, type SceneState } from '@game/state/SceneState';
-import { GameFlowController } from '@game/flow/GameFlowController';
-import catImage from '@assets/cat.png';
+  WorkersBase,
+} from '@game/objects';
+import {
+  BallController,
+  ExplosionController,
+  GameFlowController,
+} from '@game/flow';
+import { createSceneState, type SceneState } from '@game/state';
+import { preloadGameAssets } from '@game/assets/game-assets';
 
 export type MySceneConfig = {
   workerCount: number;
@@ -24,55 +28,47 @@ export type MySceneConfig = {
 
 export class MyScene extends Phaser.Scene {
   private paddle!: Paddle;
-  private inputHandler!: GameInput;
   private ball!: Ball;
-  private readonly background: Background;
-  private pauseKey!: Phaser.Input.Keyboard.Key;
+  private moleBase!: MoleBase;
+  private workersBase!: WorkersBase<CatDrop, ResourceDrop>;
+  private inputHandler!: GameInput;
+  private collisionOrchestrator!: CollisionOrchestrator;
+  private dropSystem!: DropSystem;
+  private battlefield!: Battlefield;
+  private background!: Background;
   private playfieldLeft = 0;
   private playfieldRight = 0;
   private playfieldWidth = 0;
-  private readonly energyMax = 160;
-  private readonly pushEnergyCost = 32;
-  private readonly boostEnergyPerSecond = 28;
-  private readonly livesMax = 4;
-  private readonly latePushWindowMs = 135;
-  private readonly explosionRadius = 90;
-  private readonly battlefield: Battlefield;
-  private readonly dropSystem: DropSystem;
-  private collisionOrchestrator!: CollisionOrchestrator;
-  private moleBase!: MoleBase;
   private readonly minCellImpactAlongNormal = 1.8;
-  private readonly resourceDropChance = 0.4;
-  private readonly emptyCellChance = 0.16;
-  private readonly moleCount: number;
-  private readonly finalCountdownTotalMs = 10000;
-  private readonly workerCount: number;
-  private workersBase!: WorkersBase<CatDrop, ResourceDrop>;
-  private readonly state: SceneState;
-  private readonly hud: GameHud;
-  private readonly flow: GameFlowController;
+  private readonly sceneConfig?: Partial<MySceneConfig>;
+  private state!: SceneState;
+  private hud!: GameHud;
+  private flow!: GameFlowController;
+  private explosion!: ExplosionController;
+  private ballController!: BallController;
 
   constructor(config?: Partial<MySceneConfig>) {
     super('MyScene');
-    this.workerCount = Math.max(1, Math.floor(config?.workerCount ?? 3));
-    this.moleCount = Math.max(1, Math.floor(config?.moleCount ?? 3));
-    this.state = createSceneState(this.energyMax, this.livesMax);
+    this.sceneConfig = config;
+  }
+
+  preload(): void {
+    preloadGameAssets(this);
+  }
+
+  create() {
+    const { width, height } = this.scale;
+
+    this.state = createSceneState();
     this.background = new Background(this);
     this.battlefield = new Battlefield(this);
     this.dropSystem = new DropSystem(this);
     this.hud = new GameHud(this);
     this.flow = new GameFlowController(this, this.hud, this.state);
-  }
-
-  preload(): void {
-    this.background.preload();
-    this.load.image('cat', catImage);
-  }
-
-  create() {
-    const { width, height } = this.scale;
-    this.background.draw(width, height);
+    this.explosion = new ExplosionController(this, this.battlefield);
     this.inputHandler = new GameInput(this);
+
+    this.background.draw(width, height);
 
     this.playfieldWidth = width * 0.7;
     this.playfieldLeft = (width - this.playfieldWidth) / 2;
@@ -105,16 +101,10 @@ export class MyScene extends Phaser.Scene {
     this.workersBase = new WorkersBase<CatDrop, ResourceDrop>(this, {
       playfieldLeft: this.playfieldLeft,
       sceneHeight: height,
-      workerCount: this.workerCount,
-      livesMax: this.livesMax,
-      workerSpeed: 130,
-      workerCooldownMs: 2000,
-      workerEnergyTaskDurationMs: 2000,
-      workerEnergyTaskMaxFill: this.energyMax * 0.05,
+      workerCount: this.sceneConfig?.workerCount,
     });
     this.workersBase.draw();
-    this.workersBase.setEnergyInstant(this.state.energy.value);
-    this.pauseKey = this.input.keyboard!.addKey('P');
+    this.workersBase.setEnergyInstant(this.workersBase.getEnergyMax());
     this.hud.draw(
       width,
       height,
@@ -123,7 +113,7 @@ export class MyScene extends Phaser.Scene {
     );
     this.createCellsGrid();
     this.moleBase = new MoleBase(this, {
-      moleCount: this.moleCount,
+      moleCount: this.sceneConfig?.moleCount,
       showDebugMarkers: this.isDebugPhysicsEnabled(),
     });
     this.collisionOrchestrator = new CollisionOrchestrator({
@@ -138,19 +128,26 @@ export class MyScene extends Phaser.Scene {
         this.state.ball.ballCellHitCooldownMs = value;
       },
       onPaddleHit: (pushStrength) => {
-        this.state.ball.lastPaddleHitAtMs = this.time.now;
-        this.state.ball.latePushConsumed = pushStrength > 0.05;
+        this.ballController.onPaddleCollision(pushStrength);
       },
       onTriggerExplosion: (x, y) => this.triggerExplosion(x, y),
       onDestroyCellByBodyId: (bodyId) => this.destroyCellByBodyId(bodyId),
     });
+    this.ballController = new BallController(
+      this.state,
+      this.inputHandler,
+      this.ball,
+      this.paddle,
+      {},
+    );
+    this.ballController.setNowProvider(() => this.time.now);
 
     this.matter.world.on('collisionstart', this.handleCollisionStart);
   }
 
   update(_: number, delta: number) {
     if (
-      Phaser.Input.Keyboard.JustDown(this.pauseKey) &&
+      this.inputHandler.keyJustDown(Key.PAUSE) &&
       this.state.end.state === 'none'
     ) {
       this.flow.togglePause();
@@ -161,16 +158,13 @@ export class MyScene extends Phaser.Scene {
       return;
     }
 
-    this.state.ball.ballCellHitCooldownMs = Math.max(
-      0,
-      this.state.ball.ballCellHitCooldownMs - delta,
-    );
+    this.ballController.tickCooldown(delta);
     this.flushPendingCellBreaks();
     this.flow.updateFinalCountdown(delta);
-    const launchDown = this.inputHandler.keyDown(Key.LAUNCH);
-    const launchPressedThisFrame = launchDown && !this.state.ball.wasLaunchDown;
-    this.state.ball.wasLaunchDown = launchDown;
-    const energyContext = this.getPaddleEnergyContext();
+    const energyContext = this.workersBase.getPaddleEnergyContext(
+      this.state.ball.isLaunched,
+      this.workersBase.isBallDeliveryPending(),
+    );
     this.paddle.update(
       delta,
       this.playfieldLeft,
@@ -178,38 +172,16 @@ export class MyScene extends Phaser.Scene {
       energyContext,
       this.state.ball.isLaunched && !this.workersBase.isBallDeliveryPending(),
     );
-    const pushSerial = this.paddle.getPushSerial();
-    if (pushSerial !== this.state.ball.lastSeenPushSerial) {
-      if (this.state.ball.isLaunched) {
-        this.state.ball.explosionArmed = true;
-      }
-      this.state.ball.lastSeenPushSerial = pushSerial;
-    }
-    if (!this.state.ball.isLaunched) {
-      if (!this.workersBase.isBallDeliveryPending()) {
-        this.ball.stickToPaddle(
-          this.paddle.x,
-          this.paddle.y - this.paddle.height / 2 - this.ball.radiusPx - 2,
-        );
-        if (launchPressedThisFrame) {
-          // Space is shared for launch/push. Consume push edge here so it doesn't fire on next frame.
-          this.inputHandler.keyJustDown(Key.PUSH);
-          this.state.ball.isLaunched = true;
-          this.state.player.hasGameStarted = true;
-          this.ball.launchFromPaddle(this.paddle.angle, 0);
-          this.paddle.clearPushCooldown();
-          this.state.ball.lastSeenPushSerial = this.paddle.getPushSerial();
-          this.state.ball.explosionArmed = false;
-        }
-      }
-    } else {
-      this.ball.update(delta);
-      this.handleBallOutOfBounds();
-      this.applyLatePushAssist();
-    }
+    this.ballController.syncPushSerial(this.paddle.getPushSerial());
+    this.ballController.update({
+      deltaMs: delta,
+      sceneHeight: this.scale.height,
+      isBallDeliveryPending: this.workersBase.isBallDeliveryPending(),
+      onOutOfBounds: () => this.loseLifeAndRespawn(),
+    });
     this.updateWorkers(delta);
     this.updateMoles(delta);
-    this.updateEnergyUi();
+    this.workersBase.updateEnergyUi();
     this.updateLivesUi();
 
     this.hud.updateFps(this.game.loop.actualFps);
@@ -220,8 +192,6 @@ export class MyScene extends Phaser.Scene {
       playfieldLeft: this.playfieldLeft,
       playfieldWidth: this.playfieldWidth,
       sceneHeight: this.scale.height,
-      emptyCellChance: this.emptyCellChance,
-      resourceDropChance: this.resourceDropChance,
     });
   }
 
@@ -266,63 +236,10 @@ export class MyScene extends Phaser.Scene {
     this.battlefield.flushPendingCellBreaks();
   }
 
-  private applyLatePushAssist(): void {
-    if (this.state.ball.latePushConsumed) {
-      return;
-    }
-
-    const elapsed = this.time.now - this.state.ball.lastPaddleHitAtMs;
-    if (elapsed > this.latePushWindowMs) {
-      this.state.ball.latePushConsumed = true;
-      return;
-    }
-
-    const pushStrength = this.paddle.getPushStrength();
-    if (pushStrength <= 0.05) {
-      return;
-    }
-
-    if (this.ball.velocityY >= 0) {
-      this.state.ball.latePushConsumed = true;
-      return;
-    }
-
-    this.ball.applyPushAssist(pushStrength, this.paddle.angle);
-    this.state.ball.latePushConsumed = true;
-  }
-
   private triggerExplosion(x: number, y: number): void {
     this.state.ball.explosionArmed = false;
-    this.createExplosionVisual(x, y);
-
-    for (const cell of this.battlefield.getCellsSnapshot()) {
-      const dx = cell.x - x;
-      const dy = cell.y - y;
-      const halfDiagonal = Math.hypot(cell.width, cell.height) * 0.5;
-      if (Math.hypot(dx, dy) <= this.explosionRadius + halfDiagonal) {
-        this.destroyCellByBodyId(cell.bodyRef.id);
-      }
-    }
+    this.explosion.trigger(x, y, (bodyId) => this.destroyCellByBodyId(bodyId));
     this.state.ball.ballCellHitCooldownMs = 45;
-  }
-
-  private createExplosionVisual(x: number, y: number): void {
-    const ring = this.add
-      .circle(x, y, this.explosionRadius, 0xffffff, 0)
-      .setStrokeStyle(3, 0xff8f8f, 0.95)
-      .setDepth(1203);
-
-    this.tweens.add({
-      targets: ring,
-      alpha: 0,
-      scale: 1.2,
-      duration: 380,
-      ease: 'Cubic.Out',
-      onUpdate: () => {
-        ring.setStrokeStyle(3, 0xff8f8f, ring.alpha);
-      },
-      onComplete: () => ring.destroy(),
-    });
   }
 
   private destroyCellByBodyId(bodyId: number): void {
@@ -335,7 +252,7 @@ export class MyScene extends Phaser.Scene {
         this.tryStartFinalCountdownIfReady();
       },
       onCatCageDestroyed: (cell) => {
-        this.dropSystem.createCatDrop(cell.x, cell.y, 'cat');
+        this.dropSystem.createCatDrop(cell.x, cell.y, CAT_TEXTURE_KEY);
         this.tryEnterRageIfReady();
       },
     });
@@ -344,20 +261,12 @@ export class MyScene extends Phaser.Scene {
   private updateWorkers(delta: number): void {
     this.workersBase.updateWorkers({
       deltaMs: delta,
-      energy: this.state.energy.value,
-      energyMax: this.energyMax,
       paddleX: this.paddle.x,
       paddleY: this.paddle.y,
       paddleHeight: this.paddle.height,
       ballRadiusPx: this.ball.radiusPx,
       resourceDrops: this.dropSystem.getResourceDrops(),
       catDrops: this.dropSystem.getCatDrops(),
-      onEnergyGain: (amount) => {
-        this.state.energy.value = Math.min(
-          this.energyMax,
-          this.state.energy.value + amount,
-        );
-      },
       onResourceDelivered: (amount) => {
         this.state.player.resources += amount;
       },
@@ -371,56 +280,8 @@ export class MyScene extends Phaser.Scene {
     this.workersBase.setResources(this.state.player.resources);
   }
 
-  private getPaddleEnergyContext(): PaddleEnergyContext {
-    const canUsePushNow =
-      this.state.ball.isLaunched &&
-      !this.workersBase.isBallDeliveryPending() &&
-      (this.state.player.firstPushIsFree ||
-        this.state.energy.value >= this.pushEnergyCost);
-    return {
-      canBoost:
-        this.state.ball.isLaunched &&
-        !this.workersBase.isBallDeliveryPending() &&
-        this.state.energy.value > 0,
-      canPush: canUsePushNow,
-      spendBoost: (deltaMs: number) => this.spendBoostEnergy(deltaMs),
-      spendPush: () => this.spendPushEnergy(),
-    };
-  }
-
-  private spendPushEnergy(): void {
-    if (this.state.player.firstPushIsFree) {
-      this.state.player.firstPushIsFree = false;
-      return;
-    }
-
-    this.state.energy.value = Math.max(
-      0,
-      this.state.energy.value - this.pushEnergyCost,
-    );
-    this.workersBase.animateEnergyToTarget(this.state.energy.value, 260);
-  }
-
-  private spendBoostEnergy(deltaMs: number): void {
-    const amount = this.boostEnergyPerSecond * (deltaMs / 1000);
-    this.state.energy.value = Math.max(0, this.state.energy.value - amount);
-  }
-
-  private updateEnergyUi(): void {
-    this.workersBase.updateEnergy(this.state.energy.value, this.energyMax);
-  }
-
   private updateLivesUi(): void {
     this.workersBase.setLives(this.state.player.lives);
-  }
-
-  private handleBallOutOfBounds(): void {
-    const outY = this.scale.height + this.ball.radiusPx + 6;
-    if (this.ball.y <= outY) {
-      return;
-    }
-
-    this.loseLifeAndRespawn();
   }
 
   private loseLifeAndRespawn(): void {
@@ -429,7 +290,7 @@ export class MyScene extends Phaser.Scene {
     this.state.ball.isLaunched = false;
     this.state.ball.explosionArmed = false;
     this.state.ball.latePushConsumed = true;
-    this.state.player.firstPushIsFree = true;
+    this.workersBase.resetFirstPushAllowance();
 
     if (this.state.player.lives <= 0) {
       this.flow.triggerEndState('gameover');
@@ -465,7 +326,7 @@ export class MyScene extends Phaser.Scene {
   }
 
   private startFinalCountdown(): void {
-    this.flow.startFinalCountdown(this.finalCountdownTotalMs);
+    this.flow.startFinalCountdown();
   }
 
   private enterMoleRageMode(): void {
@@ -476,19 +337,10 @@ export class MyScene extends Phaser.Scene {
     if (this.moleBase.isRageActive() || this.state.end.state !== 'none') {
       return;
     }
-    if (this.getAliveCatCageCount() > 0) {
+    if (this.battlefield.countCellsByType(CellType.CAT_CAGE) > 0) {
       return;
     }
     this.enterMoleRageMode();
-  }
-
-  private getAliveCatCageCount(): number {
-    return this.battlefield
-      .getCellsSnapshot()
-      .reduce(
-        (acc, cell) => acc + (cell.type === CellType.CAT_CAGE ? 1 : 0),
-        0,
-      );
   }
 
   private tryStartFinalCountdownIfReady(): void {

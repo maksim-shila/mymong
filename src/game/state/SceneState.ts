@@ -20,7 +20,6 @@ export type SceneState = {
     lives: number;
     resources: number;
     hasGameStarted: boolean;
-    firstPushIsFree: boolean;
   };
   countdown: {
     active: boolean;
@@ -31,15 +30,11 @@ export type SceneState = {
   cats: {
     totalToRescue: number;
   };
-  energy: {
-    value: number;
-  };
 };
 
-export const createSceneState = (
-  energyMax: number,
-  livesMax: number,
-): SceneState => ({
+const DEFAULT_LIVES_MAX = 4;
+
+export const createSceneState = (livesMax = DEFAULT_LIVES_MAX): SceneState => ({
   pause: {
     isPaused: false,
   },
@@ -59,7 +54,6 @@ export const createSceneState = (
     lives: livesMax,
     resources: 0,
     hasGameStarted: false,
-    firstPushIsFree: true,
   },
   countdown: {
     active: false,
@@ -69,8 +63,5 @@ export const createSceneState = (
   },
   cats: {
     totalToRescue: 0,
-  },
-  energy: {
-    value: energyMax,
   },
 });

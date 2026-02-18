@@ -19,7 +19,7 @@ export type MoleBuildSite = {
 };
 
 type MoleBaseConfig = {
-  moleCount: number;
+  moleCount?: number;
   enragedMoleCount?: number;
   moleSpeed?: number;
   moleCooldownMs?: number;
@@ -49,6 +49,7 @@ type MoleBaseUpdateContext = {
 };
 
 export class MoleBase {
+  private static readonly DEFAULT_MOLE_COUNT = 3;
   private readonly scene: Phaser.Scene;
   private readonly moles: Mole[] = [];
   private readonly buildSiteByBodyId = new Map<number, MoleBuildSite>();
@@ -67,7 +68,7 @@ export class MoleBase {
     this.moleWarningDurationMs = config.moleWarningDurationMs ?? 2000;
     this.enragedMoleCount = config.enragedMoleCount ?? 5;
     this.showDebugMarkers = config.showDebugMarkers;
-    this.createMoles(config.moleCount);
+    this.createMoles(config.moleCount ?? MoleBase.DEFAULT_MOLE_COUNT);
   }
 
   public isRageActive(): boolean {

@@ -14,8 +14,8 @@ type CreateGridConfig = {
   playfieldLeft: number;
   playfieldWidth: number;
   sceneHeight: number;
-  emptyCellChance: number;
-  resourceDropChance: number;
+  emptyCellChance?: number;
+  resourceDropChance?: number;
 };
 
 type DestroyCellCallbacks = {
@@ -24,6 +24,8 @@ type DestroyCellCallbacks = {
 };
 
 export class Battlefield {
+  private static readonly DEFAULT_EMPTY_CELL_CHANCE = 0.16;
+  private static readonly DEFAULT_RESOURCE_DROP_CHANCE = 0.4;
   private readonly scene: Phaser.Scene;
   private readonly cells: Cell[] = [];
   private readonly cellByBodyId = new Map<number, Cell>();
@@ -40,6 +42,10 @@ export class Battlefield {
   }
 
   public drawGrid(config: CreateGridConfig): number {
+    const emptyCellChance =
+      config.emptyCellChance ?? Battlefield.DEFAULT_EMPTY_CELL_CHANCE;
+    const resourceDropChance =
+      config.resourceDropChance ?? Battlefield.DEFAULT_RESOURCE_DROP_CHANCE;
     this.slots.length = 0;
     this.cells.length = 0;
     this.cellByBodyId.clear();
@@ -89,13 +95,13 @@ export class Battlefield {
         const type = catCageIndices.has(cellIndex)
           ? CellType.CAT_CAGE
           : CellType.BASIC;
-        if (type === CellType.BASIC && Math.random() < config.emptyCellChance) {
+        if (type === CellType.BASIC && Math.random() < emptyCellChance) {
           cellIndex += 1;
           continue;
         }
         const hasResource =
           type !== CellType.CAT_CAGE &&
-          Math.random() < config.resourceDropChance;
+          Math.random() < resourceDropChance;
         const resourceAmount = hasResource ? Phaser.Math.Between(0, 100) : null;
         this.spawnCellInSlot(
           slotIndex,
@@ -159,6 +165,10 @@ export class Battlefield {
 
   public getCellsCount(): number {
     return this.cells.length;
+  }
+
+  public countCellsByType(type: CellType): number {
+    return this.cells.reduce((acc, cell) => acc + (cell.type === type ? 1 : 0), 0);
   }
 
   public getSlot(slotIndex: number): BattlefieldSlot | undefined {
