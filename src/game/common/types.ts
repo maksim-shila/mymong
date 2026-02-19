@@ -1,0 +1,18 @@
+export interface MinMax {
+  min: number;
+  max: number;
+}
+
+export interface Offset {
+  x: number;
+  y: number;
+}
+
+export interface Bounds {
+  x: MinMax;
+  y: MinMax;
+  width: number;
+  height: number;
+}
+
+export type Direction = -1 | 0 | 1;

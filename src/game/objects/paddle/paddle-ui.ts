@@ -1,0 +1,97 @@
+import { TEXTURE } from '@game/assets/common-assets';
+
+interface TrailSnapshot {
+  x: number;
+  y: number;
+  angle: number;
+  life: number;
+}
+
+const SHIP_Z_INDEX = 10;
+
+// BT === BOOST_TRAIL
+const BT_COUNT = 4;
+const BT_INTERVAL_MS = 34;
+const BT_LIFE_MS = 180;
+const BT_ALPHA = 0.48;
+
+export class PaddleUI {
+  private readonly paddle: Phaser.GameObjects.Rectangle;
+
+  private readonly shipSprite: Phaser.GameObjects.Image;
+  private readonly boostTrail: Phaser.GameObjects.Image[] = [];
+  private readonly trailSnapshots: TrailSnapshot[] = [];
+
+  private trailSnapshotTimerMs = 0;
+
+  constructor(scene: Phaser.Scene, paddle: Phaser.GameObjects.Rectangle) {
+    this.paddle = paddle;
+
+    this.shipSprite = scene.add.image(paddle.x, paddle.y, TEXTURE.SHIP);
+    this.shipSprite.setDisplaySize(paddle.width, paddle.height);
+    this.shipSprite.setDepth(SHIP_Z_INDEX);
+
+    for (let i = 0; i < BT_COUNT; i += 1) {
+      const ghost = scene.add.image(paddle.x, paddle.y, TEXTURE.SHIP);
+      ghost.setDisplaySize(paddle.width, paddle.height);
+      ghost.setDepth(this.shipSprite.depth - i);
+      ghost.setAlpha(0);
+      this.boostTrail.push(ghost);
+    }
+  }
+
+  draw(delta: number, isBoostActive: boolean): void {
+    this.shipSprite.setPosition(this.paddle.x, this.paddle.y);
+    this.shipSprite.setAngle(this.paddle.angle);
+
+    this.updateTrailSnapshots(delta, isBoostActive);
+    this.drawBoostTrail();
+  }
+
+  private updateTrailSnapshots(delta: number, emitSnapshots: boolean): void {
+    this.trailSnapshotTimerMs = Math.max(0, this.trailSnapshotTimerMs - delta);
+
+    // Add snapshot if needed and interval passed
+    if (emitSnapshots && this.trailSnapshotTimerMs === 0) {
+      this.trailSnapshotTimerMs = BT_INTERVAL_MS;
+
+      this.trailSnapshots.unshift({
+        x: this.paddle.x,
+        y: this.paddle.y,
+        angle: this.paddle.angle,
+        life: BT_LIFE_MS,
+      });
+    }
+
+    // Reduce each snapshot life
+    for (const snapshot of this.trailSnapshots) {
+      snapshot.life -= delta;
+    }
+
+    // Remove 'dead' snapshots
+    while (
+      this.trailSnapshots.length &&
+      this.trailSnapshots[this.trailSnapshots.length - 1].life <= 0
+    ) {
+      this.trailSnapshots.pop();
+    }
+  }
+
+  private drawBoostTrail(): void {
+    for (let i = 0; i < this.boostTrail.length; i++) {
+      const ghost = this.boostTrail[i];
+      const snapshot = this.trailSnapshots[i];
+
+      if (!snapshot) {
+        ghost.setAlpha(0);
+        continue;
+      }
+
+      const alphaBlend = Phaser.Math.Clamp(snapshot.life / BT_LIFE_MS, 0, 1);
+
+      ghost.setPosition(snapshot.x, snapshot.y);
+      ghost.setAngle(snapshot.angle);
+      ghost.setAlpha(BT_ALPHA * alphaBlend);
+    }
+  }
+}

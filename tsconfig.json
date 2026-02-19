@@ -17,10 +17,13 @@
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
+    "declaration": true,
     "noEmit": true,
 
     /* Linting */
     "strict": true,
+    "isolatedDeclarations": true,
+    "noImplicitReturns": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": false,
