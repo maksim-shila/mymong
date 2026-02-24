@@ -2,6 +2,7 @@
 import { resolve } from 'node:path';
 
 export default defineConfig({
+  base: './',
   resolve: {
     alias: {
       '@game': resolve(__dirname, 'src/game'),

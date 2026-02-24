@@ -1,0 +1,34 @@
+import type { Drop } from '../drop/drop';
+import { ResourceDrop } from '../drop/resource-drop';
+import { Cell } from './cell';
+
+const LIVES_COLOR: Record<number, number> = {
+  0: 0x585d66,
+  1: 0xbefcf6,
+  2: 0x95c6cd,
+  3: 0x6f9ea5,
+  4: 0x3e727b,
+  5: 0x12464f,
+};
+
+const RESOURCE_DROP_CHANCE = 0.3;
+const RESOURCE_DROP_MIN_AMOUNT = 10;
+const RESOURCE_DROP_MAX_AMOUNT = 100;
+
+export class MoleBuildingCell extends Cell {
+  public override getDrop(): Drop | null {
+    const hasDrop = RESOURCE_DROP_CHANCE > Math.random();
+    if (!hasDrop) {
+      return null;
+    }
+
+    const resourceAmount = Phaser.Math.Between(RESOURCE_DROP_MIN_AMOUNT, RESOURCE_DROP_MAX_AMOUNT);
+    return new ResourceDrop(this.scene, this.x, this.y, resourceAmount);
+  }
+
+  public override update(delta: number): void {
+    const colorKey = Math.ceil(this.lives / 5);
+    this.setFillStyle(LIVES_COLOR[colorKey], 1);
+    super.update(delta);
+  }
+}
