@@ -212,6 +212,10 @@ export class Mole {
       buildingCell.constructing = false;
       this.targetCellSlot.targetedByMole = false;
       this.targetCellSlot = null;
+
+      this.stolenDrop?.destroy();
+      this.stolenDrop = null;
+
       this.state = MoleState.MOVE_TO_BASE;
     }
   }
