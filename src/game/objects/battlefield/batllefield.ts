@@ -79,6 +79,14 @@ export class Battlefield {
       .setDepth(Z_INDEX);
   }
 
+  public get allCatsSaved(): boolean {
+    return this.workersBase.getSavedCatsCount() >= this.grid.catsCount;
+  }
+
+  public get allMolesKilled(): boolean {
+    return this.moleBase.getAliveMolesCount() === 0;
+  }
+
   public update(delta: number): void {
     this.workersBase.update(delta);
     this.moleBase.update(delta);

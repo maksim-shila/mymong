@@ -32,6 +32,7 @@ export class WorkersBase {
   private readonly catPlaces: CatPlace[] = [];
 
   private resources = 0;
+  private savedCatsCount = 0;
 
   private fillEnergyTankRequested = false;
 
@@ -57,7 +58,7 @@ export class WorkersBase {
       lastWorkerY = workerY;
     }
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < this.grid.catsCount; i++) {
       this.catPlaces.push({ x: baseX, y: lastWorkerY - WORKER_HEIGHT - CAT_OFFSET * i });
     }
 
@@ -100,7 +101,10 @@ export class WorkersBase {
           worker.moveToBase(delta);
           break;
         case WorkerState2.SAVE_CAT:
-          worker.saveCat(delta);
+          const savedDrop = worker.saveCat(delta);
+          if (savedDrop?.type === DropType.CAT) {
+            this.savedCatsCount += 1;
+          }
           break;
         case WorkerState2.SAVE_RESOURCES:
           this.resources += worker.saveResources(delta);
@@ -114,6 +118,10 @@ export class WorkersBase {
     }
 
     this.hud.update(this.resources);
+  }
+
+  public getSavedCatsCount(): number {
+    return this.savedCatsCount;
   }
 
   private tryGiveTask(worker: Worker, dropSlots: CellSlot[]) {

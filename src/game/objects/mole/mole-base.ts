@@ -91,6 +91,10 @@ export class MoleBase {
     this.hud.update(this.moles.length);
   }
 
+  public getAliveMolesCount(): number {
+    return this.moles.length;
+  }
+
   private tryAddToQueue(mole: Mole): boolean {
     if (this.molesQueue.includes(mole)) {
       return false;
