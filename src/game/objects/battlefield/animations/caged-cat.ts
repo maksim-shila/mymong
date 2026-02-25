@@ -8,8 +8,7 @@ const CAT_JUMP_INTERVAL_MAX_MS = 3500;
 export class CagedCatAnimation {
   private readonly scene: Phaser.Scene;
 
-  private x: number;
-  private y: number;
+  private baseY: number;
   private width: number;
   private height: number;
   private depth: number;
@@ -28,13 +27,12 @@ export class CagedCatAnimation {
   ) {
     this.scene = scene;
 
-    this.x = x;
-    this.y = y;
+    this.baseY = y;
     this.width = width;
     this.height = height;
     this.depth = depth;
 
-    this.catImage = scene.add.image(this.x, this.y, TEXTURE.CAT);
+    this.catImage = scene.add.image(x, y, TEXTURE.CAT);
     this.catImage.setDisplaySize(this.width, this.height);
     this.catImage.setDepth(this.depth);
 
@@ -42,23 +40,22 @@ export class CagedCatAnimation {
   }
 
   public setPostion(x: number, y: number): void {
-    this.x = x;
-    this.y = y;
-    this.catImage.setPosition(this.x, this.y);
+    this.baseY = y;
+    this.catImage.setPosition(x, y);
   }
 
   public setFree(): void {
     this.stopJumpLoop();
     this.catImage.destroy();
 
-    this.catImage = this.scene.add.image(this.x, this.y, TEXTURE.CAT_SAVED);
+    this.catImage = this.scene.add.image(this.catImage.x, this.baseY, TEXTURE.CAT_SAVED);
     this.catImage.setDisplaySize(this.width, this.height);
     this.catImage.setDepth(this.depth);
   }
 
   public hide(): void {
     this.stopJumpLoop();
-    this.catImage.setY(this.y);
+    this.catImage.setY(this.baseY);
     this.catImage.setVisible(false);
   }
 
@@ -68,7 +65,7 @@ export class CagedCatAnimation {
     }
 
     this.stopJumpLoop();
-    this.catImage.setY(this.y);
+    this.catImage.setY(this.baseY);
     this.catImage.setVisible(true);
     this.scheduleNextJump();
   }
@@ -96,17 +93,17 @@ export class CagedCatAnimation {
       return;
     }
 
-    this.catImage.setY(this.y);
+    this.catImage.setY(this.baseY);
     this.jumpTween = this.scene.tweens.add({
       targets: this.catImage,
-      y: this.y - CAT_JUMP_AMPLITUDE,
+      y: this.baseY - CAT_JUMP_AMPLITUDE,
       duration: CAT_JUMP_DURATION_MS / 2,
       ease: 'Sine.easeOut',
       yoyo: true,
       easeParams: undefined,
       onComplete: () => {
         this.jumpTween = null;
-        this.catImage.setY(this.y);
+        this.catImage.setY(this.baseY);
         this.scheduleNextJump();
       },
     });

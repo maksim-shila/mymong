@@ -39,8 +39,6 @@ export class Mole {
   private targetCellSlot: CellSlot | null = null;
   private stolenDrop: Drop | null = null;
 
-  private x: number;
-  private y: number;
   private state = MoleState.IDLE;
   private readonly relaxTimer = new Timer(RELAX_TIME_MS);
   private readonly stealDropTimer = new Timer(STEAL_DROP_TIME_MS);
@@ -77,8 +75,6 @@ export class Mole {
 
     this.homeX = x;
     this.homeY = y;
-    this.x = x;
-    this.y = y;
   }
 
   public update(_delta: number): void {
@@ -86,7 +82,6 @@ export class Mole {
       return;
     }
 
-    this.debugCollider.setPosition(this.x, this.y);
     this.debugColliderBody.updateFromGameObject();
   }
 
@@ -256,18 +251,19 @@ export class Mole {
   }
 
   private move(targetX: number, targetY: number, step: number): boolean {
-    const dx = targetX - this.x;
-    const dy = targetY - this.y;
+    const dx = targetX - this.debugCollider.x;
+    const dy = targetY - this.debugCollider.y;
     const distance = Math.hypot(dx, dy);
 
     if (distance <= step) {
-      this.x = targetX;
-      this.y = targetY;
+      this.debugCollider.setPosition(targetX, targetY);
       return true;
     } else {
       const factor = step / distance;
-      this.x += dx * factor;
-      this.y += dy * factor;
+      this.debugCollider.setPosition(
+        this.debugCollider.x + dx * factor,
+        this.debugCollider.y + dy * factor,
+      );
       return false;
     }
   }
