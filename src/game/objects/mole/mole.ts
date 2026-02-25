@@ -167,6 +167,7 @@ export class Mole {
       cell.constructing = true;
       this.buildingCellLives = cell.lives;
       cell.lives = 1;
+      this.buildingTimeMs = 0;
       return;
     }
 
@@ -195,16 +196,18 @@ export class Mole {
       this.targetCellSlot.targetedByMole = false;
       this.targetCellSlot = null;
       this.stolenDrop = null;
+      this.buildingTimeMs = 0;
       return;
     }
 
     // Start build cell
     this.buildingTimeMs += delta;
-    if (this.buildingTimeMs >= BUILD_TIME_PER_LIFE_MS) {
-      this.buildingTimeMs = 0;
-      buildingCell.lives += 1;
+    if (this.buildingTimeMs < BUILD_TIME_PER_LIFE_MS) {
+      return;
     }
 
+    this.buildingTimeMs = 0;
+    buildingCell.lives += 1;
     const buildingCompleted = buildingCell.lives === this.buildingCellLives;
     if (buildingCompleted) {
       buildingCell.constructing = false;
@@ -237,6 +240,10 @@ export class Mole {
 
     this.destroyed = true;
     this.state = MoleState.DEAD;
+    if (this.targetCellSlot) {
+      this.targetCellSlot.targetedByMole = false;
+    }
+
     this.stealDropIndicator.destroy();
     this.matterWorld.remove(this.collider);
   }

@@ -53,6 +53,7 @@ export class MoleBase {
       }
     }
 
+    const molesToDestroy: Mole[] = [];
     for (const mole of this.moles) {
       switch (mole.getState()) {
         case MoleState.IDLE:
@@ -74,11 +75,17 @@ export class MoleBase {
           mole.relax(delta);
           break;
         case MoleState.DEAD:
-          mole.destroy();
-          CollectionsUtils.remove(this.moles, mole);
+          molesToDestroy.push(mole);
+          break;
       }
 
       mole.update(delta);
+    }
+
+    for (const mole of molesToDestroy) {
+      mole.destroy();
+      CollectionsUtils.remove(this.moles, mole);
+      CollectionsUtils.remove(this.molesQueue, mole);
     }
 
     this.hud.update(this.moles.length);
