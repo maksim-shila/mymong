@@ -30,7 +30,7 @@ export const RESOLUTION_OPTIONS: readonly ResolutionOption[] = [
   { width: 1920, height: 1440, label: '1920 x 1440' },
   { width: 2560, height: 1440, label: '2560 x 1440' },
   { width: 3200, height: 1800, label: '3200 x 1800' },
-  { width: 3840, height: 2160, label: '3840 x 2160 (4K)' },
+  { width: 3840, height: 2160, label: '3840 x 2160' },
 ];
 
 export const DEFAULT_RESOLUTION: ResolutionOption = RESOLUTION_OPTIONS[6];
