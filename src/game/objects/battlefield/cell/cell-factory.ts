@@ -1,11 +1,10 @@
-import { CatCageCell } from './cat-cage-cell';
-import { MoleBuildingCell } from './mole-building-cell';
+import { CAT_CAGE_LIVES, CatCageCell } from './cat-cage-cell';
+import {
+  MOLE_BUILDING_MAX_LIVES,
+  MOLE_BUILDING_MIN_LIVES,
+  MoleBuildingCell,
+} from './mole-building-cell';
 import type { CellSlot } from './cell-slot';
-
-const MOLE_BUILDING_MIN_LIVES = 5;
-const MOLE_BUILDING_MAX_LIVES = 25;
-
-const CAT_CAGE_LIVES = 10;
 
 export class CellFactory {
   constructor(private readonly scene: Phaser.Scene) {}

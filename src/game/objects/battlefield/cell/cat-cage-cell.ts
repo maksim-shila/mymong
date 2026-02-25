@@ -3,6 +3,8 @@ import { CatDrop } from '../drop/cat-drop';
 import type { Drop } from '../drop/drop';
 import { Cell } from './cell';
 
+export const CAT_CAGE_LIVES = 10;
+
 const FILL_COLOR = 0xf5e6a6;
 
 const CAT_IMG_SCALE = 0.72;

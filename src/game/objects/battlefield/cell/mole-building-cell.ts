@@ -2,6 +2,10 @@ import type { Drop } from '../drop/drop';
 import { ResourceDrop } from '../drop/resource-drop';
 import { Cell } from './cell';
 
+export const MOLE_BUILDING_MIN_LIVES = 5;
+export const MOLE_BUILDING_MAX_LIVES = 25;
+
+const LIVES_COLOR_STEP = 5;
 const LIVES_COLOR: Record<number, number> = {
   0: 0x585d66,
   1: 0xbefcf6,
@@ -27,7 +31,7 @@ export class MoleBuildingCell extends Cell {
   }
 
   public override update(delta: number): void {
-    const colorKey = Math.ceil(this.lives / 5);
+    const colorKey = Math.ceil(this.lives / LIVES_COLOR_STEP);
     this.setFillStyle(LIVES_COLOR[colorKey], 1);
     super.update(delta);
   }
