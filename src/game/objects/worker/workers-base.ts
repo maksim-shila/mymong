@@ -10,7 +10,7 @@ const DEFAULT_WORKERS_COUNT = 3;
 
 const BASE_OFFSET_X = 80;
 const BASE_OFFSET_Y = 80;
-const QUEUE_OFFSET_Y = 0;
+const QUEUE_OFFSET_Y = -20;
 
 const WORKER_WIDTH = 100;
 const WORKER_HEIGHT = 100;
