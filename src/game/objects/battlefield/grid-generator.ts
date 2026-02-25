@@ -12,7 +12,9 @@ const CELL_WIDTH = 120;
 const CELL_HEIGHT = CELL_WIDTH;
 
 const EMPTY_CELL_CHANCE = 0.16;
-const CAT_CAGES_COUNT = 3;
+
+const CATS_COUNT_MIN = 1;
+const CATS_COUNT_MAX = 4;
 
 export class GridGenerator {
   private readonly bounds: Bounds;
@@ -34,9 +36,11 @@ export class GridGenerator {
     const paddingX = (this.bounds.width - actualWidth) / 2;
     const startX = this.bounds.x.min + paddingX + CELL_WIDTH / 2;
     const startY = this.bounds.y.max - GRID_TOP_PADDING - CELL_HEIGHT / 2;
-    const grid = new CellsGrid(columns, rows, CELL_WIDTH, CELL_HEIGHT, startX, startY);
+    const catsCount = Phaser.Math.RND.between(CATS_COUNT_MIN, CATS_COUNT_MAX);
 
-    const catCageSlotIndices = this.pickCatCageIndices(rows, columns);
+    const grid = new CellsGrid(columns, rows, CELL_WIDTH, CELL_HEIGHT, startX, startY, catsCount);
+
+    const catCageSlotIndices = this.pickCatCageIndices(catsCount, rows, columns);
 
     for (const slot of grid.slots) {
       if (catCageSlotIndices.has(slot.index)) {
@@ -54,7 +58,7 @@ export class GridGenerator {
     return grid;
   }
 
-  private pickCatCageIndices(rows: number, columns: number): Set<number> {
+  private pickCatCageIndices(catsCount: number, rows: number, columns: number): Set<number> {
     const indices: number[] = [];
 
     // Skip first and last rows
@@ -65,6 +69,6 @@ export class GridGenerator {
     }
 
     const shuffled = CollectionsUtils.shuffle(indices);
-    return new Set(shuffled.slice(0, CAT_CAGES_COUNT));
+    return new Set(shuffled.slice(0, catsCount));
   }
 }

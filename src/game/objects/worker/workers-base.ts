@@ -4,6 +4,7 @@ import { Worker, WorkerState2 } from './worker';
 import type { CellSlot } from '../battlefield/cell/cell-slot';
 import { DropType } from '../battlefield/drop/drop';
 import type { EnergyTank } from '../energy-tank';
+import { WorkerBaseHud } from './worker-base-hud';
 
 const DEFAULT_WORKERS_COUNT = 3;
 
@@ -16,12 +17,6 @@ const WORKER_HEIGHT = 100;
 
 const CAT_OFFSET = 100;
 
-const HUD_OFFSET_X = 30;
-const HUD_OFFSET_Y = 30;
-const HUD_FONT_SIZE = '40px';
-const HUD_COLOR = '#ffffff';
-const HUD_Z_INDEX = 1200;
-
 type CatPlace = {
   x: number;
   y: number;
@@ -30,7 +25,7 @@ type CatPlace = {
 export class WorkersBase {
   private readonly scene: Phaser.Scene;
   private readonly grid: CellsGrid;
-  private readonly hudText: Phaser.GameObjects.Text;
+  private readonly hud: WorkerBaseHud;
   private readonly energyTank: EnergyTank;
 
   private readonly workers: Worker[] = [];
@@ -66,18 +61,8 @@ export class WorkersBase {
       this.catPlaces.push({ x: baseX, y: lastWorkerY - WORKER_HEIGHT - CAT_OFFSET * i });
     }
 
-    this.hudText = this.scene.add.text(
-      bounds.x.min - HUD_OFFSET_X,
-      bounds.y.min + HUD_OFFSET_Y,
-      '',
-      {
-        fontSize: HUD_FONT_SIZE,
-        color: HUD_COLOR,
-      },
-    );
-    this.hudText.setOrigin(1, 0);
-    this.hudText.setDepth(HUD_Z_INDEX);
-    this.drawHud();
+    this.hud = new WorkerBaseHud(this.scene, bounds);
+    this.hud.update(this.resources);
   }
 
   public update(delta: number): void {
@@ -128,11 +113,7 @@ export class WorkersBase {
       worker.update(delta);
     }
 
-    this.drawHud();
-  }
-
-  private drawHud(): void {
-    this.hudText.setText(`Resources: ${this.resources}`);
+    this.hud.update(this.resources);
   }
 
   private tryGiveTask(worker: Worker, dropSlots: CellSlot[]) {

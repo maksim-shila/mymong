@@ -2,6 +2,7 @@ import { CellSlot } from './cell-slot';
 
 export class CellsGrid {
   public readonly slots: CellSlot[] = [];
+  public readonly catsCount: number;
 
   private readonly columns: number;
   private readonly rows: number;
@@ -13,9 +14,11 @@ export class CellsGrid {
     cellHeight: number,
     startX: number,
     startY: number,
+    catsCount: number,
   ) {
     this.columns = columns;
     this.rows = rows;
+    this.catsCount = catsCount;
     this.init(cellWidth, cellHeight, startX, startY);
   }
 
