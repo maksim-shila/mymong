@@ -1,6 +1,7 @@
 import type { Drop } from '../drop/drop';
 import { ResourceDrop } from '../drop/resource-drop';
 import { Cell } from './cell';
+import type { Bounds, MinMax } from '@game/common/types';
 
 export const MOLE_BUILDING_MIN_LIVES = 5;
 export const MOLE_BUILDING_MAX_LIVES = 25;
@@ -20,6 +21,18 @@ const RESOURCE_DROP_MIN_AMOUNT = 10;
 const RESOURCE_DROP_MAX_AMOUNT = 100;
 
 export class MoleBuildingCell extends Cell {
+  constructor(
+    scene: Phaser.Scene,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    lives: number,
+    bounds: Bounds,
+  ) {
+    super(scene, x, y, width, height, lives, bounds);
+  }
+
   public override getDrop(): Drop | null {
     const hasDrop = RESOURCE_DROP_CHANCE > Math.random();
     if (!hasDrop) {
@@ -30,9 +43,9 @@ export class MoleBuildingCell extends Cell {
     return new ResourceDrop(this.scene, this.x, this.y, resourceAmount);
   }
 
-  public override update(delta: number): void {
+  public override update(delta: number, shotAreaX: MinMax, shotAreaY: MinMax): void {
     const colorKey = Math.ceil(this.lives / LIVES_COLOR_STEP);
     this.setFillStyle(LIVES_COLOR[colorKey], 1);
-    super.update(delta);
+    super.update(delta, shotAreaX, shotAreaY);
   }
 }

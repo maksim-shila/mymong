@@ -1,5 +1,6 @@
 import type { Drop } from '../drop/drop';
 import type { Cell } from './cell';
+import type { MinMax } from '@game/common/types';
 
 export class CellSlot {
   public cell: Cell | null = null;
@@ -17,8 +18,8 @@ export class CellSlot {
     public readonly y: number,
   ) {}
 
-  public update(delta: number): void {
-    this.cell?.update(delta);
+  public update(delta: number, shotAreaX: MinMax, shotAreaY: MinMax): void {
+    this.cell?.update(delta, shotAreaX, shotAreaY);
     this.drop?.update(delta);
   }
 

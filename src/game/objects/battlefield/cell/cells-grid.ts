@@ -1,4 +1,5 @@
 import { CellSlot } from './cell-slot';
+import type { MinMax } from '@game/common/types';
 
 export class CellsGrid {
   public readonly slots: CellSlot[] = [];
@@ -6,6 +7,8 @@ export class CellsGrid {
 
   private readonly columns: number;
   private readonly rows: number;
+
+  private difficulty = 0;
 
   constructor(
     columns: number,
@@ -22,10 +25,15 @@ export class CellsGrid {
     this.init(cellWidth, cellHeight, startX, startY);
   }
 
-  public update(delta: number): void {
+  public update(delta: number, shotAreaX: MinMax, shotAreaY: MinMax): void {
     for (const slot of this.slots) {
-      slot.update(delta);
+      slot.cell?.setDifficulty(this.difficulty);
+      slot.update(delta, shotAreaX, shotAreaY);
     }
+  }
+
+  public setDifficulty(difficulty: number): void {
+    this.difficulty = Phaser.Math.Clamp(difficulty, 0, 1);
   }
 
   private init(width: number, height: number, startX: number, startY: number): void {

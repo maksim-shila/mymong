@@ -22,7 +22,7 @@ export class GridGenerator {
 
   constructor(scene: Phaser.Scene, bounds: Bounds) {
     this.bounds = bounds;
-    this.cellFactory = new CellFactory(scene);
+    this.cellFactory = new CellFactory(scene, bounds);
   }
 
   public createGrid(): CellsGrid {

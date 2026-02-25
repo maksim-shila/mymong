@@ -32,7 +32,7 @@ export class MoleBase {
     for (let i = 0; i < DEFAULT_MOLES_COUNT; i++) {
       const moleX = bounds.x.max + MOLE_BASE_OFFSET_X;
       const moleY = bounds.y.min + MOLE_BASE_OFFSET_Y + (MOLE_HEIGHT + MOLE_QUEUE_OFFSET_Y) * i;
-      const mole = new Mole(this.scene, moleX, moleY, MOLE_WIDTH, MOLE_HEIGHT);
+      const mole = new Mole(this.scene, moleX, moleY, MOLE_WIDTH, MOLE_HEIGHT, bounds);
       this.moles.push(mole);
     }
 

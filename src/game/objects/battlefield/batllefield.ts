@@ -1,4 +1,4 @@
-import type { Bounds } from '@game/common/types';
+import type { Bounds, MinMax } from '@game/common/types';
 import { GridGenerator } from './grid-generator';
 import type { ResolutionViewport } from '@game/settings/resolution';
 import type { CellsGrid } from './cell/cells-grid';
@@ -8,6 +8,7 @@ import { CollisionHandler } from '../collisions/collision-handler';
 import { EnergyTank } from '../energy-tank';
 import { Controls } from '@game/input/controls';
 import { WorkersBase } from '../worker/workers-base';
+import { Timer } from '@game/common/helpers/timer';
 
 const INITIAL_WIDTH = 1200;
 
@@ -18,6 +19,11 @@ const PADDLE_Y_OFFSET = 68;
 const STROKE_WIDTH = 3;
 const STROKE_COLOR = 0x1e1b42;
 const STROKE_ALPHA = 0.45;
+
+const DIFFICULTY_STEP_INTERVAL_MS = 10000;
+const MAX_DIFFICULTY_STEPS = 12;
+const SHOT_AREA_X_OFFSET = 70;
+const SHOT_AREA_Y_OFFSET = 20;
 
 export class Battlefield {
   private readonly controls: Controls;
@@ -33,7 +39,10 @@ export class Battlefield {
 
   private readonly viewport: ResolutionViewport;
 
+  private readonly difficultyTimer = new Timer(DIFFICULTY_STEP_INTERVAL_MS);
+
   private width: number;
+  private difficultyStep = 0;
 
   constructor(scene: Phaser.Scene, viewport: ResolutionViewport) {
     this.viewport = viewport;
@@ -88,11 +97,35 @@ export class Battlefield {
   }
 
   public update(delta: number): void {
+    this.updateDifficulty(delta);
+
     this.workersBase.update(delta);
     this.moleBase.update(delta);
-    this.grid.update(delta);
     this.paddle.update(delta);
+
+    const shotAreaX: MinMax = {
+      min: Math.floor(this.paddle.x - this.paddle.width / 2 - SHOT_AREA_X_OFFSET),
+      max: Math.floor(this.paddle.x + this.paddle.width / 2 + SHOT_AREA_X_OFFSET),
+    };
+    const shotAreaY: MinMax = {
+      min: Math.floor(this.paddle.y - this.paddle.height / 2 - SHOT_AREA_Y_OFFSET),
+      max: Math.floor(this.paddle.y + this.paddle.height / 2 + SHOT_AREA_Y_OFFSET),
+    };
+    this.grid.update(delta, shotAreaX, shotAreaY);
+
     this.energyTank.update();
     this.collisionHandler.update();
+  }
+
+  private updateDifficulty(delta: number): void {
+    if (!this.difficultyTimer.tick(delta)) {
+      return;
+    }
+
+    this.difficultyTimer.reset();
+    if (this.difficultyStep < MAX_DIFFICULTY_STEPS) {
+      this.difficultyStep += 1;
+      this.grid.setDifficulty(this.difficultyStep / MAX_DIFFICULTY_STEPS);
+    }
   }
 }

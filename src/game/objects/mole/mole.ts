@@ -1,3 +1,4 @@
+import type { Bounds } from '@game/common/types';
 import { CellFactory } from '../battlefield/cell/cell-factory';
 import type { CellSlot } from '../battlefield/cell/cell-slot';
 import { Drop, DropType } from '../battlefield/drop/drop';
@@ -49,7 +50,14 @@ export class Mole {
   private destroyed = false;
   private lives = MOLE_LIVES;
 
-  constructor(scene: Phaser.Scene, x: number, y: number, width: number, height: number) {
+  constructor(
+    scene: Phaser.Scene,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    bounds: Bounds,
+  ) {
     this.matterWorld = scene.matter.world;
     this.colliderApi = scene.matter.body;
     this.collider = scene.matter.add.rectangle(x, y, width, height, {
@@ -60,7 +68,7 @@ export class Mole {
       frictionStatic: 0,
       restitution: 0,
     });
-    this.cellFactory = new CellFactory(scene);
+    this.cellFactory = new CellFactory(scene, bounds);
 
     this.stealDropIndicator = scene.add.circle(x, y, 1, STEAL_INDICATOR_COLOR, 0);
     this.stealDropIndicator.setStrokeStyle(

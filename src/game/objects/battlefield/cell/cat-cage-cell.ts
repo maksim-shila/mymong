@@ -2,6 +2,7 @@ import { CagedCatAnimation } from '../animations/caged-cat';
 import { CatDrop } from '../drop/cat-drop';
 import type { Drop } from '../drop/drop';
 import { Cell } from './cell';
+import type { Bounds } from '@game/common/types';
 
 export const CAT_CAGE_LIVES = 10;
 
@@ -19,8 +20,9 @@ export class CatCageCell extends Cell {
     width: number,
     height: number,
     lives: number,
+    bounds: Bounds,
   ) {
-    super(scene, x, y, width, height, lives);
+    super(scene, x, y, width, height, lives, bounds);
 
     this.setFillStyle(FILL_COLOR, 1);
 
