@@ -34,7 +34,7 @@ export class OptionsScene extends Phaser.Scene {
 
     this.add
       .text(worldWidth / 2, worldHeight * 0.22, 'OPTIONS', {
-        fontFamily: 'Arial, Helvetica, sans-serif',
+        fontFamily: 'Fredoka, Arial, Helvetica, sans-serif',
         fontSize: '62px',
         color: '#ffffff',
       })
@@ -43,7 +43,7 @@ export class OptionsScene extends Phaser.Scene {
 
     this.add
       .text(worldWidth / 2, worldHeight * 0.34, `Current: ${current.width} x ${current.height}`, {
-        fontFamily: 'Arial, Helvetica, sans-serif',
+        fontFamily: 'Fredoka, Arial, Helvetica, sans-serif',
         fontSize: '30px',
         color: '#d9e2ff',
       })
@@ -52,7 +52,7 @@ export class OptionsScene extends Phaser.Scene {
 
     const vSyncStateText = this.add
       .text(worldWidth / 2, worldHeight * 0.39, `VSync: ${vSyncEnabled ? 'On' : 'Off'}`, {
-        fontFamily: 'Arial, Helvetica, sans-serif',
+        fontFamily: 'Fredoka, Arial, Helvetica, sans-serif',
         fontSize: '30px',
         color: '#d9e2ff',
       })
@@ -140,7 +140,7 @@ export class OptionsScene extends Phaser.Scene {
   private createMenuButton(x: number, y: number, label: string): Phaser.GameObjects.Text {
     return this.add
       .text(x, y, label, {
-        fontFamily: 'Arial, Helvetica, sans-serif',
+        fontFamily: 'Fredoka, Arial, Helvetica, sans-serif',
         fontSize: '38px',
         color: '#ffffff',
       })

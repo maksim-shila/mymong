@@ -26,7 +26,7 @@ export class MainMenuScene extends Phaser.Scene {
 
     this.add
       .text(worldWidth / 2, worldHeight * 0.34, 'MYMONG', {
-        fontFamily: 'Arial, Helvetica, sans-serif',
+        fontFamily: 'Fredoka, Arial, Helvetica, sans-serif',
         fontSize: '80px',
         color: '#ffffff',
       })
@@ -38,7 +38,7 @@ export class MainMenuScene extends Phaser.Scene {
     const exitText = this.createMenuButton(worldWidth / 2, worldHeight * 0.74, 'Exit');
     const buttons = [startText, optionsText, exitText];
     const actions: Array<() => void> = [
-      () => this.scene.start('FirstScene'),
+      () => this.scene.start('LoadingScene'),
       () => this.scene.start('OptionsScene'),
       () => this.exitGame(),
     ];
@@ -93,7 +93,7 @@ export class MainMenuScene extends Phaser.Scene {
   private createMenuButton(x: number, y: number, label: string): Phaser.GameObjects.Text {
     const button = this.add
       .text(x, y, label, {
-        fontFamily: 'Arial, Helvetica, sans-serif',
+        fontFamily: 'Fredoka, Arial, Helvetica, sans-serif',
         fontSize: '50px',
         color: '#ffffff',
       })

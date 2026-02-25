@@ -1,4 +1,3 @@
-import { CommonAssets } from '@game/assets/common-assets';
 import { Battlefield } from '@game/objects/battlefield/batllefield';
 import { applyResolutionCamera } from '@game/settings/resolution';
 
@@ -7,10 +6,6 @@ export class FirstScene extends Phaser.Scene {
 
   constructor() {
     super('FirstScene');
-  }
-
-  preload(): void {
-    CommonAssets.preload(this);
   }
 
   create(): void {
