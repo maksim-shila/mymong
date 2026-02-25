@@ -1,4 +1,5 @@
 import { TEXTURE } from '@game/assets/common-assets';
+import { Timer } from '@game/common/helpers/timer';
 import type { EnergyTank } from '../energy-tank';
 import type { CellSlot } from '../battlefield/cell/cell-slot';
 import { DropType, type Drop } from '../battlefield/drop/drop';
@@ -45,7 +46,7 @@ export class Worker extends Phaser.GameObjects.Container {
 
   private targetCellSlot: CellSlot | null = null;
   private savedDrop: Drop | null = null;
-  private actionTimeLeftMs = 0;
+  private readonly actionTimer = new Timer();
   public targetCatPosition: { x: number; y: number } | null = null;
 
   constructor(
@@ -125,7 +126,7 @@ export class Worker extends Phaser.GameObjects.Container {
     const step = SPEED * (delta / 1000);
     const hasArrived = this.move(this.targetCellSlot.x, this.targetCellSlot.y, step);
     if (hasArrived) {
-      this.actionTimeLeftMs = COLLECT_DROP_TIME_MS;
+      this.actionTimer.set(COLLECT_DROP_TIME_MS);
       this.state = WorkerState2.COLLECT_DROP;
     }
   }
@@ -134,14 +135,13 @@ export class Worker extends Phaser.GameObjects.Container {
     const step = SPEED * (delta / 1000);
     const hasArrived = this.move(this.energyTank.platformX, this.energyTank.platformY, step);
     if (hasArrived) {
-      this.actionTimeLeftMs = ENERGY_TANK_FILL_TIME_MS;
+      this.actionTimer.set(ENERGY_TANK_FILL_TIME_MS);
       this.state = WorkerState2.FILL_ENERGY_TANK;
     }
   }
 
   public fillEnergyTank(delta: number): boolean {
-    this.actionTimeLeftMs = Math.max(0, this.actionTimeLeftMs - delta);
-    if (this.actionTimeLeftMs > 0) {
+    if (!this.actionTimer.tick(delta)) {
       const tickFuelAmount = (ENERGY_TANK_FILL_AMOUNT / ENERGY_TANK_FILL_TIME_MS) * delta;
       this.energyTank.addFuel(tickFuelAmount);
       return false;
@@ -159,14 +159,13 @@ export class Worker extends Phaser.GameObjects.Container {
 
     const drop = this.targetCellSlot.drop;
     if (!drop) {
-      this.actionTimeLeftMs = 0;
+      this.actionTimer.set(0);
       this.state = WorkerState2.MOVE_TO_BASE;
       this.targetCellSlot.targetedByWorker = false;
       return;
     }
 
-    this.actionTimeLeftMs = Math.max(0, this.actionTimeLeftMs - delta);
-    if (this.actionTimeLeftMs === 0) {
+    if (this.actionTimer.tick(delta)) {
       this.savedDrop = drop;
       this.savedDrop.hide();
       this.targetCellSlot.targetedByWorker = false;
@@ -188,7 +187,7 @@ export class Worker extends Phaser.GameObjects.Container {
     const step = SPEED * (delta / 1000);
     const hasArrived = this.move(this.targetCatPosition.x, this.targetCatPosition.y, step);
     if (hasArrived) {
-      this.actionTimeLeftMs = SAVE_CAT_TIME_MS;
+      this.actionTimer.set(SAVE_CAT_TIME_MS);
       this.state = WorkerState2.SAVE_CAT;
     }
   }
@@ -201,8 +200,7 @@ export class Worker extends Phaser.GameObjects.Container {
     }
 
     if (this.savedDrop && this.savedDrop.type === DropType.CAT) {
-      this.actionTimeLeftMs = Math.max(0, this.actionTimeLeftMs - delta);
-      if (this.actionTimeLeftMs > 0) {
+      if (!this.actionTimer.tick(delta)) {
         return null;
       }
 
@@ -223,10 +221,10 @@ export class Worker extends Phaser.GameObjects.Container {
     const hasArrived = this.move(this.homeX, this.homeY, step);
     if (hasArrived) {
       if (this.savedDrop) {
-        this.actionTimeLeftMs = SAVE_RESOURCES_TIME_MS;
+        this.actionTimer.set(SAVE_RESOURCES_TIME_MS);
         this.state = WorkerState2.SAVE_RESOURCES;
       } else {
-        this.actionTimeLeftMs = RELAX_TIME_MS;
+        this.actionTimer.set(RELAX_TIME_MS);
         this.state = WorkerState2.RELAX;
       }
     }
@@ -235,23 +233,21 @@ export class Worker extends Phaser.GameObjects.Container {
   public saveResources(delta: number): number {
     let resourcesAmount = 0;
     if (this.savedDrop && this.savedDrop instanceof ResourceDrop) {
-      this.actionTimeLeftMs = Math.max(0, this.actionTimeLeftMs - delta);
-      if (this.actionTimeLeftMs > 0) {
+      if (!this.actionTimer.tick(delta)) {
         return 0;
       }
 
       resourcesAmount = this.savedDrop.amount;
     }
 
-    this.actionTimeLeftMs = RELAX_TIME_MS;
+    this.actionTimer.set(RELAX_TIME_MS);
     this.state = WorkerState2.RELAX;
     this.savedDrop = null;
     return resourcesAmount;
   }
 
   public relax(delta: number): void {
-    this.actionTimeLeftMs = Math.max(0, this.actionTimeLeftMs - delta);
-    if (this.actionTimeLeftMs > 0) {
+    if (!this.actionTimer.tick(delta)) {
       return;
     }
 

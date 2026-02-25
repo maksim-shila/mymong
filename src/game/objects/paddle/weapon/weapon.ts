@@ -1,6 +1,7 @@
 import type { Bounds } from '@game/common/types';
 import { Key, type Controls } from '@game/input/controls';
 import type { EnergyTank } from '@game/objects/energy-tank';
+import { Timer } from '@game/common/helpers/timer';
 import type { Paddle } from '../paddle';
 import { Bullet } from './bullet';
 
@@ -18,7 +19,7 @@ export class Weapon {
 
   private readonly bullets: Bullet[] = [];
 
-  private shootCooldownLeftMs = 0;
+  private readonly shootCooldownTimer = new Timer(SHOOT_COOLDOWN_MS);
 
   constructor(
     scene: Phaser.Scene,
@@ -39,13 +40,13 @@ export class Weapon {
   }
 
   public update(delta: number): void {
-    this.shootCooldownLeftMs = Math.max(0, this.shootCooldownLeftMs - delta);
+    this.shootCooldownTimer.tick(delta);
 
     const shootPressed = this.controls.keyDown(Key.SHOOT);
-    if (shootPressed && this.shootCooldownLeftMs <= 0) {
+    if (shootPressed && this.shootCooldownTimer.done) {
       if (this.energyTank.tryConsume(FUEL_PER_SHOT)) {
         this.shoot();
-        this.shootCooldownLeftMs = SHOOT_COOLDOWN_MS;
+        this.shootCooldownTimer.reset();
       }
     }
 

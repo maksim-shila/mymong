@@ -1,6 +1,7 @@
 import { CellFactory } from '../battlefield/cell/cell-factory';
 import type { CellSlot } from '../battlefield/cell/cell-slot';
 import { Drop, DropType } from '../battlefield/drop/drop';
+import { Timer } from '@game/common/helpers/timer';
 
 export enum MoleState {
   IDLE,
@@ -41,10 +42,10 @@ export class Mole {
   private x: number;
   private y: number;
   private state = MoleState.IDLE;
-  private relaxTimeLeftMs = 0;
-  private stealDropTimeLeftMs = 0;
+  private readonly relaxTimer = new Timer(RELAX_TIME_MS);
+  private readonly stealDropTimer = new Timer(STEAL_DROP_TIME_MS);
   private buildingCellLives = 0;
-  private buildingTimeMs = 0;
+  private readonly buildingTimer = new Timer(BUILD_TIME_PER_LIFE_MS);
   private destroyed = false;
   private lives = MOLE_LIVES;
 
@@ -114,7 +115,7 @@ export class Mole {
   public stealDrop(delta: number): void {
     if (!this.targetCellSlot) {
       this.stealDropIndicator.setVisible(false);
-      this.stealDropTimeLeftMs = 0;
+      this.stealDropTimer.set(0);
       this.state = MoleState.MOVE_TO_BASE;
       return;
     }
@@ -122,14 +123,13 @@ export class Mole {
     const drop = this.targetCellSlot.drop;
     if (!drop) {
       this.stealDropIndicator.setVisible(false);
-      this.stealDropTimeLeftMs = 0;
+      this.stealDropTimer.set(0);
       this.state = MoleState.BUILD;
       return;
     }
 
-    this.stealDropTimeLeftMs = Math.max(0, this.stealDropTimeLeftMs - delta);
-    if (this.stealDropTimeLeftMs > 0) {
-      const progress = this.stealDropTimeLeftMs / STEAL_DROP_TIME_MS;
+    if (!this.stealDropTimer.tick(delta)) {
+      const progress = this.stealDropTimer.remaining / STEAL_DROP_TIME_MS;
       const baseRadius = Math.min(this.targetCellSlot.width, this.targetCellSlot.height) / 2;
       this.stealDropIndicator.setVisible(true);
       this.stealDropIndicator.setPosition(this.targetCellSlot.x, this.targetCellSlot.y);
@@ -154,7 +154,7 @@ export class Mole {
     const drop = this.targetCellSlot.drop;
     if (drop) {
       this.state = MoleState.STEAL_DROP;
-      this.stealDropTimeLeftMs = STEAL_DROP_TIME_MS;
+      this.stealDropTimer.reset();
       return;
     }
 
@@ -167,7 +167,7 @@ export class Mole {
       cell.constructing = true;
       this.buildingCellLives = cell.lives;
       cell.lives = 1;
-      this.buildingTimeMs = 0;
+      this.buildingTimer.reset();
       return;
     }
 
@@ -196,17 +196,16 @@ export class Mole {
       this.targetCellSlot.targetedByMole = false;
       this.targetCellSlot = null;
       this.stolenDrop = null;
-      this.buildingTimeMs = 0;
+      this.buildingTimer.reset();
       return;
     }
 
     // Start build cell
-    this.buildingTimeMs += delta;
-    if (this.buildingTimeMs < BUILD_TIME_PER_LIFE_MS) {
+    if (!this.buildingTimer.tick(delta)) {
       return;
     }
 
-    this.buildingTimeMs = 0;
+    this.buildingTimer.reset();
     buildingCell.lives += 1;
     const buildingCompleted = buildingCell.lives === this.buildingCellLives;
     if (buildingCompleted) {
@@ -222,13 +221,12 @@ export class Mole {
     const hasArrived = this.move(this.homeX, this.homeY, step);
     if (hasArrived) {
       this.state = MoleState.RELAX;
-      this.relaxTimeLeftMs = RELAX_TIME_MS;
+      this.relaxTimer.reset();
     }
   }
 
   public relax(delta: number): void {
-    this.relaxTimeLeftMs = Math.max(0, this.relaxTimeLeftMs - delta);
-    if (this.relaxTimeLeftMs === 0) {
+    if (this.relaxTimer.tick(delta)) {
       this.state = MoleState.IDLE;
     }
   }

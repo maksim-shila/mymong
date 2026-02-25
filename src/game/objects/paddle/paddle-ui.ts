@@ -1,4 +1,5 @@
 import { TEXTURE } from '@game/assets/common-assets';
+import { Timer } from '@game/common/helpers/timer';
 
 interface TrailSnapshot {
   x: number;
@@ -22,7 +23,7 @@ export class PaddleUI {
   private readonly boostTrail: Phaser.GameObjects.Image[] = [];
   private readonly trailSnapshots: TrailSnapshot[] = [];
 
-  private trailSnapshotTimerMs = 0;
+  private readonly trailSnapshotTimer = new Timer(BT_INTERVAL_MS);
 
   constructor(scene: Phaser.Scene, paddle: Phaser.GameObjects.Rectangle) {
     this.paddle = paddle;
@@ -49,11 +50,11 @@ export class PaddleUI {
   }
 
   private updateTrailSnapshots(delta: number, emitSnapshots: boolean): void {
-    this.trailSnapshotTimerMs = Math.max(0, this.trailSnapshotTimerMs - delta);
+    this.trailSnapshotTimer.tick(delta);
 
     // Add snapshot if needed and interval passed
-    if (emitSnapshots && this.trailSnapshotTimerMs === 0) {
-      this.trailSnapshotTimerMs = BT_INTERVAL_MS;
+    if (emitSnapshots && this.trailSnapshotTimer.done) {
+      this.trailSnapshotTimer.reset();
 
       this.trailSnapshots.unshift({
         x: this.paddle.x,

@@ -3,6 +3,7 @@ import type { CellsGrid } from '../battlefield/cell/cells-grid';
 import { Mole, MoleState } from './mole';
 import { MoleBaseHud } from './mole-base-hud';
 import { CollectionsUtils } from '@game/common/helpers/collections-utils';
+import { Timer } from '@game/common/helpers/timer';
 
 const DEFAULT_MOLES_COUNT = 5;
 const MOLES_DEQUEUE_COOLDOWN_MS = 500;
@@ -21,7 +22,7 @@ export class MoleBase {
   private readonly moles: Mole[] = [];
   private readonly molesQueue: Mole[] = [];
 
-  private molesDequeueCooldownLeftMs = 0;
+  private readonly molesDequeueCooldownTimer = new Timer(MOLES_DEQUEUE_COOLDOWN_MS);
 
   constructor(scene: Phaser.Scene, grid: CellsGrid, bounds: Bounds) {
     this.scene = scene;
@@ -39,9 +40,8 @@ export class MoleBase {
   }
 
   public update(delta: number): void {
-    this.molesDequeueCooldownLeftMs = Math.max(0, this.molesDequeueCooldownLeftMs - delta);
-    if (this.molesDequeueCooldownLeftMs === 0 && this.molesQueue.length > 0) {
-      this.molesDequeueCooldownLeftMs = MOLES_DEQUEUE_COOLDOWN_MS;
+    if (this.molesDequeueCooldownTimer.tick(delta) && this.molesQueue.length > 0) {
+      this.molesDequeueCooldownTimer.reset();
       const mole = this.molesQueue.shift()!;
 
       const freeSlots = this.grid.slots.filter(
