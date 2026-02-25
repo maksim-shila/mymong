@@ -73,9 +73,7 @@ export abstract class Cell extends Phaser.GameObjects.Rectangle {
     }
   }
 
-  public getDrop(): Drop | null {
-    return null;
-  }
+  public abstract getDrop(): Drop | null;
 
   public applyDamage(damage: number): void {
     damage = Math.max(1, Math.floor(damage));

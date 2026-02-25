@@ -2,6 +2,7 @@ import type { Bounds } from '@game/common/types';
 import type { CellsGrid } from '../battlefield/cell/cells-grid';
 import { Mole, MoleState } from './mole';
 import { MoleBaseHud } from './mole-base-hud';
+import { CollectionsUtils } from '@game/common/helpers/collections-utils';
 
 const DEFAULT_MOLES_COUNT = 5;
 const MOLES_DEQUEUE_COOLDOWN_MS = 500;
@@ -72,6 +73,9 @@ export class MoleBase {
         case MoleState.RELAX:
           mole.relax(delta);
           break;
+        case MoleState.DEAD:
+          mole.destroy();
+          CollectionsUtils.remove(this.moles, mole);
       }
 
       mole.update(delta);

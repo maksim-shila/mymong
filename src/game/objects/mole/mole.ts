@@ -9,6 +9,7 @@ export enum MoleState {
   BUILD,
   MOVE_TO_BASE,
   RELAX,
+  DEAD,
 }
 
 const SPEED = 300;
@@ -22,7 +23,10 @@ const STEAL_INDICATOR_ALPHA = 0.7;
 const STEAL_INDICATOR_STROKE_WIDTH = 3;
 const STEAL_INDICATOR_Z_INDEX = 60;
 
+const MOLE_LIVES = 3;
+
 export class Mole {
+  private readonly matterWorld: Phaser.Physics.Matter.World;
   private readonly colliderApi: Phaser.Physics.Matter.MatterPhysics['body'];
   private readonly collider: MatterJS.BodyType;
   private readonly cellFactory: CellFactory;
@@ -41,8 +45,11 @@ export class Mole {
   private stealDropTimeLeftMs = 0;
   private buildingCellLives = 0;
   private buildingTimeMs = 0;
+  private destroyed = false;
+  private lives = MOLE_LIVES;
 
   constructor(scene: Phaser.Scene, x: number, y: number, width: number, height: number) {
+    this.matterWorld = scene.matter.world;
     this.colliderApi = scene.matter.body;
     this.collider = scene.matter.add.rectangle(x, y, width, height, {
       isStatic: true,
@@ -70,6 +77,10 @@ export class Mole {
   }
 
   public update(_delta: number): void {
+    if (this.destroyed) {
+      return;
+    }
+
     this.colliderApi.setPosition(this.collider, { x: this.x, y: this.y });
   }
 
@@ -126,17 +137,20 @@ export class Mole {
     } else {
       this.stealDropIndicator.setVisible(false);
       this.stolenDrop = drop;
+      this.stolenDrop.hide();
       this.targetCellSlot.drop = null;
       this.state = MoleState.BUILD;
     }
   }
 
   public build(delta: number): void {
+    // Just safe-check: if, by some reason, target slot is null - return to base
     if (!this.targetCellSlot) {
       this.state = MoleState.MOVE_TO_BASE;
       return;
     }
 
+    // If cell slot has drop - try steel it
     const drop = this.targetCellSlot.drop;
     if (drop) {
       this.state = MoleState.STEAL_DROP;
@@ -144,13 +158,9 @@ export class Mole {
       return;
     }
 
-    const isCatStolen = this.stolenDrop?.type === DropType.CAT;
-    if (this.stolenDrop) {
-      this.stolenDrop.destroy();
-      this.stolenDrop = null;
-    }
-
+    // If slot is empty (no build started) create new cell
     if (this.targetCellSlot.cell === null) {
+      const isCatStolen = this.stolenDrop?.type === DropType.CAT;
       const cell = isCatStolen
         ? this.cellFactory.createCatCage(this.targetCellSlot)
         : this.cellFactory.createMoleBuilding(this.targetCellSlot);
@@ -160,15 +170,43 @@ export class Mole {
       return;
     }
 
-    this.buildingTimeMs += delta;
     const buildingCell = this.targetCellSlot.cell;
+
+    // If cell destroyed until building - mole takes hit
+    if (buildingCell.isDead()) {
+      this.lives--;
+      const isDead = this.lives <= 0;
+
+      // Return stolen drop on mole death
+      if (isDead) {
+        this.state = MoleState.DEAD;
+        if (this.stolenDrop) {
+          this.targetCellSlot.drop = this.stolenDrop;
+          this.stolenDrop.show();
+        }
+      } else {
+        this.state = MoleState.MOVE_TO_BASE;
+        if (this.stolenDrop) {
+          this.stolenDrop.destroy();
+          this.stolenDrop = null;
+        }
+      }
+
+      this.targetCellSlot.targetedByMole = false;
+      this.targetCellSlot = null;
+      this.stolenDrop = null;
+      return;
+    }
+
+    // Start build cell
+    this.buildingTimeMs += delta;
     if (this.buildingTimeMs >= BUILD_TIME_PER_LIFE_MS) {
       this.buildingTimeMs = 0;
       buildingCell.lives += 1;
     }
 
     const buildingCompleted = buildingCell.lives === this.buildingCellLives;
-    if (buildingCell.isDead() || buildingCompleted) {
+    if (buildingCompleted) {
       buildingCell.constructing = false;
       this.targetCellSlot.targetedByMole = false;
       this.targetCellSlot = null;
@@ -190,6 +228,17 @@ export class Mole {
     if (this.relaxTimeLeftMs === 0) {
       this.state = MoleState.IDLE;
     }
+  }
+
+  public destroy(): void {
+    if (this.destroyed) {
+      return;
+    }
+
+    this.destroyed = true;
+    this.state = MoleState.DEAD;
+    this.stealDropIndicator.destroy();
+    this.matterWorld.remove(this.collider);
   }
 
   private move(targetX: number, targetY: number, step: number): boolean {
