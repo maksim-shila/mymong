@@ -1,6 +1,7 @@
 import type { Bounds } from '@game/common/types';
 import type { CellsGrid } from '../battlefield/cell/cells-grid';
 import { Mole, MoleState } from './mole';
+import { MoleBaseHud } from './mole-base-hud';
 
 const DEFAULT_MOLES_COUNT = 5;
 const MOLES_DEQUEUE_COOLDOWN_MS = 500;
@@ -14,6 +15,7 @@ const MOLE_QUEUE_OFFSET_Y = 20;
 export class MoleBase {
   private readonly scene: Phaser.Scene;
   private readonly grid: CellsGrid;
+  private readonly hud: MoleBaseHud;
 
   private readonly moles: Mole[] = [];
   private readonly molesQueue: Mole[] = [];
@@ -23,6 +25,7 @@ export class MoleBase {
   constructor(scene: Phaser.Scene, grid: CellsGrid, bounds: Bounds) {
     this.scene = scene;
     this.grid = grid;
+    this.hud = new MoleBaseHud(this.scene, bounds);
 
     for (let i = 0; i < DEFAULT_MOLES_COUNT; i++) {
       const moleX = bounds.x.max + MOLE_BASE_OFFSET_X;
@@ -30,6 +33,8 @@ export class MoleBase {
       const mole = new Mole(this.scene, moleX, moleY, MOLE_WIDTH, MOLE_HEIGHT);
       this.moles.push(mole);
     }
+
+    this.hud.update(this.moles.length);
   }
 
   public update(delta: number): void {
@@ -71,6 +76,8 @@ export class MoleBase {
 
       mole.update(delta);
     }
+
+    this.hud.update(this.moles.length);
   }
 
   private tryAddToQueue(mole: Mole): boolean {
