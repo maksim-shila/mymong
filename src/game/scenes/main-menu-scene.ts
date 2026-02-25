@@ -1,9 +1,10 @@
 import { applyResolutionCamera } from '@game/settings/resolution';
+import { SCENE } from '../../scenes';
 
 // TODO Refactor
 export class MainMenuScene extends Phaser.Scene {
-  constructor() {
-    super('MainMenuScene');
+  constructor(name: string) {
+    super(name);
   }
 
   create(): void {
@@ -38,8 +39,8 @@ export class MainMenuScene extends Phaser.Scene {
     const exitText = this.createMenuButton(worldWidth / 2, worldHeight * 0.74, 'Exit');
     const buttons = [startText, optionsText, exitText];
     const actions: Array<() => void> = [
-      () => this.scene.start('LoadingScene'),
-      () => this.scene.start('OptionsScene'),
+      () => this.scene.start(SCENE.LOADING),
+      () => this.scene.start(SCENE.OPTIONS),
       () => this.exitGame(),
     ];
     let selectedIndex = 0;

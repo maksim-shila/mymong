@@ -7,11 +7,12 @@ import {
   saveVSyncEnabled,
   type ResolutionOption,
 } from '@game/settings/resolution';
+import { SCENE } from '../../scenes';
 
 // TODO Refactor
 export class OptionsScene extends Phaser.Scene {
-  constructor() {
-    super('OptionsScene');
+  constructor(name: string) {
+    super(name);
   }
 
   create(): void {
@@ -87,7 +88,7 @@ export class OptionsScene extends Phaser.Scene {
       'Back',
     );
     buttons.push(backButton);
-    actions.push(() => this.scene.start('MainMenuScene'));
+    actions.push(() => this.scene.start(SCENE.MAIN_MENU));
 
     let selectedIndex = 0;
     const renderSelection = () => {
@@ -152,7 +153,7 @@ export class OptionsScene extends Phaser.Scene {
   private applyResolution(option: ResolutionOption): void {
     saveResolution(option);
     this.scale.setGameSize(option.width, option.height);
-    this.scene.start('MainMenuScene');
+    this.scene.start(SCENE.MAIN_MENU);
   }
 
   private toggleVSync(vSyncStateText: Phaser.GameObjects.Text): void {

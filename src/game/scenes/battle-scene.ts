@@ -1,11 +1,11 @@
 import { Battlefield } from '@game/objects/battlefield/batllefield';
 import { applyResolutionCamera } from '@game/settings/resolution';
 
-export class FirstScene extends Phaser.Scene {
+export class BattleScene extends Phaser.Scene {
   private battlefield!: Battlefield;
 
-  constructor() {
-    super('FirstScene');
+  constructor(name: string) {
+    super(name);
   }
 
   create(): void {

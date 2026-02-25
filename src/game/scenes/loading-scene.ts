@@ -1,6 +1,7 @@
-import catLoadingImage from '@assets/cat-loading.png';
 import { CommonAssets } from '@game/assets/common-assets';
 import { applyResolutionCamera, type ResolutionViewport } from '@game/settings/resolution';
+import catLoadingImage from '@assets/cat-loading.png';
+import { SCENE } from '../../scenes';
 
 const LOADING_CAT_KEY = 'cat-loading';
 
@@ -10,20 +11,14 @@ const LOADING_TEXT_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
   color: '#ffffff',
 };
 
-const PRESS_ANY_KEY_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
-  fontFamily: 'Fredoka, Arial, Helvetica, sans-serif',
-  fontSize: '32px',
-  color: '#ffffff',
-};
-
 // TODO Refactor
 export class LoadingScene extends Phaser.Scene {
   private progressBar?: Phaser.GameObjects.Graphics;
   private progressBox?: Phaser.GameObjects.Graphics;
   private loadingText?: Phaser.GameObjects.Text;
 
-  constructor() {
-    super('LoadingScene');
+  constructor(name: string) {
+    super(name);
   }
 
   preload(): void {
@@ -35,7 +30,7 @@ export class LoadingScene extends Phaser.Scene {
     });
 
     this.load.once('complete', () => {
-      this.showReadyScreen(viewport);
+      this.scene.start(SCENE.READY);
     });
 
     this.load.image(LOADING_CAT_KEY, catLoadingImage);
@@ -75,46 +70,5 @@ export class LoadingScene extends Phaser.Scene {
     this.progressBar.clear();
     this.progressBar.fillStyle(0xffffff, 1);
     this.progressBar.fillRect(barX + 2, barY + 2, (barWidth - 4) * value, barHeight - 4);
-  }
-
-  private showReadyScreen(viewport: ResolutionViewport): void {
-    this.progressBar?.destroy();
-    this.progressBox?.destroy();
-    this.loadingText?.destroy();
-
-    const centerX = viewport.viewX + viewport.viewWidth / 2;
-    const centerY = viewport.viewY + viewport.viewHeight / 2;
-
-    const catImage = this.add.image(centerX, centerY, LOADING_CAT_KEY);
-    const targetHeight = viewport.viewHeight * 0.5;
-    const scale = targetHeight / catImage.height;
-    catImage.setScale(scale);
-
-    const pressAnyKey = this.add
-      .text(
-        centerX,
-        viewport.viewY + viewport.viewHeight * 0.85,
-        'PRESS ANY KEY',
-        PRESS_ANY_KEY_STYLE,
-      )
-      .setOrigin(0.5);
-
-    this.tweens.add({
-      targets: pressAnyKey,
-      alpha: 0,
-      duration: 500,
-      yoyo: true,
-      repeat: -1,
-      ease: 'Sine.easeInOut',
-    });
-
-    const keyboard = this.input.keyboard;
-    if (!keyboard) {
-      return;
-    }
-
-    keyboard.once('keydown', () => {
-      this.scene.start('FirstScene');
-    });
   }
 }

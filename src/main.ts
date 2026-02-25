@@ -1,9 +1,6 @@
 import Phaser from 'phaser';
-import { MainMenuScene } from '@game/scenes/main-menu-scene';
-import { OptionsScene } from '@game/scenes/options-scene';
 import { loadResolution, loadVSyncEnabled } from '@game/settings/resolution';
-import { FirstScene } from '@game/scenes/first-scene';
-import { LoadingScene } from '@game/scenes/loading-scene';
+import { SCENES } from './scenes';
 
 const selectedResolution = loadResolution();
 const vSyncEnabled = loadVSyncEnabled();
@@ -41,7 +38,7 @@ const config: Phaser.Types.Core.GameConfig = {
     forceSetTimeOut: !vSyncEnabled,
     target: 60,
   },
-  scene: [new MainMenuScene(), new OptionsScene(), new LoadingScene(), new FirstScene()],
+  scene: SCENES,
 };
 
 new Phaser.Game(config);
