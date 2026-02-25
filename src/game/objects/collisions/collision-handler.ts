@@ -1,17 +1,24 @@
-import { CollisionsUtils } from '@game/common/helpers/collisions-utils';
 import type { Paddle } from '../paddle/paddle';
 import type { CellsGrid } from '../battlefield/cell/cells-grid';
+import type { CellBullet } from '../battlefield/cell/cell-bullet';
 
 export class CollisionHandler {
+  private readonly physics: Phaser.Physics.Arcade.ArcadePhysics;
   private readonly paddle: Paddle;
   private readonly grid: CellsGrid;
 
-  constructor(paddle: Paddle, grid: CellsGrid) {
+  constructor(scene: Phaser.Scene, paddle: Paddle, grid: CellsGrid) {
+    this.physics = scene.physics;
     this.paddle = paddle;
     this.grid = grid;
   }
 
   public update(): void {
+    this.handlePaddleBulletsVsCells();
+    this.handleEnemyBulletsVsPaddle();
+  }
+
+  private handlePaddleBulletsVsCells(): void {
     const weapon = this.paddle.getWeapon();
     const cellSlots = this.grid.slots;
 
@@ -21,9 +28,7 @@ export class CollisionHandler {
           return false;
         }
 
-        const bulletCollider = bullet.getCollider();
-        const cellCollider = slot.cell.getCollider();
-        return CollisionsUtils.hasIntersection(bulletCollider, cellCollider);
+        return this.physics.overlap(bullet, slot.cell.getCollider());
       });
 
       if (!hitSlot?.cell) {
@@ -35,6 +40,27 @@ export class CollisionHandler {
       hitSlot.cell.applyDamage(bullet.damage);
       if (hitSlot.cell.isDead()) {
         hitSlot.breakCell();
+      }
+    }
+  }
+
+  private handleEnemyBulletsVsPaddle(): void {
+    for (const slot of this.grid.slots) {
+      const cell = slot.cell;
+      if (!cell) {
+        continue;
+      }
+
+      const bulletsToDestroy: CellBullet[] = [];
+
+      for (const bullet of cell.getBullets()) {
+        if (this.physics.overlap(bullet.getCollider(), this.paddle)) {
+          bulletsToDestroy.push(bullet);
+        }
+      }
+
+      for (const bullet of bulletsToDestroy) {
+        cell.destroyBullet(bullet);
       }
     }
   }

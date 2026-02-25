@@ -24,8 +24,7 @@ export class Paddle extends Phaser.GameObjects.Rectangle {
   private readonly weapon: Weapon;
   private readonly ui: PaddleUI;
 
-  private readonly colliderApi: Phaser.Physics.Matter.MatterPhysics['body'];
-  private readonly collider: MatterJS.BodyType;
+  private readonly arcadeBody: Phaser.Physics.Arcade.Body;
 
   private speed: number;
 
@@ -50,15 +49,10 @@ export class Paddle extends Phaser.GameObjects.Rectangle {
     this.setOrigin(0.5);
     this.speed = BASE_SPEED;
 
-    this.colliderApi = scene.matter.body;
-    this.collider = scene.matter.add.rectangle(x, y, this.width, this.height, {
-      isStatic: true,
-      isSensor: true,
-      friction: 0,
-      frictionAir: 0,
-      frictionStatic: 0,
-      restitution: 0,
-    });
+    scene.physics.add.existing(this);
+    this.arcadeBody = this.body as Phaser.Physics.Arcade.Body;
+    this.arcadeBody.setAllowGravity(false);
+    this.arcadeBody.setImmovable(true);
   }
 
   public getWeapon(): Weapon {
@@ -103,9 +97,7 @@ export class Paddle extends Phaser.GameObjects.Rectangle {
 
     this.x = Phaser.Math.Clamp(this.x + offsetX, minX, maxX);
 
-    // Update collider
-    this.colliderApi.setPosition(this.collider, { x: this.x, y: this.y });
-    this.colliderApi.setAngle(this.collider, Phaser.Math.DegToRad(this.angle));
+    this.arcadeBody.updateFromGameObject();
 
     // Draw UI
     this.ui.draw(delta, boosted);

@@ -76,9 +76,9 @@ export class Weapon {
     this.bullets.push(bullet);
   }
 
-  private updateBullets(delta: number): void {
+  private updateBullets(_delta: number): void {
     for (const bullet of this.bullets) {
-      bullet.update(delta);
+      bullet.update();
 
       if (bullet.y + bullet.height / 2 < this.bounds.y.min) {
         this.destroyBullet(bullet);

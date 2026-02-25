@@ -74,7 +74,7 @@ export class Battlefield {
     const fieldGenerator = new GridGenerator(scene, this.bounds);
     this.grid = fieldGenerator.createGrid();
 
-    this.collisionHandler = new CollisionHandler(this.paddle, this.grid);
+    this.collisionHandler = new CollisionHandler(scene, this.paddle, this.grid);
 
     this.moleBase = new MoleBase(scene, this.grid, this.bounds);
     this.workersBase = new WorkersBase(scene, this.grid, this.bounds, this.energyTank);

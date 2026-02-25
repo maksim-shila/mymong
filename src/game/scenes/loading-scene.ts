@@ -15,7 +15,6 @@ const LOADING_TEXT_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
 export class LoadingScene extends Phaser.Scene {
   private progressBar?: Phaser.GameObjects.Graphics;
   private progressBox?: Phaser.GameObjects.Graphics;
-  private loadingText?: Phaser.GameObjects.Text;
 
   constructor(name: string) {
     super(name);
@@ -41,9 +40,7 @@ export class LoadingScene extends Phaser.Scene {
     const centerX = viewport.viewX + viewport.viewWidth / 2;
     const centerY = viewport.viewY + viewport.viewHeight / 2;
 
-    this.loadingText = this.add
-      .text(centerX, centerY - 70, 'LOADING...', LOADING_TEXT_STYLE)
-      .setOrigin(0.5);
+    this.add.text(centerX, centerY - 70, 'LOADING...', LOADING_TEXT_STYLE).setOrigin(0.5);
 
     this.progressBox = this.add.graphics();
     this.progressBar = this.add.graphics();

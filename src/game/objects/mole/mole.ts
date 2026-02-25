@@ -28,10 +28,9 @@ const STEAL_INDICATOR_Z_INDEX = 60;
 const MOLE_LIVES = 3;
 
 export class Mole {
-  private readonly matterWorld: Phaser.Physics.Matter.World;
-  private readonly colliderApi: Phaser.Physics.Matter.MatterPhysics['body'];
-  private readonly collider: MatterJS.BodyType;
   private readonly cellFactory: CellFactory;
+  private readonly debugCollider: Phaser.GameObjects.Rectangle;
+  private readonly debugColliderBody: Phaser.Physics.Arcade.Body;
   private readonly stealDropIndicator: Phaser.GameObjects.Arc;
 
   private readonly homeX: number;
@@ -58,17 +57,14 @@ export class Mole {
     height: number,
     bounds: Bounds,
   ) {
-    this.matterWorld = scene.matter.world;
-    this.colliderApi = scene.matter.body;
-    this.collider = scene.matter.add.rectangle(x, y, width, height, {
-      isStatic: true,
-      isSensor: true,
-      friction: 0,
-      frictionAir: 0,
-      frictionStatic: 0,
-      restitution: 0,
-    });
     this.cellFactory = new CellFactory(scene, bounds);
+
+    this.debugCollider = scene.add.rectangle(x, y, width, height, 0xffffff, 0);
+    scene.physics.add.existing(this.debugCollider);
+    this.debugColliderBody = this.debugCollider.body as Phaser.Physics.Arcade.Body;
+    this.debugColliderBody.setAllowGravity(false);
+    this.debugColliderBody.setImmovable(true);
+    this.debugColliderBody.checkCollision.none = true;
 
     this.stealDropIndicator = scene.add.circle(x, y, 1, STEAL_INDICATOR_COLOR, 0);
     this.stealDropIndicator.setStrokeStyle(
@@ -90,7 +86,8 @@ export class Mole {
       return;
     }
 
-    this.colliderApi.setPosition(this.collider, { x: this.x, y: this.y });
+    this.debugCollider.setPosition(this.x, this.y);
+    this.debugColliderBody.updateFromGameObject();
   }
 
   public getState(): MoleState {
@@ -255,7 +252,7 @@ export class Mole {
     }
 
     this.stealDropIndicator.destroy();
-    this.matterWorld.remove(this.collider);
+    this.debugCollider.destroy();
   }
 
   private move(targetX: number, targetY: number, step: number): boolean {

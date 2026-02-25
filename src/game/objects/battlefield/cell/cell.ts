@@ -1,6 +1,7 @@
 import type { Drop } from '../drop/drop';
 import { Timer } from '@game/common/helpers/timer';
 import { CellWeapon } from './cell-weapon';
+import type { CellBullet } from './cell-bullet';
 import type { Bounds, MinMax } from '@game/common/types';
 
 const DEFAULT_FILL_COLOR = 0xff7a33;
@@ -20,8 +21,7 @@ const FIRE_CD_MAX_MS = 2000;
 const FIRE_CD_MIN_MS = 500;
 
 export abstract class Cell extends Phaser.GameObjects.Rectangle {
-  private readonly matterWorld: Phaser.Physics.Matter.World;
-  private collider: MatterJS.BodyType | null;
+  private readonly arcadeBody: Phaser.Physics.Arcade.StaticBody;
 
   private readonly fireCooldownTimer: Timer;
   private readonly weapon: CellWeapon;
@@ -47,15 +47,8 @@ export abstract class Cell extends Phaser.GameObjects.Rectangle {
 
     scene.add.existing(this);
 
-    this.matterWorld = scene.matter.world;
-    this.collider = scene.matter.add.rectangle(x, y, width, height, {
-      isStatic: true,
-      isSensor: true,
-      friction: 0,
-      frictionAir: 0,
-      frictionStatic: 0,
-      restitution: 0,
-    });
+    scene.physics.add.existing(this, true);
+    this.arcadeBody = this.body as Phaser.Physics.Arcade.StaticBody;
 
     this.weapon = new CellWeapon(scene, bounds);
 
@@ -70,8 +63,8 @@ export abstract class Cell extends Phaser.GameObjects.Rectangle {
     this.setDepth(Z_INDEX);
   }
 
-  public getCollider(): MatterJS.BodyType | null {
-    return this.collider;
+  public getCollider(): Phaser.GameObjects.Rectangle {
+    return this;
   }
 
   public isDead(): boolean {
@@ -103,6 +96,14 @@ export abstract class Cell extends Phaser.GameObjects.Rectangle {
 
   public abstract getDrop(): Drop | null;
 
+  public getBullets(): readonly CellBullet[] {
+    return this.weapon.getBullets();
+  }
+
+  public destroyBullet(bullet: CellBullet): void {
+    this.weapon.destroyBullet(bullet);
+  }
+
   public setDifficulty(difficulty: number): void {
     this.fireChance = Phaser.Math.Linear(FIRE_CHANCE_MIN, FIRE_CHANCE_MAX, difficulty);
     this.fireCooldownMs = Phaser.Math.Linear(FIRE_CD_MAX_MS, FIRE_CD_MIN_MS, difficulty);
@@ -132,10 +133,7 @@ export abstract class Cell extends Phaser.GameObjects.Rectangle {
     }
 
     this.breaking = true;
-    if (this.collider) {
-      this.matterWorld.remove(this.collider);
-      this.collider = null;
-    }
+    this.arcadeBody.enable = false;
     this.scene.tweens.add({
       targets: this,
       alpha: 0,
@@ -150,10 +148,6 @@ export abstract class Cell extends Phaser.GameObjects.Rectangle {
 
   public override destroy(): void {
     this.weapon.destroy();
-    if (this.collider) {
-      this.matterWorld.remove(this.collider);
-      this.collider = null;
-    }
     super.destroy();
   }
 }
