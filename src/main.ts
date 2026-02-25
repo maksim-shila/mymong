@@ -31,7 +31,7 @@ const config: Phaser.Types.Core.GameConfig = {
         x: 0,
         y: 0,
       },
-      debug: true,
+      debug: false,
     },
   },
   fps: {

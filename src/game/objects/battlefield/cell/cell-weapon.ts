@@ -14,7 +14,7 @@ export class CellWeapon {
     this.bounds = bounds;
   }
 
-  public fire(fromX: number, fromY: number, targetX: number, targetY: number): void {
+  public shoot(fromX: number, fromY: number, targetX: number, targetY: number): void {
     this.spawnBullet(fromX, fromY, targetX, targetY);
   }
 

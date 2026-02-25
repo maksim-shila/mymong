@@ -15,21 +15,22 @@ const STROKE_WIDTH = 2;
 const STROKE_COLOR = 0x1f2d3d;
 const STROKE_ALPHA = 0.7;
 
-const FIRE_CHANCE_MIN = 0.1;
-const FIRE_CHANCE_MAX = 0.7;
-const FIRE_CD_MAX_MS = 2000;
-const FIRE_CD_MIN_MS = 500;
+const SHOT_CHANCE_MIN = 0.1;
+const SHOT_CHANCE_MAX = 0.7;
+const SHOT_CD_MAX_MS = 2000;
+const SHOT_CD_MIN_MS = 500;
+const SHOT_CD_STEP_MAX = 6000;
 
 export abstract class Cell extends Phaser.GameObjects.Rectangle {
   private readonly arcadeBody: Phaser.Physics.Arcade.StaticBody;
 
-  private readonly fireCooldownTimer: Timer;
+  private readonly shotCooldownTimer: Timer;
   private readonly weapon: CellWeapon;
 
   private breaking = false;
   private constructingBlinkTimeMs = 0;
-  private fireChance: number;
-  private fireCooldownMs: number;
+  private shotChance: number;
+  private shotCooldownMs: number;
 
   public lives: number;
   public constructing = false;
@@ -52,9 +53,9 @@ export abstract class Cell extends Phaser.GameObjects.Rectangle {
 
     this.weapon = new CellWeapon(scene, bounds);
 
-    this.fireChance = FIRE_CHANCE_MIN;
-    this.fireCooldownMs = FIRE_CD_MAX_MS;
-    this.fireCooldownTimer = new Timer(this.fireCooldownMs);
+    this.shotChance = SHOT_CHANCE_MIN;
+    this.shotCooldownMs = SHOT_CD_MAX_MS;
+    this.shotCooldownTimer = new Timer(this.shotCooldownMs);
 
     this.lives = lives;
 
@@ -85,10 +86,10 @@ export abstract class Cell extends Phaser.GameObjects.Rectangle {
       this.setStrokeStyle(STROKE_WIDTH, STROKE_COLOR, STROKE_ALPHA);
     }
 
-    if (this.shouldFire(delta)) {
+    if (this.shouldShoot(delta)) {
       const targetX = Phaser.Math.Between(shotAreaX.min, shotAreaX.max);
       const targetY = Phaser.Math.Between(shotAreaY.min, shotAreaY.max);
-      this.weapon.fire(this.x, this.y, targetX, targetY);
+      this.weapon.shoot(this.x, this.y, targetX, targetY);
     }
 
     this.weapon.update(delta);
@@ -105,21 +106,23 @@ export abstract class Cell extends Phaser.GameObjects.Rectangle {
   }
 
   public setDifficulty(difficulty: number): void {
-    this.fireChance = Phaser.Math.Linear(FIRE_CHANCE_MIN, FIRE_CHANCE_MAX, difficulty);
-    this.fireCooldownMs = Phaser.Math.Linear(FIRE_CD_MAX_MS, FIRE_CD_MIN_MS, difficulty);
+    this.shotChance = Phaser.Math.Linear(SHOT_CHANCE_MIN, SHOT_CHANCE_MAX, difficulty);
+    this.shotCooldownMs = Phaser.Math.Linear(SHOT_CD_MAX_MS, SHOT_CD_MIN_MS, difficulty);
   }
 
-  public shouldFire(delta: number): boolean {
+  public shouldShoot(delta: number): boolean {
     if (this.constructing || this.isDead()) {
       return false;
     }
 
-    if (!this.fireCooldownTimer.tick(delta)) {
+    if (!this.shotCooldownTimer.tick(delta)) {
       return false;
     }
 
-    this.fireCooldownTimer.set(this.fireCooldownMs);
-    return Math.random() <= this.fireChance;
+    const shouldShoot = Math.random() <= this.shotChance;
+    const nextShotCooldown = this.shotCooldownMs + Phaser.Math.Between(0, SHOT_CD_STEP_MAX);
+    this.shotCooldownTimer.set(nextShotCooldown);
+    return shouldShoot;
   }
 
   public applyDamage(damage: number): void {
