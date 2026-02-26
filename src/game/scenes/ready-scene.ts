@@ -2,6 +2,7 @@ import { applyResolutionCamera, type ResolutionViewport } from '@game/settings/r
 import { SCENE } from '../../scenes';
 
 const LOADING_CAT_KEY = 'cat-loading';
+const GAME_BACKGROUND_COLOR = 'rgb(137, 187, 225)';
 
 const PRESS_ANY_KEY_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
   fontFamily: 'Fredoka, Arial, Helvetica, sans-serif',
@@ -15,6 +16,8 @@ export class ReadyScene extends Phaser.Scene {
   }
 
   create(): void {
+    this.cameras.main.setBackgroundColor(GAME_BACKGROUND_COLOR);
+
     const viewport = applyResolutionCamera(this);
     this.showReadyScreen(viewport);
   }

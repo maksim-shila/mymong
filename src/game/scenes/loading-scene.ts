@@ -1,9 +1,10 @@
 import { CommonAssets } from '@game/assets/common-assets';
 import { applyResolutionCamera, type ResolutionViewport } from '@game/settings/resolution';
-import catLoadingImage from '@assets/cat-loading.png';
+import catLoadingImage from '@assets/image/cat-loading.png';
 import { SCENE } from '../../scenes';
 
 const LOADING_CAT_KEY = 'cat-loading';
+const GAME_BACKGROUND_COLOR = 'rgb(137, 187, 225)';
 
 const LOADING_TEXT_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
   fontFamily: 'Fredoka, Arial, Helvetica, sans-serif',
@@ -21,6 +22,8 @@ export class LoadingScene extends Phaser.Scene {
   }
 
   preload(): void {
+    this.cameras.main.setBackgroundColor(GAME_BACKGROUND_COLOR);
+
     const viewport = applyResolutionCamera(this);
     this.createLoadingUi(viewport);
 

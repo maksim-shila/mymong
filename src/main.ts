@@ -6,6 +6,7 @@ const selectedResolution = loadResolution();
 const vSyncEnabled = loadVSyncEnabled();
 const BASE_WIDTH = selectedResolution.width;
 const BASE_HEIGHT = selectedResolution.height;
+const MENU_BACKGROUND_COLOR = 'rgb(67, 90, 109)';
 
 const config: Phaser.Types.Core.GameConfig = {
   parent: 'game',
@@ -23,7 +24,7 @@ const config: Phaser.Types.Core.GameConfig = {
     height: BASE_HEIGHT,
     zoom: 1,
   },
-  backgroundColor: 'rgb(137, 187, 225)',
+  backgroundColor: MENU_BACKGROUND_COLOR,
   physics: {
     default: 'arcade',
     arcade: {

@@ -59,7 +59,7 @@ export class Paddle extends Phaser.GameObjects.Rectangle {
     return this.weapon;
   }
 
-  public update(delta: number): void {
+  public override update(delta: number): void {
     const deltaSeconds = delta / 1000;
 
     const leftPressed = this.controls.keyDown(Key.LEFT);

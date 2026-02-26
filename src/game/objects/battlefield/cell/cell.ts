@@ -72,7 +72,7 @@ export abstract class Cell extends Phaser.GameObjects.Rectangle {
     return this.lives <= 0;
   }
 
-  public update(delta: number, shotAreaX: MinMax, shotAreaY: MinMax): void {
+  public override update(delta: number, shotAreaX: MinMax, shotAreaY: MinMax): void {
     if (this.constructing) {
       this.constructingBlinkTimeMs += delta;
       const blinkSpeedPerMs = CONSTRUCTING_BLINK_SPEED / 1000;

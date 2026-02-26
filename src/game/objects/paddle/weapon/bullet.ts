@@ -28,7 +28,7 @@ export class Bullet extends Phaser.GameObjects.Rectangle {
     return 1;
   }
 
-  public update(): void {
+  public override update(): void {
     this.setPosition(this.arcadeBody.center.x, this.arcadeBody.center.y);
   }
 

@@ -1,8 +1,8 @@
-import backgroundImage from '@assets/background.jpg';
-import botImage from '@assets/bot.PNG';
-import catImage from '@assets/cat.png';
-import shipImage from '@assets/ship.PNG';
-import soundtrackAudio from '@assets/soundtrack.wav';
+import backgroundImage from '@assets/image/background.jpg';
+import botImage from '@assets/image/bot.png';
+import catImage from '@assets/image/cat.png';
+import shipImage from '@assets/image/ship.png';
+import soundtrackAudio from '@assets/audio/soundtrack.wav';
 
 export const CAT_TEXTURE_KEY = 'cat';
 export const SHIP_IMAGE = 'ship';
