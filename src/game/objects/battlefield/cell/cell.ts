@@ -64,8 +64,12 @@ export abstract class Cell extends Phaser.GameObjects.Rectangle {
     this.setDepth(Z_INDEX);
   }
 
-  public getCollider(): Phaser.GameObjects.Rectangle {
+  public get collider(): Phaser.GameObjects.Rectangle {
     return this;
+  }
+
+  public get bullets(): readonly CellBullet[] {
+    return this.weapon.getBullets();
   }
 
   public isDead(): boolean {
@@ -96,10 +100,6 @@ export abstract class Cell extends Phaser.GameObjects.Rectangle {
   }
 
   public abstract getDrop(): Drop | null;
-
-  public getBullets(): readonly CellBullet[] {
-    return this.weapon.getBullets();
-  }
 
   public destroyBullet(bullet: CellBullet): void {
     this.weapon.destroyBullet(bullet);

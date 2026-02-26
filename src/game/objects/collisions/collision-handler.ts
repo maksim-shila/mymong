@@ -19,7 +19,7 @@ export class CollisionHandler {
   }
 
   private handlePaddleBulletsVsCells(): void {
-    const weapon = this.paddle.getWeapon();
+    const weapon = this.paddle.weapon;
     const cellSlots = this.grid.slots;
 
     for (const bullet of weapon.getBullets()) {
@@ -28,7 +28,7 @@ export class CollisionHandler {
           return false;
         }
 
-        return this.physics.overlap(bullet, slot.cell.getCollider());
+        return this.physics.overlap(bullet, slot.cell.collider);
       });
 
       if (!hitSlot?.cell) {
@@ -45,6 +45,8 @@ export class CollisionHandler {
   }
 
   private handleEnemyBulletsVsPaddle(): void {
+    const shield = this.paddle.shield;
+
     for (const slot of this.grid.slots) {
       const cell = slot.cell;
       if (!cell) {
@@ -53,8 +55,13 @@ export class CollisionHandler {
 
       const bulletsToDestroy: CellBullet[] = [];
 
-      for (const bullet of cell.getBullets()) {
-        if (this.physics.overlap(bullet.getCollider(), this.paddle)) {
+      for (const bullet of cell.bullets) {
+        if (shield.active && this.physics.overlap(bullet.collider, shield.collider)) {
+          bulletsToDestroy.push(bullet);
+          continue;
+        }
+
+        if (this.physics.overlap(bullet.collider, this.paddle.collider)) {
           bulletsToDestroy.push(bullet);
           this.paddle.onHit(bullet.damage);
         }

@@ -13,7 +13,6 @@ export class PaddleHitAnimation {
   private readonly ui: PaddleUI;
 
   private durationMs = 0;
-  private shieldDurationMs = 0;
   private elapsedMs = 0;
   private active = false;
   private phaseShiftX = 0;
@@ -27,9 +26,8 @@ export class PaddleHitAnimation {
     this.ui = ui;
   }
 
-  public start(invulnerabilityDurationMs: number): void {
-    this.shieldDurationMs = Math.max(0, invulnerabilityDurationMs);
-    this.durationMs = Math.max(SHAKE_DURATION_MS, this.shieldDurationMs);
+  public start(): void {
+    this.durationMs = SHAKE_DURATION_MS;
     this.elapsedMs = 0;
     this.active = this.durationMs > 0;
     this.phaseShiftX = Phaser.Math.FloatBetween(0, Math.PI * 2);
@@ -47,14 +45,12 @@ export class PaddleHitAnimation {
     }
 
     this.elapsedMs = Math.min(this.durationMs, this.elapsedMs + Math.max(0, deltaMs));
-    this.ui.setShieldVisible(this.elapsedMs < this.shieldDurationMs);
 
-    const shakeTime = Math.min(this.elapsedMs, SHAKE_DURATION_MS);
-    const shakeProgress = Phaser.Math.Clamp(shakeTime / SHAKE_DURATION_MS, 0, 1);
+    const shakeProgress = Phaser.Math.Clamp(this.elapsedMs / SHAKE_DURATION_MS, 0, 1);
     const shakeFalloff = 1 - shakeProgress;
-    const shakePhase = (shakeTime / SHAKE_DURATION_MS) * SHAKE_OSCILLATIONS * Math.PI * 2;
+    const shakePhase = (this.elapsedMs / SHAKE_DURATION_MS) * SHAKE_OSCILLATIONS * Math.PI * 2;
 
-    const noisePhase = (shakeTime / SHAKE_DURATION_MS) * Math.PI * 12;
+    const noisePhase = (this.elapsedMs / SHAKE_DURATION_MS) * Math.PI * 12;
     const noiseX = Math.sin(noisePhase + this.phaseShiftX * 1.7) * SHAKE_NOISE_X_PX;
     const noiseY = Math.cos(noisePhase + this.phaseShiftY * 1.5) * SHAKE_NOISE_Y_PX;
     const noiseAngle = Math.sin(noisePhase + this.phaseShiftAngle * 1.3) * SHAKE_NOISE_ANGLE_DEG;

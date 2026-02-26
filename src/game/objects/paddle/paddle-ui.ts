@@ -1,5 +1,4 @@
 import { TEXTURE } from '@game/assets/common-assets';
-import { Color } from '@game/common/color';
 import { Timer } from '@game/common/helpers/timer';
 
 interface TrailSnapshot {
@@ -11,14 +10,6 @@ interface TrailSnapshot {
 
 const SHIP_Z_INDEX = 10;
 
-const SHIELD_Z_INDEX = 11;
-const SHIELD_ALPHA = 0.22;
-const SHIELD_COLOR = 0xffffff;
-const SHIELD_RADIUS_MULTIPLIER = 0.62;
-const SHIELD_STROKE_WIDTH = 2;
-const SHIELD_STROKE_COLOR = Color.GRAY;
-const SHIELD_STROKE_ALPHA = 0.4;
-
 // BT === BOOST_TRAIL
 const BT_COUNT = 4;
 const BT_INTERVAL_MS = 34;
@@ -29,7 +20,6 @@ export class PaddleUI {
   private readonly paddle: Phaser.GameObjects.Rectangle;
 
   private readonly shipSprite: Phaser.GameObjects.Image;
-  private readonly shield: Phaser.GameObjects.Arc;
   private readonly boostTrail: Phaser.GameObjects.Image[] = [];
   private readonly trailSnapshots: TrailSnapshot[] = [];
 
@@ -46,12 +36,6 @@ export class PaddleUI {
     this.shipSprite.setDisplaySize(paddle.width, paddle.height);
     this.shipSprite.setDepth(SHIP_Z_INDEX);
 
-    const shieldRadius = Math.max(paddle.width, paddle.height) * SHIELD_RADIUS_MULTIPLIER;
-    this.shield = scene.add.circle(paddle.x, paddle.y, shieldRadius, SHIELD_COLOR, SHIELD_ALPHA);
-    this.shield.setDepth(SHIELD_Z_INDEX);
-    this.shield.setStrokeStyle(SHIELD_STROKE_WIDTH, SHIELD_STROKE_COLOR, SHIELD_STROKE_ALPHA);
-    this.shield.setVisible(false);
-
     for (let i = 0; i < BT_COUNT; i += 1) {
       const ghost = scene.add.image(paddle.x, paddle.y, TEXTURE.SHIP);
       ghost.setDisplaySize(paddle.width, paddle.height);
@@ -65,7 +49,6 @@ export class PaddleUI {
     this.shipSprite.setPosition(this.paddle.x + this.hitOffsetX, this.paddle.y + this.hitOffsetY);
     this.shipSprite.setAngle(this.paddle.angle + this.hitAngleOffset);
     this.shipSprite.setAlpha(this.hitAlpha);
-    this.shield.setPosition(this.paddle.x + this.hitOffsetX, this.paddle.y + this.hitOffsetY);
 
     this.updateTrailSnapshots(delta, isBoostActive);
     this.drawBoostTrail();
@@ -87,16 +70,11 @@ export class PaddleUI {
     this.hitAlpha = Phaser.Math.Clamp(alpha, 0, 1);
   }
 
-  public setShieldVisible(visible: boolean): void {
-    this.shield.setVisible(visible);
-  }
-
   public resetHitEffects(): void {
     this.hitOffsetX = 0;
     this.hitOffsetY = 0;
     this.hitAngleOffset = 0;
     this.hitAlpha = 1;
-    this.shield.setVisible(false);
   }
 
   private updateTrailSnapshots(delta: number, emitSnapshots: boolean): void {

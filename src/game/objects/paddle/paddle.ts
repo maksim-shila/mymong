@@ -3,8 +3,8 @@ import { PaddleUI } from './paddle-ui';
 import { Weapon } from './weapon/weapon';
 import type { Bounds } from '@game/common/types';
 import type { EnergyTank } from '../energy-tank';
-import { Timer } from '@game/common/helpers/timer';
 import { PaddleHitAnimation } from './paddle-hit-animation';
+import { PaddleShield } from './paddle-shield';
 
 const BASE_WIDTH = 135;
 const BASE_HEIGHT = 135;
@@ -20,20 +20,18 @@ const BOOST_SPEED_RATE = 12;
 const BOOST_FUEL_CONSUMPTION_PER_SEC = 25;
 
 const LIVES = 10;
-const I_FRAMES_MS = 2000;
-const I_FRAMES_ENERGY_COST = 10;
 
 export class Paddle extends Phaser.GameObjects.Rectangle {
+  public readonly weapon: Weapon;
+  public readonly shield: PaddleShield;
+
   private readonly controls: Controls;
   private readonly bounds: Bounds;
   private readonly energyTank: EnergyTank;
-  private readonly weapon: Weapon;
   private readonly ui: PaddleUI;
   private readonly hitAnimation: PaddleHitAnimation;
 
   private readonly arcadeBody: Phaser.Physics.Arcade.Body;
-
-  private readonly invincibilityTimer = new Timer();
 
   private speed: number;
   private lives: number;
@@ -55,6 +53,7 @@ export class Paddle extends Phaser.GameObjects.Rectangle {
     this.energyTank = energyTank;
     this.weapon = new Weapon(scene, this, bounds, controls, energyTank);
     this.ui = new PaddleUI(scene, this);
+    this.shield = new PaddleShield(scene, this, this.energyTank);
     this.hitAnimation = new PaddleHitAnimation(this.ui);
 
     this.setOrigin(0.5);
@@ -67,8 +66,8 @@ export class Paddle extends Phaser.GameObjects.Rectangle {
     this.arcadeBody.setImmovable(true);
   }
 
-  public getWeapon(): Weapon {
-    return this.weapon;
+  public get collider(): Phaser.GameObjects.Rectangle {
+    return this;
   }
 
   public override update(delta: number): void {
@@ -110,9 +109,9 @@ export class Paddle extends Phaser.GameObjects.Rectangle {
     this.x = Phaser.Math.Clamp(this.x + offsetX, minX, maxX);
 
     this.arcadeBody.updateFromGameObject();
+    this.shield.update(delta);
 
     // Draw UI
-    this.invincibilityTimer.tick(delta);
     this.hitAnimation.update(delta);
     this.ui.draw(delta, boosted);
 
@@ -120,23 +119,14 @@ export class Paddle extends Phaser.GameObjects.Rectangle {
   }
 
   public onHit(damage: number): void {
-    if (this.invincibilityTimer.active) {
-      return;
-    }
-
     damage = Math.max(1, Math.floor(damage));
     this.lives = Math.max(0, this.lives - damage);
-
-    const hasInvincibilityEnergy = this.energyTank.tryConsumeExact(I_FRAMES_ENERGY_COST);
-    if (hasInvincibilityEnergy) {
-      this.invincibilityTimer.set(I_FRAMES_MS);
-      this.hitAnimation.start(I_FRAMES_MS);
-    } else {
-      this.hitAnimation.start(0);
-    }
+    this.shield.tryActivate();
+    this.hitAnimation.start();
   }
 
   public override destroy(): void {
+    this.shield.destroy();
     this.hitAnimation.stop();
     this.weapon.destroy();
     super.destroy();

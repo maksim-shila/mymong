@@ -47,7 +47,7 @@ export class CellBullet {
     return this.sprite.radius;
   }
 
-  public getCollider(): Phaser.GameObjects.Arc {
+  public get collider(): Phaser.GameObjects.Arc {
     return this.sprite;
   }
 

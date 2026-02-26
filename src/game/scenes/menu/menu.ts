@@ -26,6 +26,7 @@ type MenuNavigationConfig = {
 };
 
 export class MenuComponent {
+  private static fontReadyPromise: Promise<void> | null = null;
   private readonly scene: Phaser.Scene;
 
   constructor(scene: Phaser.Scene) {
@@ -47,7 +48,7 @@ export class MenuComponent {
     label: string,
     fontSize: string,
   ): Phaser.GameObjects.Text {
-    return this.scene.add
+    const text = this.scene.add
       .text(x, y, label, {
         fontFamily: MENU_FONT_FAMILY,
         fontSize,
@@ -56,6 +57,9 @@ export class MenuComponent {
       .setOrigin(0.5)
       .setDepth(2)
       .setInteractive({ useHandCursor: true });
+
+    this.ensureMenuFontApplied(text);
+    return text;
   }
 
   public setupMenuNavigation(config: MenuNavigationConfig): void {
@@ -194,5 +198,35 @@ export class MenuComponent {
     if (this.scene.cache.audio.exists(AUDIO.MENU_SELECT)) {
       SoundManager.playEffect(this.scene, AUDIO.MENU_SELECT);
     }
+  }
+
+  private ensureMenuFontApplied(text: Phaser.GameObjects.Text): void {
+    void MenuComponent.getFontReadyPromise().then(() => {
+      if (!text.scene || !text.active) {
+        return;
+      }
+
+      // Force text re-render once the web font is ready.
+      text.setFontFamily(MENU_FONT_FAMILY);
+      text.setText(text.text);
+    });
+  }
+
+  private static getFontReadyPromise(): Promise<void> {
+    if (this.fontReadyPromise) {
+      return this.fontReadyPromise;
+    }
+
+    if (typeof document === 'undefined' || !('fonts' in document)) {
+      this.fontReadyPromise = Promise.resolve();
+      return this.fontReadyPromise;
+    }
+
+    this.fontReadyPromise = document.fonts
+      .load('400 16px Fredoka')
+      .then(() => undefined)
+      .catch(() => undefined);
+
+    return this.fontReadyPromise;
   }
 }
