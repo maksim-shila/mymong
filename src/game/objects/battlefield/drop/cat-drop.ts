@@ -25,6 +25,6 @@ export class CatDrop extends Drop {
   }
 
   public setPosition(x: number, y: number): void {
-    this.catAnimation.setPostion(x, y);
+    this.catAnimation.setPosition(x, y);
   }
 }

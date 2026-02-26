@@ -20,7 +20,7 @@ const WALK_PHASE_SPEED = 16;
 const WALK_WIDTH_DELTA_RATIO = 0.2;
 const WALK_HEIGHT_DELTA_RATIO = 0.2;
 
-export enum WorkerState2 {
+export enum WorkerState {
   IDLE,
   MOVE_TO_DROP,
   MOVE_TO_ENERGY_TANK,
@@ -72,30 +72,30 @@ export class Worker extends Phaser.GameObjects.Container {
     this.spriteWidth = width;
     this.spriteHeight = height;
 
-    this.state = WorkerState2.IDLE;
+    this.state = WorkerState.IDLE;
 
     scene.add.existing(this);
   }
 
   public takeDrop(slot: CellSlot): void {
-    if (this.state !== WorkerState2.IDLE) {
+    if (this.state !== WorkerState.IDLE) {
       return;
     }
 
-    this.state = WorkerState2.MOVE_TO_DROP;
+    this.state = WorkerState.MOVE_TO_DROP;
     slot.targetedByWorker = true;
     this.targetCellSlot = slot;
   }
 
   public goFillEnergyTank(): void {
-    this.state = WorkerState2.MOVE_TO_ENERGY_TANK;
+    this.state = WorkerState.MOVE_TO_ENERGY_TANK;
   }
 
   public override update(delta: number): void {
     const isMoving =
-      this.state === WorkerState2.MOVE_TO_DROP ||
-      this.state === WorkerState2.MOVE_TO_ENERGY_TANK ||
-      this.state === WorkerState2.MOVE_TO_BASE;
+      this.state === WorkerState.MOVE_TO_DROP ||
+      this.state === WorkerState.MOVE_TO_ENERGY_TANK ||
+      this.state === WorkerState.MOVE_TO_BASE;
 
     if (!isMoving) {
       this.sprite.setDisplaySize(this.spriteWidth, this.spriteHeight);
@@ -112,56 +112,55 @@ export class Worker extends Phaser.GameObjects.Container {
 
   public moveToDrop(delta: number): void {
     if (this.targetCellSlot === null) {
-      this.state = WorkerState2.MOVE_TO_BASE;
+      this.state = WorkerState.MOVE_TO_BASE;
       return;
     }
 
     if (this.targetCellSlot.drop === null) {
       this.targetCellSlot.targetedByWorker = false;
       this.targetCellSlot = null;
-      this.state = WorkerState2.MOVE_TO_BASE;
+      this.state = WorkerState.MOVE_TO_BASE;
       return;
     }
 
-    const step = SPEED * (delta / 1000);
-    const hasArrived = this.move(this.targetCellSlot.x, this.targetCellSlot.y, step);
+    const hasArrived = this.move(this.targetCellSlot.x, this.targetCellSlot.y, delta);
     if (hasArrived) {
       this.actionTimer.set(COLLECT_DROP_TIME_MS);
-      this.state = WorkerState2.COLLECT_DROP;
+      this.state = WorkerState.COLLECT_DROP;
     }
   }
 
   public moveToEnergyTank(delta: number): void {
-    const step = SPEED * (delta / 1000);
-    const hasArrived = this.move(this.energyTank.platformX, this.energyTank.platformY, step);
+    const hasArrived = this.move(this.energyTank.platformX, this.energyTank.platformY, delta);
     if (hasArrived) {
       this.actionTimer.set(ENERGY_TANK_FILL_TIME_MS);
-      this.state = WorkerState2.FILL_ENERGY_TANK;
+      this.state = WorkerState.FILL_ENERGY_TANK;
     }
   }
 
   public fillEnergyTank(delta: number): boolean {
-    if (!this.actionTimer.tick(delta)) {
-      const tickFuelAmount = (ENERGY_TANK_FILL_AMOUNT / ENERGY_TANK_FILL_TIME_MS) * delta;
-      this.energyTank.addFuel(tickFuelAmount);
-      return false;
+    if (this.actionTimer.tick(delta)) {
+      this.state = WorkerState.MOVE_TO_BASE;
+      return true;
     }
 
-    this.state = WorkerState2.MOVE_TO_BASE;
-    return true;
+    const tickFuelAmount = (ENERGY_TANK_FILL_AMOUNT / ENERGY_TANK_FILL_TIME_MS) * delta;
+    this.energyTank.addFuel(tickFuelAmount);
+    return false;
   }
 
   public collectDrop(delta: number): void {
     if (!this.targetCellSlot) {
-      this.state = WorkerState2.MOVE_TO_BASE;
+      this.state = WorkerState.MOVE_TO_BASE;
       return;
     }
 
     const drop = this.targetCellSlot.drop;
     if (!drop) {
       this.actionTimer.set(0);
-      this.state = WorkerState2.MOVE_TO_BASE;
+      this.state = WorkerState.MOVE_TO_BASE;
       this.targetCellSlot.targetedByWorker = false;
+      this.targetCellSlot = null;
       return;
     }
 
@@ -173,43 +172,46 @@ export class Worker extends Phaser.GameObjects.Container {
       this.targetCellSlot = null;
 
       const isCatDrop = drop.type === DropType.CAT;
-      this.state = isCatDrop ? WorkerState2.MOVE_TO_CAT_BASE : WorkerState2.MOVE_TO_BASE;
+      this.state = isCatDrop ? WorkerState.MOVE_TO_CAT_BASE : WorkerState.MOVE_TO_BASE;
     }
   }
 
   public moveToCatBase(delta: number): void {
     if (!this.targetCatPosition) {
       this.savedDrop = null;
-      this.state = WorkerState2.MOVE_TO_BASE;
+      this.state = WorkerState.MOVE_TO_BASE;
       return;
     }
 
-    const step = SPEED * (delta / 1000);
-    const hasArrived = this.move(this.targetCatPosition.x, this.targetCatPosition.y, step);
+    const hasArrived = this.move(this.targetCatPosition.x, this.targetCatPosition.y, delta);
     if (hasArrived) {
       this.actionTimer.set(SAVE_CAT_TIME_MS);
-      this.state = WorkerState2.SAVE_CAT;
+      this.state = WorkerState.SAVE_CAT;
     }
   }
 
   public saveCat(delta: number): Drop | null {
     if (!this.targetCatPosition) {
-      this.state = WorkerState2.MOVE_TO_BASE;
+      this.state = WorkerState.MOVE_TO_BASE;
       this.savedDrop = null;
       return null;
     }
 
-    if (this.savedDrop && this.savedDrop.type === DropType.CAT) {
-      if (!this.actionTimer.tick(delta)) {
-        return null;
-      }
+    if (!this.savedDrop || this.savedDrop.type !== DropType.CAT) {
+      this.state = WorkerState.MOVE_TO_BASE;
+      this.targetCatPosition = null;
+      return null;
+    }
 
-      this.savedDrop.setPosition(this.targetCatPosition.x, this.targetCatPosition.y);
-      this.savedDrop?.show();
+    if (!this.actionTimer.tick(delta)) {
+      return null;
     }
 
     const savedDrop = this.savedDrop;
-    this.state = WorkerState2.MOVE_TO_BASE;
+    savedDrop.setPosition(this.targetCatPosition.x, this.targetCatPosition.y);
+    savedDrop.show();
+
+    this.state = WorkerState.MOVE_TO_BASE;
     this.targetCatPosition = null;
     this.savedDrop = null;
 
@@ -217,17 +219,19 @@ export class Worker extends Phaser.GameObjects.Container {
   }
 
   public moveToBase(delta: number): void {
-    const step = SPEED * (delta / 1000);
-    const hasArrived = this.move(this.homeX, this.homeY, step);
-    if (hasArrived) {
-      if (this.savedDrop) {
-        this.actionTimer.set(SAVE_RESOURCES_TIME_MS);
-        this.state = WorkerState2.SAVE_RESOURCES;
-      } else {
-        this.actionTimer.set(RELAX_TIME_MS);
-        this.state = WorkerState2.RELAX;
-      }
+    const hasArrived = this.move(this.homeX, this.homeY, delta);
+    if (!hasArrived) {
+      return;
     }
+
+    if (this.savedDrop) {
+      this.actionTimer.set(SAVE_RESOURCES_TIME_MS);
+      this.state = WorkerState.SAVE_RESOURCES;
+      return;
+    }
+
+    this.actionTimer.set(RELAX_TIME_MS);
+    this.state = WorkerState.RELAX;
   }
 
   public saveResources(delta: number): number {
@@ -241,20 +245,19 @@ export class Worker extends Phaser.GameObjects.Container {
     }
 
     this.actionTimer.set(RELAX_TIME_MS);
-    this.state = WorkerState2.RELAX;
+    this.state = WorkerState.RELAX;
     this.savedDrop = null;
     return resourcesAmount;
   }
 
   public relax(delta: number): void {
-    if (!this.actionTimer.tick(delta)) {
-      return;
+    if (this.actionTimer.tick(delta)) {
+      this.state = WorkerState.IDLE;
     }
-
-    this.state = WorkerState2.IDLE;
   }
 
-  private move(targetX: number, targetY: number, step: number): boolean {
+  private move(targetX: number, targetY: number, delta: number): boolean {
+    const step = SPEED * (delta / 1000);
     const dx = targetX - this.x;
     const dy = targetY - this.y;
     const distance = Math.hypot(dx, dy);

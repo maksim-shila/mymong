@@ -39,7 +39,7 @@ export class CagedCatAnimation {
     this.scheduleNextJump();
   }
 
-  public setPostion(x: number, y: number): void {
+  public setPosition(x: number, y: number): void {
     this.baseY = y;
     this.catImage.setPosition(x, y);
   }

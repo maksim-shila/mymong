@@ -1,10 +1,11 @@
 import type { Bounds } from '@game/common/types';
 import type { CellsGrid } from '../battlefield/cell/cells-grid';
-import { Worker, WorkerState2 } from './worker';
+import { Worker, WorkerState } from './worker';
 import type { CellSlot } from '../battlefield/cell/cell-slot';
 import { DropType } from '../battlefield/drop/drop';
 import type { EnergyTank } from '../energy-tank';
 import { WorkerBaseHud } from './worker-base-hud';
+import { CollectionsUtils } from '@game/common/helpers/collections-utils';
 
 const DEFAULT_WORKERS_COUNT = 3;
 
@@ -73,43 +74,43 @@ export class WorkersBase {
 
     for (const worker of this.workers) {
       switch (worker.state) {
-        case WorkerState2.IDLE:
+        case WorkerState.IDLE:
           this.tryGiveTask(worker, dropSlots);
           break;
-        case WorkerState2.MOVE_TO_DROP:
+        case WorkerState.MOVE_TO_DROP:
           worker.moveToDrop(delta);
           break;
-        case WorkerState2.MOVE_TO_ENERGY_TANK:
+        case WorkerState.MOVE_TO_ENERGY_TANK:
           worker.moveToEnergyTank(delta);
           break;
-        case WorkerState2.FILL_ENERGY_TANK:
+        case WorkerState.FILL_ENERGY_TANK:
           const completed = worker.fillEnergyTank(delta);
           if (completed) {
             this.fillEnergyTankRequested = false;
           }
           break;
-        case WorkerState2.COLLECT_DROP:
+        case WorkerState.COLLECT_DROP:
           worker.collectDrop(delta);
           break;
-        case WorkerState2.MOVE_TO_CAT_BASE:
+        case WorkerState.MOVE_TO_CAT_BASE:
           if (!worker.targetCatPosition) {
             worker.targetCatPosition = this.catPlaces.shift() ?? null;
           }
           worker.moveToCatBase(delta);
           break;
-        case WorkerState2.MOVE_TO_BASE:
+        case WorkerState.MOVE_TO_BASE:
           worker.moveToBase(delta);
           break;
-        case WorkerState2.SAVE_CAT:
+        case WorkerState.SAVE_CAT:
           const savedDrop = worker.saveCat(delta);
           if (savedDrop?.type === DropType.CAT) {
             this.savedCatsCount += 1;
           }
           break;
-        case WorkerState2.SAVE_RESOURCES:
+        case WorkerState.SAVE_RESOURCES:
           this.resources += worker.saveResources(delta);
           break;
-        case WorkerState2.RELAX:
+        case WorkerState.RELAX:
           worker.relax(delta);
           break;
       }
@@ -124,21 +125,23 @@ export class WorkersBase {
     return this.savedCatsCount;
   }
 
-  private tryGiveTask(worker: Worker, dropSlots: CellSlot[]) {
-    const catDrops = dropSlots.filter((slot) => slot.drop!.type === DropType.CAT);
-    const resourcesDrops = dropSlots.filter((slot) => slot.drop!.type === DropType.RESOURCE);
+  private tryGiveTask(worker: Worker, dropSlots: CellSlot[]): boolean {
+    const catSlot = dropSlots.find((slot) => slot.drop?.type === DropType.CAT);
+    const resourceSlot = dropSlots.find((slot) => slot.drop?.type === DropType.RESOURCE);
 
-    const slot = catDrops.length > 0 ? catDrops[0] : resourcesDrops[0];
-    if (slot) {
-      const index = dropSlots.indexOf(slot);
-      dropSlots.splice(index, 1);
-      worker.takeDrop(slot);
-      return;
+    const targetSlot = catSlot ?? resourceSlot;
+    if (targetSlot) {
+      CollectionsUtils.remove(dropSlots, targetSlot);
+      worker.takeDrop(targetSlot);
+      return true;
     }
 
     if (!this.energyTank.isFull() && !this.fillEnergyTankRequested) {
       this.fillEnergyTankRequested = true;
       worker.goFillEnergyTank();
+      return true;
     }
+
+    return false;
   }
 }
