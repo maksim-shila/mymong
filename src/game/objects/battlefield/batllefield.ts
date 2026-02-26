@@ -96,6 +96,10 @@ export class Battlefield {
     return this.moleBase.getAliveMolesCount() === 0;
   }
 
+  public get isPaddleDead(): boolean {
+    return this.paddle.isDead;
+  }
+
   public update(delta: number): void {
     this.updateDifficulty(delta);
 

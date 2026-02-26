@@ -8,6 +8,10 @@ import { PaddleShield } from './paddle-shield';
 
 const BASE_WIDTH = 135;
 const BASE_HEIGHT = 135;
+const HITBOX_SCALE_X = 0.3;
+const HITBOX_SCALE_Y = 0.8;
+const HITBOX_WIDTH = BASE_WIDTH * HITBOX_SCALE_X;
+const HITBOX_HEIGHT = BASE_HEIGHT * HITBOX_SCALE_Y;
 const FILL_COLOR = 0xffffff;
 const ALPHA = 0;
 
@@ -64,10 +68,15 @@ export class Paddle extends Phaser.GameObjects.Rectangle {
     this.arcadeBody = this.body as Phaser.Physics.Arcade.Body;
     this.arcadeBody.setAllowGravity(false);
     this.arcadeBody.setImmovable(true);
+    this.arcadeBody.setSize(HITBOX_WIDTH, HITBOX_HEIGHT, true);
   }
 
   public get collider(): Phaser.GameObjects.Rectangle {
     return this;
+  }
+
+  public get isDead(): boolean {
+    return this.lives <= 0;
   }
 
   public override update(delta: number): void {

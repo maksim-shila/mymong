@@ -3,6 +3,7 @@ import { applyResolutionCamera, type ResolutionViewport } from '@game/settings/r
 import { SCENE } from '../../scenes';
 import { VictoryScreen } from '@game/objects/screens/victory-screen';
 import { GameMenu } from './menu/game-menu';
+import { DefeatScreen } from '@game/objects/screens/defeat-screen';
 
 const BATTLE_BACKGROUND_COLOR = 'rgb(137, 187, 225)';
 
@@ -10,6 +11,7 @@ export class BattleScene extends Phaser.Scene {
   private battlefield!: Battlefield;
   private viewport!: ResolutionViewport;
   private victoryScreen!: VictoryScreen;
+  private defeatScreen!: DefeatScreen;
   private gameMenu!: GameMenu;
 
   private hasShownMolesDestroyedMessage = false;
@@ -24,6 +26,7 @@ export class BattleScene extends Phaser.Scene {
     this.viewport = applyResolutionCamera(this);
     this.battlefield = new Battlefield(this, this.viewport);
     this.victoryScreen = new VictoryScreen(this, this.viewport);
+    this.defeatScreen = new DefeatScreen(this, this.viewport);
     this.gameMenu = new GameMenu(this, this.viewport, {
       onOpen: () => this.pauseGameplay(),
       onClose: () => this.resumeGameplay(),
@@ -38,7 +41,7 @@ export class BattleScene extends Phaser.Scene {
     }
 
     const togglePauseMenu = () => {
-      if (this.victoryScreen.isVictoryStarted) {
+      if (this.victoryScreen.isVictoryStarted || this.defeatScreen.isDefeatStarted) {
         return;
       }
       this.gameMenu.toggle();
@@ -55,15 +58,31 @@ export class BattleScene extends Phaser.Scene {
       return;
     }
 
-    if (!this.victoryScreen.isVictoryCompleted) {
-      this.battlefield.update(delta * this.victoryScreen.timeScale);
+    if (!this.victoryScreen.isVictoryCompleted && !this.defeatScreen.isDefeatCompleted) {
+      const gameplayTimeScale = this.defeatScreen.isDefeatStarted
+        ? this.defeatScreen.timeScale
+        : this.victoryScreen.timeScale;
+      this.battlefield.update(delta * gameplayTimeScale);
     }
 
+    this.checkDefeat();
     this.checkObjectives();
   }
 
+  private checkDefeat(): void {
+    if (this.victoryScreen.isVictoryStarted || this.defeatScreen.isDefeatStarted) {
+      return;
+    }
+
+    if (this.battlefield.isPaddleDead) {
+      this.defeatScreen.playDefeat(() => {
+        this.scene.start(SCENE.MAIN_MENU);
+      });
+    }
+  }
+
   private checkObjectives(): void {
-    if (this.victoryScreen.isVictoryStarted) {
+    if (this.victoryScreen.isVictoryStarted || this.defeatScreen.isDefeatStarted) {
       return;
     }
 
