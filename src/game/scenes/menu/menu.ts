@@ -1,4 +1,5 @@
 import { AUDIO } from '@game/assets/common-assets';
+import { SoundManager } from '@game/settings/sound';
 import menuSwitchAudio from '@assets/audio/menu-switch.mp3';
 import menuSelectAudio from '@assets/audio/menu-select.mp3';
 
@@ -6,7 +7,10 @@ export const MENU_FONT_FAMILY = 'Fredoka, Arial, Helvetica, sans-serif';
 export const MENU_COLOR_DEFAULT = '#ffffff';
 export const MENU_COLOR_SELECTED = '#6be1ff';
 
+export type MenuOptionType = 'button' | 'slider';
+
 export type MenuOption = {
+  type?: MenuOptionType;
   label: string;
   onSelect: () => void;
 };
@@ -84,7 +88,7 @@ export class MenuComponent {
 
       if (shouldPlaySelectionSound && selectedIndex !== previousSelectedIndex) {
         if (this.scene.cache.audio.exists(AUDIO.MENU_SWITCH)) {
-          this.scene.sound.play(AUDIO.MENU_SWITCH);
+          SoundManager.playEffect(this.scene, AUDIO.MENU_SWITCH);
         }
       }
 
@@ -188,7 +192,7 @@ export class MenuComponent {
 
   private playSelectSound(): void {
     if (this.scene.cache.audio.exists(AUDIO.MENU_SELECT)) {
-      this.scene.sound.play(AUDIO.MENU_SELECT);
+      SoundManager.playEffect(this.scene, AUDIO.MENU_SELECT);
     }
   }
 }

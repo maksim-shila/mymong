@@ -33,6 +33,13 @@ export abstract class OptionsMenuBase extends Phaser.Scene {
   protected getInitialSelectedIndex(_options: MenuOption[], _actions: MenuOption[]): number {
     return 0;
   }
+  protected onMenuSelectionChanged(_selectedIndex: number): void {}
+  protected afterOptionsCreated(_context: {
+    worldWidth: number;
+    worldHeight: number;
+    optionRowY: (index: number) => number;
+    optionButtons: Phaser.GameObjects.Text[];
+  }): void {}
 
   protected beforeCreate(_viewport: ResolutionViewport): void {}
 
@@ -142,6 +149,7 @@ export abstract class OptionsMenuBase extends Phaser.Scene {
 
     const onSelectedIndexChanged = (selectedIndex: number) => {
       if (selectedIndex >= options.length) {
+        this.onMenuSelectionChanged(selectedIndex);
         layoutOptionButtons();
         return;
       }
@@ -156,6 +164,7 @@ export abstract class OptionsMenuBase extends Phaser.Scene {
         optionsScrollStartIndex = selectedIndex - visibleRows + 1;
       }
 
+      this.onMenuSelectionChanged(selectedIndex);
       layoutOptionButtons();
     };
 
@@ -197,6 +206,13 @@ export abstract class OptionsMenuBase extends Phaser.Scene {
         actions.map((action) => action.option),
       ),
       enableWheel: true,
+    });
+
+    this.afterOptionsCreated({
+      worldWidth,
+      worldHeight,
+      optionRowY: (index: number) => optionsSectionTopY + index * optionsStepPx,
+      optionButtons,
     });
 
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {

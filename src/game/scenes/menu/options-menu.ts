@@ -22,6 +22,10 @@ export class OptionsMenu extends OptionsMenuBase {
           label: 'Display',
           onSelect: () => this.scene.start(SCENE.DISPLAY_MENU),
         },
+        {
+          label: 'Sound',
+          onSelect: () => this.scene.start(SCENE.SOUND_MENU),
+        },
       ],
       onBack: () => this.scene.start(SCENE.MAIN_MENU),
     };
