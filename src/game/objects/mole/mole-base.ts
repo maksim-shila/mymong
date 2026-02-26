@@ -4,6 +4,7 @@ import { Mole, MoleState } from './mole';
 import { MoleBaseHud } from './mole-base-hud';
 import { CollectionsUtils } from '@game/common/helpers/collections-utils';
 import { Timer } from '@game/common/helpers/timer';
+import { MoleDeathAnimation } from '../animations/mole-death-animation';
 
 const DEFAULT_MOLES_COUNT = 5;
 const MOLES_DEQUEUE_COOLDOWN_MS = 500;
@@ -21,6 +22,7 @@ export class MoleBase {
 
   private readonly moles: Mole[] = [];
   private readonly molesQueue: Mole[] = [];
+  private readonly moleDeathAnimation: MoleDeathAnimation;
 
   private readonly molesDequeueCooldownTimer = new Timer(MOLES_DEQUEUE_COOLDOWN_MS);
 
@@ -28,6 +30,7 @@ export class MoleBase {
     this.scene = scene;
     this.grid = grid;
     this.hud = new MoleBaseHud(this.scene, bounds);
+    this.moleDeathAnimation = new MoleDeathAnimation(this.scene);
 
     for (let i = 0; i < DEFAULT_MOLES_COUNT; i++) {
       const moleX = bounds.x.max + MOLE_BASE_OFFSET_X;
@@ -83,6 +86,7 @@ export class MoleBase {
     }
 
     for (const mole of deadMoles) {
+      this.moleDeathAnimation.show(mole.x, mole.y);
       mole.destroy();
       CollectionsUtils.remove(this.moles, mole);
       CollectionsUtils.remove(this.molesQueue, mole);

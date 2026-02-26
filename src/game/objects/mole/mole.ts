@@ -33,6 +33,10 @@ export class Mole {
   private readonly debugColliderBody: Phaser.Physics.Arcade.Body;
   private readonly stealDropIndicator: Phaser.GameObjects.Arc;
 
+  private readonly relaxTimer = new Timer(RELAX_TIME_MS);
+  private readonly stealDropTimer = new Timer(STEAL_DROP_TIME_MS);
+  private readonly buildingTimer = new Timer(BUILD_TIME_PER_LIFE_MS);
+
   private readonly homeX: number;
   private readonly homeY: number;
 
@@ -40,10 +44,7 @@ export class Mole {
   private stolenDrop: Drop | null = null;
 
   private state = MoleState.IDLE;
-  private readonly relaxTimer = new Timer(RELAX_TIME_MS);
-  private readonly stealDropTimer = new Timer(STEAL_DROP_TIME_MS);
   private buildingCellLives = 0;
-  private readonly buildingTimer = new Timer(BUILD_TIME_PER_LIFE_MS);
   private destroyed = false;
   private lives = MOLE_LIVES;
 
@@ -75,6 +76,14 @@ export class Mole {
 
     this.homeX = x;
     this.homeY = y;
+  }
+
+  public get x(): number {
+    return this.debugCollider.x;
+  }
+
+  public get y(): number {
+    return this.debugCollider.y;
   }
 
   public update(_delta: number): void {
