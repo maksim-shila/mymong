@@ -37,7 +37,7 @@ export class CollisionHandler {
 
       weapon.destroyBullet(bullet);
 
-      hitSlot.cell.applyDamage(bullet.damage);
+      hitSlot.cell.onHit(bullet.damage);
       if (hitSlot.cell.isDead()) {
         hitSlot.breakCell();
       }
@@ -56,6 +56,7 @@ export class CollisionHandler {
       for (const bullet of cell.getBullets()) {
         if (this.physics.overlap(bullet.getCollider(), this.paddle)) {
           bulletsToDestroy.push(bullet);
+          this.paddle.onHit(bullet.damage);
         }
       }
 

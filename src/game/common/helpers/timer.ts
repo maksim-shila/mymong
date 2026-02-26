@@ -26,6 +26,10 @@ export class Timer {
     return this.elapsedMs / this.durationMs;
   }
 
+  public get active(): boolean {
+    return !this.done;
+  }
+
   public get done(): boolean {
     return this.elapsedMs >= this.durationMs;
   }

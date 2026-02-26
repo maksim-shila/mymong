@@ -91,6 +91,15 @@ export class EnergyTank {
     return true;
   }
 
+  public tryConsumeExact(amount: number): boolean {
+    if (amount <= 0 || this.fuel < amount) {
+      return false;
+    }
+
+    this.fuel -= amount;
+    return true;
+  }
+
   public addFuel(amount: number): void {
     if (amount <= 0 || this.fuel >= this.fuelMax) {
       return;

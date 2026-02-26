@@ -125,7 +125,7 @@ export abstract class Cell extends Phaser.GameObjects.Rectangle {
     return shouldShoot;
   }
 
-  public applyDamage(damage: number): void {
+  public onHit(damage: number): void {
     damage = Math.max(1, Math.floor(damage));
     this.lives = Math.max(0, this.lives - damage);
   }

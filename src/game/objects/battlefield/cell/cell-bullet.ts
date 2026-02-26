@@ -8,6 +8,8 @@ export class CellBullet {
   private readonly arcadeBody: Phaser.Physics.Arcade.Body;
   private readonly sprite: Phaser.GameObjects.Arc;
 
+  public readonly damage = 1;
+
   public constructor(
     scene: Phaser.Scene,
     fromX: number,
