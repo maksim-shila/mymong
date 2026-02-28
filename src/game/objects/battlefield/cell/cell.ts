@@ -16,10 +16,10 @@ const STROKE_COLOR = 0x1f2d3d;
 const STROKE_ALPHA = 0.7;
 
 const SHOT_CHANCE_MIN = 0.1;
-const SHOT_CHANCE_MAX = 0.7;
-const SHOT_CD_MAX_MS = 2000;
-const SHOT_CD_MIN_MS = 500;
-const SHOT_CD_STEP_MAX = 6000;
+const SHOT_CHANCE_MAX = 0.5;
+const SHOT_CD_MAX_MS = 7000;
+const SHOT_CD_MIN_MS = 1000;
+const SHOT_CD_JITTER_MAX = 8000;
 
 export abstract class Cell extends Phaser.GameObjects.Rectangle {
   private readonly arcadeBody: Phaser.Physics.Arcade.StaticBody;
@@ -55,7 +55,9 @@ export abstract class Cell extends Phaser.GameObjects.Rectangle {
 
     this.shotChance = SHOT_CHANCE_MIN;
     this.shotCooldownMs = SHOT_CD_MAX_MS;
-    this.shotCooldownTimer = new Timer(this.shotCooldownMs);
+
+    const firstShotCooldown = Phaser.Math.Between(1000, this.shotCooldownMs);
+    this.shotCooldownTimer = new Timer(firstShotCooldown);
 
     this.lives = lives;
 
@@ -120,7 +122,8 @@ export abstract class Cell extends Phaser.GameObjects.Rectangle {
     }
 
     const shouldShoot = Math.random() <= this.shotChance;
-    const nextShotCooldown = this.shotCooldownMs + Phaser.Math.Between(0, SHOT_CD_STEP_MAX);
+    const jitter = Phaser.Math.Between(-SHOT_CD_JITTER_MAX, SHOT_CD_JITTER_MAX);
+    const nextShotCooldown = Math.max(0, this.shotCooldownMs + jitter);
     this.shotCooldownTimer.set(nextShotCooldown);
     return shouldShoot;
   }
