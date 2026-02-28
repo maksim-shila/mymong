@@ -1,5 +1,5 @@
 import type { Bounds } from '@game/common/types';
-import { CAT_CAGE_LIVES, CatCageCell } from './cat-cage-cell';
+import { MAX_LIVES, CatCageCell } from './cat-cage-cell';
 import {
   MOLE_BUILDING_MAX_LIVES,
   MOLE_BUILDING_MIN_LIVES,
@@ -14,7 +14,7 @@ export class CellFactory {
   ) {}
 
   public createCatCage(slot: CellSlot): CatCageCell {
-    const lives = CAT_CAGE_LIVES;
+    const lives = MAX_LIVES;
     const cell = new CatCageCell(
       this.scene,
       slot.x,

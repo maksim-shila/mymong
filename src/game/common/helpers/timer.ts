@@ -39,6 +39,12 @@ export class Timer {
     this.elapsedMs = 0;
   }
 
+  public setIfInactive(durationMs: number): void {
+    if (!this.active) {
+      this.set(durationMs);
+    }
+  }
+
   public reset(): void {
     this.elapsedMs = 0;
   }
