@@ -3,6 +3,7 @@ import { Timer } from '@game/common/helpers/timer';
 import { CellWeapon } from './cell-weapon';
 import type { CellBullet } from './cell-bullet';
 import type { Bounds, MinMax } from '@game/common/types';
+import { CellHitAnimation } from '../../animations/cell-hit-animation';
 
 const DEFAULT_FILL_COLOR = 0xff7a33;
 const CONSTRUCTING_MIN_ALPHA = 0.2;
@@ -21,11 +22,16 @@ const SHOT_CD_MAX_MS = 7000;
 const SHOT_CD_MIN_MS = 1000;
 const SHOT_CD_JITTER_MAX = 8000;
 
+const HIT_ANIMATION_LIVES_STEP = 5;
+const HIT_FLASH_ALPHA = 0.35;
+const HIT_FLASH_DURATION_MS = 80;
+
 export abstract class Cell extends Phaser.GameObjects.Rectangle {
   private readonly arcadeBody: Phaser.Physics.Arcade.StaticBody;
 
   private readonly shotCooldownTimer: Timer;
   private readonly weapon: CellWeapon;
+  private readonly hitAnimation: CellHitAnimation;
 
   private breaking = false;
   private constructingBlinkTimeMs = 0;
@@ -48,10 +54,15 @@ export abstract class Cell extends Phaser.GameObjects.Rectangle {
 
     scene.add.existing(this);
 
+    this.setFillStyle(DEFAULT_FILL_COLOR, 1);
+    this.setStrokeStyle(STROKE_WIDTH, STROKE_COLOR, STROKE_ALPHA);
+    this.setDepth(Z_INDEX);
+
     scene.physics.add.existing(this, true);
     this.arcadeBody = this.body as Phaser.Physics.Arcade.StaticBody;
 
     this.weapon = new CellWeapon(scene, bounds);
+    this.hitAnimation = new CellHitAnimation(scene, this.width, this.height, this.depth + 1);
 
     this.shotChance = SHOT_CHANCE_MIN;
     this.shotCooldownMs = SHOT_CD_MAX_MS;
@@ -60,10 +71,6 @@ export abstract class Cell extends Phaser.GameObjects.Rectangle {
     this.shotCooldownTimer = new Timer(firstShotCooldown);
 
     this.lives = lives;
-
-    this.setFillStyle(DEFAULT_FILL_COLOR, 1);
-    this.setStrokeStyle(STROKE_WIDTH, STROKE_COLOR, STROKE_ALPHA);
-    this.setDepth(Z_INDEX);
   }
 
   public get collider(): Phaser.GameObjects.Rectangle {
@@ -131,6 +138,12 @@ export abstract class Cell extends Phaser.GameObjects.Rectangle {
   public onHit(damage: number): void {
     damage = Math.max(1, Math.floor(damage));
     this.lives = Math.max(0, this.lives - damage);
+
+    this.drawFlash();
+
+    if (this.lives % HIT_ANIMATION_LIVES_STEP === 0) {
+      this.hitAnimation.show(this.x, this.y);
+    }
   }
 
   public break(onComplete?: () => void): void {
@@ -155,5 +168,18 @@ export abstract class Cell extends Phaser.GameObjects.Rectangle {
   public override destroy(): void {
     this.weapon.destroy();
     super.destroy();
+  }
+
+  private drawFlash(): void {
+    if (!this.breaking) {
+      this.scene.tweens.killTweensOf(this);
+      this.setAlpha(1);
+      this.scene.tweens.add({
+        targets: this,
+        alpha: HIT_FLASH_ALPHA,
+        duration: HIT_FLASH_DURATION_MS,
+        yoyo: true,
+      });
+    }
   }
 }

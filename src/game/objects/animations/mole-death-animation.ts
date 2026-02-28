@@ -1,8 +1,8 @@
 import { TEXTURE } from '@game/assets/common-assets';
 
-const MOLE_SPIRIT_SIZE = 100;
-const MOLE_SPIRIT_DURATION_MS = 1000;
-const MOLE_SPIRIT_RISE_Y = 40;
+const MOLE_SPIRIT_SIZE = 120;
+const MOLE_SPIRIT_DURATION_MS = 1500;
+const MOLE_SPIRIT_RISE_Y = 100;
 const MOLE_SPIRIT_START_ALPHA = 0.8;
 const MOLE_SPIRIT_Z_INDEX = 200;
 const MOLE_SPIRIT_SWAY_OFFSET_X = 8;

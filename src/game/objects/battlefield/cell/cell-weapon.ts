@@ -2,7 +2,7 @@ import type { Bounds } from '@game/common/types';
 import { CollectionsUtils } from '@game/common/helpers/collections-utils';
 import { CellBullet } from './cell-bullet';
 
-const BULLET_SPEED = 560;
+const BULLET_SPEED = 300;
 
 export class CellWeapon {
   private readonly scene: Phaser.Scene;

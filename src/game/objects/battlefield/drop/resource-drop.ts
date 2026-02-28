@@ -1,4 +1,4 @@
-import { ResourceDropAnimation } from '../animations/resource-drop';
+import { ResourceDropAnimation } from '../../animations/resource-drop-animation';
 import { Drop, DropType } from './drop';
 
 export class ResourceDrop extends Drop {

@@ -1,5 +1,5 @@
 import { Timer } from '@game/common/helpers/timer';
-import { CagedCatAnimation } from '../animations/caged-cat';
+import { CagedCatAnimation } from '../../animations/caged-cat-animation';
 import { CatDrop } from '../drop/cat-drop';
 import type { Drop } from '../drop/drop';
 import { Cell } from './cell';

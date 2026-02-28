@@ -1,5 +1,5 @@
 import { Drop, DropType } from './drop';
-import type { CagedCatAnimation } from '../animations/caged-cat';
+import type { CagedCatAnimation } from '../../animations/caged-cat-animation';
 
 export class CatDrop extends Drop {
   public override readonly type: DropType = DropType.CAT;
