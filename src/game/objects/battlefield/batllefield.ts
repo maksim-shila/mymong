@@ -108,6 +108,10 @@ export class Battlefield {
     return this.workersBase.getResources();
   }
 
+  public get savedCatsCount(): number {
+    return this.workersBase.getSavedCatsCount();
+  }
+
   public update(delta: number): void {
     this.updateDifficulty(delta);
 

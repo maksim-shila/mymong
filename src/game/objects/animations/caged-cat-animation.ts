@@ -51,6 +51,7 @@ export class CagedCatAnimation {
     this.catImage = this.scene.add.image(this.catImage.x, this.baseY, TEXTURE.CAT_SAVED);
     this.catImage.setDisplaySize(this.width, this.height);
     this.catImage.setDepth(this.depth);
+    this.scheduleNextJump();
   }
 
   public hide(): void {

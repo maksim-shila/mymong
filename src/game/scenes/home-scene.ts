@@ -88,6 +88,8 @@ export class HomeScene extends Phaser.Scene {
       const onSelect =
         label === 'Next Battle'
           ? () => this.scene.start(SCENE.LOADING)
+          : label === 'Catoratoria'
+            ? () => this.scene.start(SCENE.CATORATORIA)
           : label === 'Armory'
             ? () => this.scene.start(SCENE.ARMORY)
             : undefined;

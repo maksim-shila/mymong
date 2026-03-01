@@ -394,12 +394,13 @@ export class ArmoryScene extends Phaser.Scene {
       const row = this.rows[i];
       if (!row.enabled) {
         row.labelText.setColor(DISABLED_TEXT_COLOR);
+        row.priceText.setColor(DISABLED_TEXT_COLOR);
         continue;
       }
 
-      row.labelText.setColor(
-        i === this.selectedRowIndex ? MENU_COLOR_SELECTED : MENU_COLOR_DEFAULT,
-      );
+      const isSelected = i === this.selectedRowIndex;
+      row.labelText.setColor(isSelected ? MENU_COLOR_SELECTED : MENU_COLOR_DEFAULT);
+      row.priceText.setColor(isSelected ? MENU_COLOR_SELECTED : RESOURCES_TEXT_COLOR);
     }
   }
 

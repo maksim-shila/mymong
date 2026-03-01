@@ -77,7 +77,10 @@ export class BattleScene extends Phaser.Scene {
 
     if (this.battlefield.isPaddleDead) {
       this.defeatScreen.playDefeat(() => {
-        GameSaveManager.saveBattleResources(this.battlefield.battleResources);
+        GameSaveManager.saveBattleResources(
+          this.battlefield.battleResources,
+          this.battlefield.savedCatsCount,
+        );
         this.scene.start(SCENE.HOME);
       });
     }
@@ -94,7 +97,10 @@ export class BattleScene extends Phaser.Scene {
     if (allCatsSaved && allMolesKilled) {
       this.victoryScreen.playVictory(() => {
         this.battlefield.collectFieldResources();
-        GameSaveManager.saveBattleResources(this.battlefield.battleResources);
+        GameSaveManager.saveBattleResources(
+          this.battlefield.battleResources,
+          this.battlefield.savedCatsCount,
+        );
         this.scene.start(SCENE.HOME);
       });
       return;

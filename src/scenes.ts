@@ -1,5 +1,6 @@
 import { ArmoryScene } from '@game/scenes/armory-scene';
 import { BattleScene } from '@game/scenes/battle-scene';
+import { CatoratoriaScene } from '@game/scenes/catoratoria-scene';
 import { HomeScene } from '@game/scenes/home-scene';
 import { LoadingScene } from '@game/scenes/loading-scene';
 import { MainMenuScene } from '@game/scenes/main-menu-scene';
@@ -22,6 +23,7 @@ export const SCENE = {
   BATTLE: 'BattleScene',
   HOME: 'HomeScene',
   ARMORY: 'ArmoryScene',
+  CATORATORIA: 'CatoratoriaScene',
 } as const;
 
 export const SCENES: Phaser.Scene[] = [
@@ -36,4 +38,5 @@ export const SCENES: Phaser.Scene[] = [
   new BattleScene(SCENE.BATTLE),
   new HomeScene(SCENE.HOME),
   new ArmoryScene(SCENE.ARMORY),
+  new CatoratoriaScene(SCENE.CATORATORIA),
 ];

@@ -1,6 +1,6 @@
 import shipImage from '@assets/image/ship.png';
 import catImage from '@assets/image/cat.png';
-import catSavedImage from '@assets/image/cat_saved.png';
+import catSavedImage from '@assets/image/cat-saved.png';
 import botImage from '@assets/image/bot.png';
 import explosion1Image from '@assets/image/explosion-1.png';
 import explosion2Image from '@assets/image/explosion-2.png';
