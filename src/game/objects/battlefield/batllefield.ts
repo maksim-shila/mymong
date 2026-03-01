@@ -100,6 +100,10 @@ export class Battlefield {
     return this.paddle.isDead;
   }
 
+  public get battleResources(): number {
+    return this.workersBase.getResources();
+  }
+
   public update(delta: number): void {
     this.updateDifficulty(delta);
 

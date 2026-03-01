@@ -1,5 +1,6 @@
 import { GameMenu } from '@game/scenes/menu/game-menu';
 import { applyResolutionCamera, type ResolutionViewport } from '@game/settings/resolution';
+import { GameSaveManager } from '@game/settings/game-save';
 import { SCENE } from '../../scenes';
 
 const HOME_BACKGROUND_COLOR = 'rgb(137, 187, 225)';
@@ -16,14 +17,23 @@ const CARD_GAP_Y_RATIO = 0.06;
 const CARD_DEPTH = 20;
 const CARD_TEXT_FONT_SIZE = '42px';
 const CARD_TEXT_FONT_FAMILY = 'Fredoka, Arial, Helvetica, sans-serif';
+const RESOURCES_TEXT_FONT_SIZE = '36px';
+const RESOURCES_TEXT_COLOR = '#ffffff';
+const RESOURCES_OFFSET_X = 56;
+const RESOURCES_OFFSET_Y = 44;
 
 type HomeCard = {
   border: Phaser.GameObjects.Rectangle;
   label: Phaser.GameObjects.Text;
+  isInteractive: boolean;
 };
 
 export class HomeScene extends Phaser.Scene {
+  private static readonly GRID_COLUMNS = 2;
+
   private gameMenu!: GameMenu;
+  private cards: HomeCard[] = [];
+  private selectedCardIndex = -1;
 
   constructor(name: string) {
     super(name);
@@ -34,11 +44,30 @@ export class HomeScene extends Phaser.Scene {
     const viewport = applyResolutionCamera(this);
 
     this.createCards(viewport);
+    this.createResourcesText(viewport);
     this.createPauseMenu(viewport);
     this.bindEscapeKey();
+    this.bindNavigationKeys();
+  }
+
+  private createResourcesText(viewport: ResolutionViewport): void {
+    const save = GameSaveManager.load();
+    const resources = save?.resources ?? 0;
+    const x = viewport.viewX + viewport.viewWidth - RESOURCES_OFFSET_X;
+    const y = viewport.viewY + RESOURCES_OFFSET_Y;
+
+    this.add
+      .text(x, y, `Resources: ${resources}`, {
+        fontFamily: CARD_TEXT_FONT_FAMILY,
+        fontSize: RESOURCES_TEXT_FONT_SIZE,
+        color: RESOURCES_TEXT_COLOR,
+      })
+      .setOrigin(1, 0)
+      .setDepth(CARD_DEPTH + 2);
   }
 
   private createCards(viewport: ResolutionViewport): void {
+    this.cards = [];
     const labels = ['Catoratoria', 'Armory', 'Coming Soon', 'Next Battle'];
     const centerX = viewport.viewX + viewport.viewWidth / 2;
     const centerY = viewport.viewY + viewport.viewHeight / 2;
@@ -54,8 +83,13 @@ export class HomeScene extends Phaser.Scene {
       const row = Math.floor(i / 2);
       const x = startX + column * (cardWidth + gapX);
       const y = startY + row * (cardHeight + gapY);
-      this.createCard(x, y, cardWidth, cardHeight, labels[i], labels[i] !== 'Coming Soon');
+      this.cards.push(
+        this.createCard(x, y, cardWidth, cardHeight, labels[i], labels[i] !== 'Coming Soon'),
+      );
     }
+
+    this.selectedCardIndex = this.cards.findIndex((card) => card.isInteractive);
+    this.renderSelection();
   }
 
   private createCard(
@@ -85,26 +119,25 @@ export class HomeScene extends Phaser.Scene {
       .setDepth(CARD_DEPTH + 1);
 
     if (!isInteractive) {
-      return { border, label };
+      return { border, label, isInteractive };
     }
 
     border.setInteractive({ useHandCursor: true });
 
     border.on('pointerover', () => {
-      border.setStrokeStyle(CARD_STROKE_WIDTH, CARD_HOVER_STROKE_COLOR, 1);
-      label.setColor(CARD_HOVER_TEXT_COLOR);
-      border.setScale(1.03);
-      label.setScale(1.03);
+      const hoveredIndex = this.cards.findIndex((card) => card.border === border);
+      if (hoveredIndex === -1) {
+        return;
+      }
+      this.selectedCardIndex = hoveredIndex;
+      this.renderSelection();
     });
 
     border.on('pointerout', () => {
-      border.setStrokeStyle(CARD_STROKE_WIDTH, CARD_STROKE_COLOR, 1);
-      label.setColor(CARD_TEXT_COLOR);
-      border.setScale(1);
-      label.setScale(1);
+      this.renderSelection();
     });
 
-    return { border, label };
+    return { border, label, isInteractive };
   }
 
   private createPauseMenu(viewport: ResolutionViewport): void {
@@ -127,5 +160,99 @@ export class HomeScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       keyboard.off('keydown-ESC', togglePauseMenu);
     });
+  }
+
+  private bindNavigationKeys(): void {
+    const keyboard = this.input.keyboard;
+    if (!keyboard) {
+      return;
+    }
+
+    const moveUp = () => this.moveSelection(0, -1);
+    const moveDown = () => this.moveSelection(0, 1);
+    const moveLeft = () => this.moveSelection(-1, 0);
+    const moveRight = () => this.moveSelection(1, 0);
+
+    keyboard.on('keydown-W', moveUp);
+    keyboard.on('keydown-UP', moveUp);
+    keyboard.on('keydown-S', moveDown);
+    keyboard.on('keydown-DOWN', moveDown);
+    keyboard.on('keydown-A', moveLeft);
+    keyboard.on('keydown-LEFT', moveLeft);
+    keyboard.on('keydown-D', moveRight);
+    keyboard.on('keydown-RIGHT', moveRight);
+
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      keyboard.off('keydown-W', moveUp);
+      keyboard.off('keydown-UP', moveUp);
+      keyboard.off('keydown-S', moveDown);
+      keyboard.off('keydown-DOWN', moveDown);
+      keyboard.off('keydown-A', moveLeft);
+      keyboard.off('keydown-LEFT', moveLeft);
+      keyboard.off('keydown-D', moveRight);
+      keyboard.off('keydown-RIGHT', moveRight);
+    });
+  }
+
+  private moveSelection(columnDelta: number, rowDelta: number): void {
+    if (this.gameMenu.isOpen || this.selectedCardIndex < 0) {
+      return;
+    }
+
+    const rows = Math.ceil(this.cards.length / HomeScene.GRID_COLUMNS);
+    let currentColumn = this.selectedCardIndex % HomeScene.GRID_COLUMNS;
+    let currentRow = Math.floor(this.selectedCardIndex / HomeScene.GRID_COLUMNS);
+
+    while (true) {
+      currentColumn += columnDelta;
+      currentRow += rowDelta;
+
+      if (
+        currentColumn < 0 ||
+        currentColumn >= HomeScene.GRID_COLUMNS ||
+        currentRow < 0 ||
+        currentRow >= rows
+      ) {
+        return;
+      }
+
+      const nextIndex = currentRow * HomeScene.GRID_COLUMNS + currentColumn;
+      const nextCard = this.cards[nextIndex];
+      if (!nextCard) {
+        return;
+      }
+
+      if (!nextCard.isInteractive) {
+        continue;
+      }
+
+      this.selectedCardIndex = nextIndex;
+      this.renderSelection();
+      return;
+    }
+  }
+
+  private renderSelection(): void {
+    for (let i = 0; i < this.cards.length; i += 1) {
+      const card = this.cards[i];
+
+      if (!card.isInteractive) {
+        card.border.setStrokeStyle(CARD_STROKE_WIDTH, CARD_DISABLED_STROKE_COLOR, 1);
+        card.label.setColor(CARD_DISABLED_TEXT_COLOR);
+        card.border.setScale(1);
+        card.label.setScale(1);
+        continue;
+      }
+
+      const isSelected = i === this.selectedCardIndex;
+      card.border.setStrokeStyle(
+        CARD_STROKE_WIDTH,
+        isSelected ? CARD_HOVER_STROKE_COLOR : CARD_STROKE_COLOR,
+        1,
+      );
+      card.label.setColor(isSelected ? CARD_HOVER_TEXT_COLOR : CARD_TEXT_COLOR);
+      card.border.setScale(isSelected ? 1.03 : 1);
+      card.label.setScale(isSelected ? 1.03 : 1);
+    }
   }
 }

@@ -4,6 +4,7 @@ import { SCENE } from '../../scenes';
 import { VictoryScreen } from '@game/objects/screens/victory-screen';
 import { GameMenu } from './menu/game-menu';
 import { DefeatScreen } from '@game/objects/screens/defeat-screen';
+import { GameSaveManager } from '@game/settings/game-save';
 
 const BATTLE_BACKGROUND_COLOR = 'rgb(137, 187, 225)';
 
@@ -76,6 +77,7 @@ export class BattleScene extends Phaser.Scene {
 
     if (this.battlefield.isPaddleDead) {
       this.defeatScreen.playDefeat(() => {
+        GameSaveManager.saveBattleResources(this.battlefield.battleResources);
         this.scene.start(SCENE.HOME);
       });
     }
@@ -91,6 +93,7 @@ export class BattleScene extends Phaser.Scene {
 
     if (allCatsSaved && allMolesKilled) {
       this.victoryScreen.playVictory(() => {
+        GameSaveManager.saveBattleResources(this.battlefield.battleResources);
         this.scene.start(SCENE.HOME);
       });
       return;

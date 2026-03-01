@@ -1,6 +1,7 @@
 import { applyResolutionCamera } from '@game/settings/resolution';
 import { SCENE } from '../../scenes';
 import { MenuComponent, type MenuOption } from '@game/scenes/menu/menu';
+import { GameSaveManager } from '@game/settings/game-save';
 
 const MENU_GAME_TITLE_Y = 0.34;
 const MENU_GAME_TITLE_FONT_SIZE = '80px';
@@ -33,11 +34,20 @@ export class MainMenuScene extends Phaser.Scene {
       MENU_GAME_TITLE_FONT_SIZE,
     );
 
-    const entries: MenuOption[] = [
-      { label: 'Start Game', onSelect: () => this.scene.start(SCENE.LOADING) },
-      { label: 'Options', onSelect: () => this.scene.start(SCENE.OPTIONS) },
-      { label: 'Exit', onSelect: () => this.exitGame() },
-    ];
+    const entries: MenuOption[] = [];
+    if (GameSaveManager.hasSave()) {
+      entries.push({ label: 'Continue', onSelect: () => this.scene.start(SCENE.HOME) });
+    }
+
+    entries.push({
+      label: 'New Game',
+      onSelect: () => {
+        GameSaveManager.startNewGame();
+        this.scene.start(SCENE.LOADING);
+      },
+    });
+    entries.push({ label: 'Options', onSelect: () => this.scene.start(SCENE.OPTIONS) });
+    entries.push({ label: 'Exit', onSelect: () => this.exitGame() });
     const buttons = entries.map((entry, index) =>
       this.menu.createMenuText(
         worldWidth / 2,

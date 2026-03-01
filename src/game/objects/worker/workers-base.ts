@@ -125,6 +125,10 @@ export class WorkersBase {
     return this.savedCatsCount;
   }
 
+  public getResources(): number {
+    return this.resources;
+  }
+
   private tryGiveTask(worker: Worker, dropSlots: CellSlot[]): boolean {
     const catSlot = dropSlots.find((slot) => slot.drop?.type === DropType.CAT);
     const resourceSlot = dropSlots.find((slot) => slot.drop?.type === DropType.RESOURCE);
