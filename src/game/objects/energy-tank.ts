@@ -1,3 +1,4 @@
+import { Cheats } from '@game/cheats';
 import type { Bounds } from '@game/common/types';
 
 const MAX_FUEL = 200;
@@ -66,6 +67,10 @@ export class EnergyTank {
   }
 
   public update(): void {
+    if (Cheats.isInfinitEnergy) {
+      this.fuel = MAX_FUEL;
+    }
+
     const fillRatio = Phaser.Math.Clamp(this.fuel / this.fuelMax, 0, 1);
     const fillWidth = TANK_WIDTH - TANK_BORDER_WIDTH * 2;
     const fillHeight = (TANK_HEIGHT - TANK_BORDER_WIDTH * 2) * fillRatio;

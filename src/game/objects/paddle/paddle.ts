@@ -5,6 +5,8 @@ import type { Bounds } from '@game/common/types';
 import type { EnergyTank } from '../energy-tank';
 import { PaddleHitAnimation } from './paddle-hit-animation';
 import { PaddleShield } from './paddle-shield';
+import { MAX_LIVES } from '../battlefield/cell/cat-cage-cell';
+import { Cheats } from '@game/cheats';
 
 const BASE_WIDTH = 135;
 const BASE_HEIGHT = 135;
@@ -80,6 +82,10 @@ export class Paddle extends Phaser.GameObjects.Rectangle {
   }
 
   public override update(delta: number): void {
+    if (Cheats.isImmortal) {
+      this.lives = MAX_LIVES;
+    }
+
     const deltaSeconds = delta / 1000;
 
     const leftPressed = this.controls.keyDown(Key.LEFT);

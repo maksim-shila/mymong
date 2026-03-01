@@ -15,6 +15,7 @@ const CAT_IMG_SCALE = 0.72;
 export class CatCageCell extends Cell {
   private readonly catAnimation: CagedCatAnimation;
   private readonly healTimer = new Timer();
+  private catDrop: CatDrop | null = null;
 
   constructor(
     scene: Phaser.Scene,
@@ -53,7 +54,12 @@ export class CatCageCell extends Cell {
   }
 
   public override getDrop(): Drop | null {
-    return new CatDrop(this.catAnimation);
+    if (this.catDrop) {
+      return this.catDrop;
+    }
+
+    this.catDrop = new CatDrop(this.catAnimation);
+    return this.catDrop;
   }
 
   public override break(onComplete?: () => void): void {
@@ -64,6 +70,15 @@ export class CatCageCell extends Cell {
   public override onHit(damage: number): void {
     super.onHit(damage);
     this.healTimer.reset();
+  }
+
+  public override destroy(): void {
+    // If a drop was never created, the animation still belongs to this cell.
+    if (!this.catDrop) {
+      this.catAnimation.destroy();
+    }
+
+    super.destroy();
   }
 
   private heal(amount: number) {

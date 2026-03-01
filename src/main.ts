@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { loadResolution, loadVSyncEnabled } from '@game/settings/resolution';
 import { SCENES } from './scenes';
 import './styles/fonts.css';
+import { Cheats } from '@game/cheats';
 
 const selectedResolution = loadResolution();
 const vSyncEnabled = loadVSyncEnabled();
@@ -62,6 +63,7 @@ const waitForFredoka = async (): Promise<void> => {
 const bootstrap = async (): Promise<void> => {
   await waitForFredoka();
   new Phaser.Game(config);
+  Cheats.disableAll();
 };
 
 void bootstrap();
