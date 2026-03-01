@@ -22,6 +22,8 @@ const BACK_COLOR_DEFAULT = '#ffffff';
 const BACK_COLOR_HOVER = '#fff27a';
 
 const CAT_IMG_SCALE = 0.72;
+const WIN_CATS_COUNT = 32;
+const WIN_FADE_DURATION_MS = 5000;
 
 export class CatoratoriaScene extends Phaser.Scene {
   private cages: boolean[] = [];
@@ -59,8 +61,21 @@ export class CatoratoriaScene extends Phaser.Scene {
     }
 
     this.createGrid(viewport);
+    const isVictory = (save.totalSavedCats ?? 0) >= WIN_CATS_COUNT;
+    if (isVictory) {
+      this.startFinalSequence();
+      return;
+    }
+
     this.createBackButton(viewport);
     this.bindEscapeKey();
+  }
+
+  private startFinalSequence(): void {
+    this.cameras.main.fadeOut(WIN_FADE_DURATION_MS, 0, 0, 0);
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.scene.start(SCENE.FINAL);
+    });
   }
 
   private fillCats(amount: number): void {
