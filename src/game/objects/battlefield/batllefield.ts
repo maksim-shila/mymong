@@ -68,8 +68,8 @@ export class Battlefield {
     };
 
     this.controls = new Controls(scene);
-    const maxEnergy = GameSaveManager.load()?.paddleMaxEnergy ?? 100;
-    this.energyTank = new EnergyTank(scene, this.bounds, maxEnergy);
+    const energyLevel = GameSaveManager.load()?.energyTankLevel ?? 0;
+    this.energyTank = new EnergyTank(scene, this.bounds, energyLevel);
 
     const paddleX = viewport.worldWidth / 2;
     const paddleY = viewport.worldHeight - PADDLE_Y_OFFSET;

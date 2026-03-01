@@ -17,8 +17,8 @@ const QUEUE_OFFSET_Y = -20;
 const WORKER_WIDTH = 100;
 const WORKER_HEIGHT = 100;
 const WORKER_SPEED_UPGRADE_STEP = 0.1;
-const WORKER_ENERGY_FILL_AMOUNT = 50;
-const WORKER_ENERGY_FILL_BONUS = 50;
+const WORKER_ENERGY_FILL_AMOUNT = 20;
+const WORKER_ENERGY_FILL_BONUS = 30;
 const WORKER_RELAX_MULTIPLIER_STEP = 0.8;
 
 const CAT_OFFSET = 100;
@@ -158,7 +158,7 @@ export class WorkersBase {
       return true;
     }
 
-    if (!this.fillEnergyTankRequested && !this.energyTank.hasFuel()) {
+    if (!this.fillEnergyTankRequested && this.energyTank.isSpent(this.workerEnergyFillAmount)) {
       this.fillEnergyTankRequested = true;
       worker.goFillEnergyTank();
       return true;
@@ -167,12 +167,6 @@ export class WorkersBase {
     if (resourceSlot) {
       CollectionsUtils.remove(dropSlots, resourceSlot);
       worker.takeDrop(resourceSlot);
-      return true;
-    }
-
-    if (!this.fillEnergyTankRequested && this.energyTank.isSpent(this.workerEnergyFillAmount)) {
-      this.fillEnergyTankRequested = true;
-      worker.goFillEnergyTank();
       return true;
     }
 

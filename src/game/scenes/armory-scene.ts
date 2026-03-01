@@ -1,5 +1,6 @@
 import { MENU_COLOR_DEFAULT, MENU_COLOR_SELECTED, MenuComponent } from '@game/scenes/menu/menu';
 import { WeaponType } from '@game/objects/paddle/weapon/weapon';
+import { ENERGY_TANK_MAX_LEVEL } from '@game/objects/energy-tank';
 import { GameSaveManager, type GameSave } from '@game/settings/game-save';
 import { applyResolutionCamera } from '@game/settings/resolution';
 import { SCENE } from '../../scenes';
@@ -25,11 +26,6 @@ const BASE_PADDLE_MAX_LIVES = 3;
 const MAX_PADDLE_MAX_LIVES = 8;
 const MAX_FIRE_RATE_LEVEL = 5;
 const MAX_WORKERS_UPGRADE_LEVEL = 3;
-const BASE_PADDLE_MAX_ENERGY = 100;
-const PADDLE_MAX_ENERGY_STEP = 50;
-const MAX_PADDLE_ENERGY_UPGRADE_LEVEL = 10;
-const MAX_PADDLE_MAX_ENERGY =
-  BASE_PADDLE_MAX_ENERGY + PADDLE_MAX_ENERGY_STEP * MAX_PADDLE_ENERGY_UPGRADE_LEVEL;
 
 const WEAPON_UPGRADE_PRICE_BY_TYPE: Record<WeaponType, number | null> = {
   [WeaponType.SINGLE_BARREL]: 500,
@@ -275,9 +271,8 @@ export class ArmoryScene extends Phaser.Scene {
       MAX_WORKERS_UPGRADE_LEVEL,
     );
     const workersUpgradePrice = WORKERS_UPGRADE_PRICE_BY_LEVEL[workersUpgradeLevel] ?? null;
-    const energyUpgradePrice =
-      ENERGY_UPGRADE_PRICE_BY_LEVEL[this.getEnergyUpgradeLevel(this.saveState.paddleMaxEnergy)] ??
-      null;
+    const energyLevel = this.getEnergyTankLevel();
+    const energyUpgradePrice = ENERGY_UPGRADE_PRICE_BY_LEVEL[energyLevel] ?? null;
     const shipUpgradePrice =
       SHIP_UPGRADE_PRICE_BY_LIVES[
         Phaser.Math.Clamp(
@@ -507,32 +502,20 @@ export class ArmoryScene extends Phaser.Scene {
   }
 
   private tryPurchaseEnergyUpgrade(): void {
-    const currentLevel = this.getEnergyUpgradeLevel(this.saveState.paddleMaxEnergy);
+    const currentLevel = this.getEnergyTankLevel();
     const price = ENERGY_UPGRADE_PRICE_BY_LEVEL[currentLevel] ?? null;
     if (price === null || this.saveState.resources < price) {
       return;
     }
 
-    this.saveState.paddleMaxEnergy = Phaser.Math.Clamp(
-      this.saveState.paddleMaxEnergy + PADDLE_MAX_ENERGY_STEP,
-      BASE_PADDLE_MAX_ENERGY,
-      MAX_PADDLE_MAX_ENERGY,
+    this.saveState.energyTankLevel = Phaser.Math.Clamp(
+      currentLevel + 1,
+      0,
+      ENERGY_TANK_MAX_LEVEL,
     );
     this.saveState.resources -= price;
     this.dirty = true;
     this.refreshRows();
-  }
-
-  private getEnergyUpgradeLevel(maxEnergy: number): number {
-    const normalizedEnergy = Phaser.Math.Clamp(
-      Math.floor(maxEnergy),
-      BASE_PADDLE_MAX_ENERGY,
-      MAX_PADDLE_MAX_ENERGY,
-    );
-    const rawLevel = Math.round(
-      (normalizedEnergy - BASE_PADDLE_MAX_ENERGY) / PADDLE_MAX_ENERGY_STEP,
-    );
-    return Phaser.Math.Clamp(rawLevel, 0, MAX_PADDLE_ENERGY_UPGRADE_LEVEL);
   }
 
   private tryPurchaseShipUpgrade(): void {
@@ -554,6 +537,12 @@ export class ArmoryScene extends Phaser.Scene {
     this.saveState.resources -= price;
     this.dirty = true;
     this.refreshRows();
+  }
+
+  private getEnergyTankLevel(): number {
+    const rawLevel = Number(this.saveState.energyTankLevel ?? 0);
+    const normalizedLevel = Number.isFinite(rawLevel) ? Math.floor(rawLevel) : 0;
+    return Phaser.Math.Clamp(normalizedLevel, 0, ENERGY_TANK_MAX_LEVEL);
   }
 
   private exitToHome(): void {

@@ -21,6 +21,10 @@ const RESOURCES_TEXT_FONT_SIZE = '36px';
 const RESOURCES_TEXT_COLOR = '#ffffff';
 const RESOURCES_OFFSET_X = 56;
 const RESOURCES_OFFSET_Y = 44;
+const CATORATORIA_CARD_INDEX = 0;
+const CATORATORIA_UNLOCK_CATS = 32;
+const CATORATORIA_BLINK_ALPHA_MIN = 0.45;
+const CATORATORIA_BLINK_DURATION_MS = 1400;
 
 type HomeCard = {
   border: Phaser.GameObjects.Rectangle;
@@ -35,6 +39,7 @@ export class HomeScene extends Phaser.Scene {
   private gameMenu!: GameMenu;
   private cards: HomeCard[] = [];
   private selectedCardIndex = -1;
+  private catoratoriaBlinkTween: Phaser.Tweens.Tween | null = null;
 
   constructor(name: string) {
     super(name);
@@ -42,6 +47,10 @@ export class HomeScene extends Phaser.Scene {
 
   public create(): void {
     this.cameras.main.setBackgroundColor(HOME_BACKGROUND_COLOR);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.stopCatoratoriaBlink();
+    });
+
     const viewport = applyResolutionCamera(this);
 
     this.createCards(viewport);
@@ -69,6 +78,9 @@ export class HomeScene extends Phaser.Scene {
 
   private createCards(viewport: ResolutionViewport): void {
     this.cards = [];
+    const save = GameSaveManager.load();
+    const totalSavedCats = save?.totalSavedCats ?? 0;
+    const catoratoriaOnlyMode = totalSavedCats >= CATORATORIA_UNLOCK_CATS;
     const labels = ['Catoratoria', 'Armory', 'Coming Soon', 'Next Battle'];
     const centerX = viewport.viewX + viewport.viewWidth / 2;
     const centerY = viewport.viewY + viewport.viewHeight / 2;
@@ -96,6 +108,12 @@ export class HomeScene extends Phaser.Scene {
       this.cards.push(
         this.createCard(x, y, cardWidth, cardHeight, label, label !== 'Coming Soon', onSelect),
       );
+    }
+
+    if (catoratoriaOnlyMode) {
+      this.applyCatoratoriaOnlyMode();
+    } else {
+      this.stopCatoratoriaBlink();
     }
 
     this.selectedCardIndex = this.cards.findIndex((card) => card.isInteractive);
@@ -277,6 +295,48 @@ export class HomeScene extends Phaser.Scene {
     }
   }
 
+  private applyCatoratoriaOnlyMode(): void {
+    for (let i = 0; i < this.cards.length; i += 1) {
+      const card = this.cards[i];
+      const isCatoratoria = i === CATORATORIA_CARD_INDEX;
+      card.isInteractive = isCatoratoria;
+
+      if (isCatoratoria) {
+        card.border.setInteractive({ useHandCursor: true });
+      } else if (card.border.input) {
+        card.border.disableInteractive();
+      }
+    }
+
+    const catoratoriaCard = this.cards[CATORATORIA_CARD_INDEX];
+    if (!catoratoriaCard) {
+      return;
+    }
+
+    this.stopCatoratoriaBlink();
+    this.catoratoriaBlinkTween = this.tweens.add({
+      targets: [catoratoriaCard.border, catoratoriaCard.label],
+      alpha: CATORATORIA_BLINK_ALPHA_MIN,
+      duration: CATORATORIA_BLINK_DURATION_MS,
+      ease: 'Sine.easeInOut',
+      yoyo: true,
+      repeat: -1,
+    });
+  }
+
+  private stopCatoratoriaBlink(): void {
+    this.catoratoriaBlinkTween?.stop();
+    this.catoratoriaBlinkTween = null;
+
+    const catoratoriaCard = this.cards[CATORATORIA_CARD_INDEX];
+    if (!catoratoriaCard) {
+      return;
+    }
+
+    catoratoriaCard.border.setAlpha(1);
+    catoratoriaCard.label.setAlpha(1);
+  }
+
   private selectCurrentCard(): void {
     if (this.gameMenu.isOpen || this.selectedCardIndex < 0) {
       return;
@@ -284,4 +344,5 @@ export class HomeScene extends Phaser.Scene {
 
     this.cards[this.selectedCardIndex]?.onSelect?.();
   }
+
 }

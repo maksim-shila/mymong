@@ -2,7 +2,7 @@ import { WeaponType } from '@game/objects/paddle/weapon/weapon';
 
 export type GameSave = {
   paddleMaxLives: number;
-  paddleMaxEnergy: number;
+  energyTankLevel: number;
   resources: number;
   totalSavedCats: number;
   weaponType: WeaponType;
@@ -15,7 +15,7 @@ export type GameSave = {
 const GAME_SAVE_STORAGE_KEY = 'mymong.save';
 const DEFAULT_SAVE: GameSave = {
   paddleMaxLives: 3,
-  paddleMaxEnergy: 100,
+  energyTankLevel: 0,
   resources: 0,
   totalSavedCats: 0,
   weaponType: WeaponType.SINGLE_BARREL,

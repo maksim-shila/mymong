@@ -1,7 +1,9 @@
 import { Cheats } from '@game/cheats';
 import type { Bounds } from '@game/common/types';
 
-const DEFAULT_MAX_FUEL = 100;
+export const ENERGY_TANK_BASE_FUEL = 100;
+export const ENERGY_TANK_LEVEL_STEP = 20;
+export const ENERGY_TANK_MAX_LEVEL = 10;
 
 const TANK_OFFSET_X = 80;
 const TANK_OFFSET_Y = 100;
@@ -30,9 +32,8 @@ export class EnergyTank {
   public readonly platformX: number;
   public readonly platformY: number;
 
-  constructor(scene: Phaser.Scene, bounds: Bounds, maxFuel: number = DEFAULT_MAX_FUEL) {
-    console.log(maxFuel);
-    this.fuelMax = Math.max(1, Math.floor(maxFuel));
+  constructor(scene: Phaser.Scene, bounds: Bounds, level: number) {
+    this.fuelMax = Math.floor(ENERGY_TANK_BASE_FUEL + level * ENERGY_TANK_LEVEL_STEP);
     this.fuel = this.fuelMax;
 
     const tankX = bounds.x.min - TANK_OFFSET_X;
