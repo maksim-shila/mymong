@@ -9,6 +9,7 @@ import explosion4Image from '@assets/image/explosion-4.png';
 import explosion5Image from '@assets/image/explosion-5.png';
 import explosion6Image from '@assets/image/explosion-6.png';
 import moleSpiritImage from '@assets/image/mole-spirit.png';
+import heartImage from '@assets/image/heart.png';
 import menuSwitchAudio from '@assets/audio/menu-switch.mp3';
 import menuSelectAudio from '@assets/audio/menu-select.mp3';
 
@@ -24,6 +25,7 @@ export const TEXTURE = {
   EXPLOSION_5: 'explosion-5',
   EXPLOSION_6: 'explosion-6',
   MOLE_SPIRIT: 'mole-spirit',
+  HEART: 'heart',
 } as const;
 
 export const AUDIO = {
@@ -44,6 +46,7 @@ export class CommonAssets {
     scene.load.image(TEXTURE.EXPLOSION_5, explosion5Image);
     scene.load.image(TEXTURE.EXPLOSION_6, explosion6Image);
     scene.load.image(TEXTURE.MOLE_SPIRIT, moleSpiritImage);
+    scene.load.image(TEXTURE.HEART, heartImage);
     scene.load.audio(AUDIO.MENU_SWITCH, menuSwitchAudio);
     scene.load.audio(AUDIO.MENU_SELECT, menuSelectAudio);
   }

@@ -7,7 +7,7 @@ import { Timer } from '@game/common/helpers/timer';
 import { MoleDeathAnimation } from '../animations/mole-death-animation';
 
 const DEFAULT_MOLES_COUNT = 5;
-const MOLES_DEQUEUE_COOLDOWN_MS = 500;
+const MOLES_DEQUEUE_COOLDOWN_MS = 300;
 
 const MOLE_WIDTH = 20;
 const MOLE_HEIGHT = 20;

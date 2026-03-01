@@ -1,8 +1,8 @@
 import { Cheats } from '@game/cheats';
 import type { Bounds } from '@game/common/types';
 
-const MAX_FUEL = 200;
-const INITIAL_FUEL = 200;
+const MAX_FUEL = 100;
+const INITIAL_FUEL = 100;
 
 const TANK_OFFSET_X = 80;
 const TANK_OFFSET_Y = 100;

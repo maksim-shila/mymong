@@ -7,6 +7,7 @@ import { PaddleHitAnimation } from './paddle-hit-animation';
 import { PaddleShield } from './paddle-shield';
 import { MAX_LIVES } from '../battlefield/cell/cat-cage-cell';
 import { Cheats } from '@game/cheats';
+import { PaddleLivesUI } from './paddle-lives-ui';
 
 const BASE_WIDTH = 135;
 const BASE_HEIGHT = 135;
@@ -25,7 +26,7 @@ const BOOST_SPEED_MULTIPLIER = 2.15;
 const BOOST_SPEED_RATE = 12;
 const BOOST_FUEL_CONSUMPTION_PER_SEC = 25;
 
-const LIVES = 10;
+const LIVES = 3;
 
 export class Paddle extends Phaser.GameObjects.Rectangle {
   public readonly weapon: Weapon;
@@ -35,6 +36,7 @@ export class Paddle extends Phaser.GameObjects.Rectangle {
   private readonly bounds: Bounds;
   private readonly energyTank: EnergyTank;
   private readonly ui: PaddleUI;
+  private readonly livesUI: PaddleLivesUI;
   private readonly hitAnimation: PaddleHitAnimation;
 
   private readonly arcadeBody: Phaser.Physics.Arcade.Body;
@@ -59,6 +61,7 @@ export class Paddle extends Phaser.GameObjects.Rectangle {
     this.energyTank = energyTank;
     this.weapon = new Weapon(scene, this, bounds, controls, energyTank);
     this.ui = new PaddleUI(scene, this);
+    this.livesUI = new PaddleLivesUI(scene, bounds, LIVES);
     this.shield = new PaddleShield(scene, this, this.energyTank);
     this.hitAnimation = new PaddleHitAnimation(this.ui);
 
@@ -129,6 +132,7 @@ export class Paddle extends Phaser.GameObjects.Rectangle {
     // Draw UI
     this.hitAnimation.update(delta);
     this.ui.draw(delta, boosted);
+    this.livesUI.update(this.lives);
 
     this.weapon.update(delta);
   }
@@ -143,6 +147,7 @@ export class Paddle extends Phaser.GameObjects.Rectangle {
   public override destroy(): void {
     this.shield.destroy();
     this.hitAnimation.stop();
+    this.livesUI.destroy();
     this.weapon.destroy();
     super.destroy();
   }
