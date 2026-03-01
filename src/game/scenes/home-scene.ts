@@ -85,7 +85,12 @@ export class HomeScene extends Phaser.Scene {
       const x = startX + column * (cardWidth + gapX);
       const y = startY + row * (cardHeight + gapY);
       const label = labels[i];
-      const onSelect = label === 'Next Battle' ? () => this.scene.start(SCENE.LOADING) : undefined;
+      const onSelect =
+        label === 'Next Battle'
+          ? () => this.scene.start(SCENE.LOADING)
+          : label === 'Armory'
+            ? () => this.scene.start(SCENE.ARMORY)
+            : undefined;
       this.cards.push(
         this.createCard(x, y, cardWidth, cardHeight, label, label !== 'Coming Soon', onSelect),
       );

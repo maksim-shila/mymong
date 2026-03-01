@@ -1,3 +1,4 @@
+import { ArmoryScene } from '@game/scenes/armory-scene';
 import { BattleScene } from '@game/scenes/battle-scene';
 import { HomeScene } from '@game/scenes/home-scene';
 import { LoadingScene } from '@game/scenes/loading-scene';
@@ -20,6 +21,7 @@ export const SCENE = {
   READY: 'ReadyScene',
   BATTLE: 'BattleScene',
   HOME: 'HomeScene',
+  ARMORY: 'ArmoryScene',
 } as const;
 
 export const SCENES: Phaser.Scene[] = [
@@ -33,4 +35,5 @@ export const SCENES: Phaser.Scene[] = [
   new ReadyScene(SCENE.READY),
   new BattleScene(SCENE.BATTLE),
   new HomeScene(SCENE.HOME),
+  new ArmoryScene(SCENE.ARMORY),
 ];
