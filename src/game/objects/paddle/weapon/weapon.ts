@@ -5,14 +5,19 @@ import { Timer } from '@game/common/helpers/timer';
 import type { Paddle } from '../paddle';
 import { Bullet } from './bullet';
 
-const WEAPON_OFFSET = 0;
-const SHOOT_COOLDOWN_MS = 100;
+const SHOOT_COOLDOWN_MS = 200;
 
 const FUEL_PER_SHOT = 1;
 
-export class Weapon {
+export enum WeaponType {
+  SINGLE_BARREL = 'single-barrel',
+  DOUBLE_BARREL = 'double-barrel',
+  TRIPLE_BARREL = 'triple-barrel',
+}
+
+export abstract class Weapon {
   private readonly scene: Phaser.Scene;
-  private readonly paddle: Paddle;
+  protected readonly paddle: Paddle;
   private readonly bounds: Bounds;
   private readonly controls: Controls;
   private readonly energyTank: EnergyTank;
@@ -69,15 +74,16 @@ export class Weapon {
     }
   }
 
-  private shoot(): void {
-    const bulletX = this.paddle.x;
-    const bulletY = this.paddle.y - this.paddle.height / 2 - WEAPON_OFFSET;
+  protected abstract shoot(): void;
+
+  protected spawnBullet(bulletX: number, bulletY: number): void {
     const bullet = new Bullet(this.scene, bulletX, bulletY);
     this.bullets.push(bullet);
   }
 
   private updateBullets(_delta: number): void {
-    for (const bullet of this.bullets) {
+    for (let i = this.bullets.length - 1; i >= 0; i -= 1) {
+      const bullet = this.bullets[i];
       bullet.update();
 
       if (bullet.y + bullet.height / 2 < this.bounds.y.min) {

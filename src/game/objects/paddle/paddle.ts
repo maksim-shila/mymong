@@ -1,6 +1,9 @@
 import { Key, type Controls } from '@game/input/controls';
 import { PaddleUI } from './paddle-ui';
-import { Weapon } from './weapon/weapon';
+import { Weapon, WeaponType } from './weapon/weapon';
+import { SingleBarrel } from './weapon/single-barrel';
+import { DoubleBarrel } from './weapon/double-barrel';
+import { TripleBarrel } from './weapon/triple-barrel';
 import type { Bounds } from '@game/common/types';
 import type { EnergyTank } from '../energy-tank';
 import { PaddleHitAnimation } from './paddle-hit-animation';
@@ -8,6 +11,7 @@ import { PaddleShield } from './paddle-shield';
 import { MAX_LIVES } from '../battlefield/cell/cat-cage-cell';
 import { Cheats } from '@game/cheats';
 import { PaddleLivesUI } from './paddle-lives-ui';
+import { GameSaveManager } from '@game/settings/game-save';
 
 const BASE_WIDTH = 135;
 const BASE_HEIGHT = 135;
@@ -59,7 +63,8 @@ export class Paddle extends Phaser.GameObjects.Rectangle {
     this.controls = controls;
     this.bounds = bounds;
     this.energyTank = energyTank;
-    this.weapon = new Weapon(scene, this, bounds, controls, energyTank);
+    const weaponType = GameSaveManager.load()?.weaponType ?? WeaponType.SINGLE_BARREL;
+    this.weapon = this.createWeapon(scene, bounds, controls, energyTank, weaponType);
     this.ui = new PaddleUI(scene, this);
     this.livesUI = new PaddleLivesUI(scene, bounds, LIVES);
     this.shield = new PaddleShield(scene, this, this.energyTank);
@@ -142,6 +147,24 @@ export class Paddle extends Phaser.GameObjects.Rectangle {
     this.lives = Math.max(0, this.lives - damage);
     this.shield.tryActivate();
     this.hitAnimation.start();
+  }
+
+  private createWeapon(
+    scene: Phaser.Scene,
+    bounds: Bounds,
+    controls: Controls,
+    energyTank: EnergyTank,
+    weaponType: WeaponType,
+  ): Weapon {
+    switch (weaponType) {
+      case WeaponType.DOUBLE_BARREL:
+        return new DoubleBarrel(scene, this, bounds, controls, energyTank);
+      case WeaponType.TRIPLE_BARREL:
+        return new TripleBarrel(scene, this, bounds, controls, energyTank);
+      case WeaponType.SINGLE_BARREL:
+      default:
+        return new SingleBarrel(scene, this, bounds, controls, energyTank);
+    }
   }
 
   public override destroy(): void {
