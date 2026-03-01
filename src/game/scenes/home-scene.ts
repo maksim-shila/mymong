@@ -26,6 +26,7 @@ type HomeCard = {
   border: Phaser.GameObjects.Rectangle;
   label: Phaser.GameObjects.Text;
   isInteractive: boolean;
+  onSelect?: () => void;
 };
 
 export class HomeScene extends Phaser.Scene {
@@ -83,8 +84,10 @@ export class HomeScene extends Phaser.Scene {
       const row = Math.floor(i / 2);
       const x = startX + column * (cardWidth + gapX);
       const y = startY + row * (cardHeight + gapY);
+      const label = labels[i];
+      const onSelect = label === 'Next Battle' ? () => this.scene.start(SCENE.LOADING) : undefined;
       this.cards.push(
-        this.createCard(x, y, cardWidth, cardHeight, labels[i], labels[i] !== 'Coming Soon'),
+        this.createCard(x, y, cardWidth, cardHeight, label, label !== 'Coming Soon', onSelect),
       );
     }
 
@@ -99,6 +102,7 @@ export class HomeScene extends Phaser.Scene {
     height: number,
     title: string,
     isInteractive: boolean,
+    onSelect?: () => void,
   ): HomeCard {
     const border = this.add
       .rectangle(centerX, centerY, width, height, 0x000000, 0)
@@ -119,7 +123,7 @@ export class HomeScene extends Phaser.Scene {
       .setDepth(CARD_DEPTH + 1);
 
     if (!isInteractive) {
-      return { border, label, isInteractive };
+      return { border, label, isInteractive, onSelect };
     }
 
     border.setInteractive({ useHandCursor: true });
@@ -137,7 +141,14 @@ export class HomeScene extends Phaser.Scene {
       this.renderSelection();
     });
 
-    return { border, label, isInteractive };
+    border.on('pointerdown', () => {
+      if (this.gameMenu.isOpen) {
+        return;
+      }
+      onSelect?.();
+    });
+
+    return { border, label, isInteractive, onSelect };
   }
 
   private createPauseMenu(viewport: ResolutionViewport): void {
@@ -172,6 +183,7 @@ export class HomeScene extends Phaser.Scene {
     const moveDown = () => this.moveSelection(0, 1);
     const moveLeft = () => this.moveSelection(-1, 0);
     const moveRight = () => this.moveSelection(1, 0);
+    const select = () => this.selectCurrentCard();
 
     keyboard.on('keydown-W', moveUp);
     keyboard.on('keydown-UP', moveUp);
@@ -181,6 +193,7 @@ export class HomeScene extends Phaser.Scene {
     keyboard.on('keydown-LEFT', moveLeft);
     keyboard.on('keydown-D', moveRight);
     keyboard.on('keydown-RIGHT', moveRight);
+    keyboard.on('keydown-ENTER', select);
 
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       keyboard.off('keydown-W', moveUp);
@@ -191,6 +204,7 @@ export class HomeScene extends Phaser.Scene {
       keyboard.off('keydown-LEFT', moveLeft);
       keyboard.off('keydown-D', moveRight);
       keyboard.off('keydown-RIGHT', moveRight);
+      keyboard.off('keydown-ENTER', select);
     });
   }
 
@@ -254,5 +268,13 @@ export class HomeScene extends Phaser.Scene {
       card.border.setScale(isSelected ? 1.03 : 1);
       card.label.setScale(isSelected ? 1.03 : 1);
     }
+  }
+
+  private selectCurrentCard(): void {
+    if (this.gameMenu.isOpen || this.selectedCardIndex < 0) {
+      return;
+    }
+
+    this.cards[this.selectedCardIndex]?.onSelect?.();
   }
 }
