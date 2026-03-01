@@ -29,8 +29,10 @@ const MOVE_ANGLE_RATE = 12;
 const BOOST_SPEED_MULTIPLIER = 2.15;
 const BOOST_SPEED_RATE = 12;
 const BOOST_FUEL_CONSUMPTION_PER_SEC = 25;
-
-const LIVES = 3;
+const EMPTY_ENERGY_SPEED_MULTIPLIER = 0.2;
+const BASE_SHOOT_COOLDOWN_MS = 200;
+const FIRE_RATE_LEVEL_STEP_MS = 20;
+const MAX_FIRE_RATE_LEVEL = 5;
 
 export class Paddle extends Phaser.GameObjects.Rectangle {
   public readonly weapon: Weapon;
@@ -63,16 +65,32 @@ export class Paddle extends Phaser.GameObjects.Rectangle {
     this.controls = controls;
     this.bounds = bounds;
     this.energyTank = energyTank;
-    const weaponType = GameSaveManager.load()?.weaponType ?? WeaponType.SINGLE_BARREL;
-    this.weapon = this.createWeapon(scene, bounds, controls, energyTank, weaponType);
+    const save = GameSaveManager.load();
+    const maxLives = save?.paddleMaxLives ?? 3;
+    const weaponType = save?.weaponType ?? WeaponType.SINGLE_BARREL;
+    const bulletDamage = save?.bulletDamage ?? 1;
+    const fireRateLevel = Phaser.Math.Clamp(save?.fireRateLevel ?? 0, 0, MAX_FIRE_RATE_LEVEL);
+    const shootCooldownMs = Math.max(
+      20,
+      BASE_SHOOT_COOLDOWN_MS - fireRateLevel * FIRE_RATE_LEVEL_STEP_MS,
+    );
+    this.weapon = this.createWeapon(
+      scene,
+      bounds,
+      controls,
+      energyTank,
+      weaponType,
+      bulletDamage,
+      shootCooldownMs,
+    );
     this.ui = new PaddleUI(scene, this);
-    this.livesUI = new PaddleLivesUI(scene, bounds, LIVES);
+    this.livesUI = new PaddleLivesUI(scene, bounds, maxLives);
     this.shield = new PaddleShield(scene, this, this.energyTank);
     this.hitAnimation = new PaddleHitAnimation(this.ui);
 
     this.setOrigin(0.5);
     this.speed = BASE_SPEED;
-    this.lives = LIVES;
+    this.lives = maxLives;
 
     scene.physics.add.existing(this);
     this.arcadeBody = this.body as Phaser.Physics.Arcade.Body;
@@ -112,7 +130,8 @@ export class Paddle extends Phaser.GameObjects.Rectangle {
     }
 
     // Compute speed
-    const speedMultiplier = boosted ? BOOST_SPEED_MULTIPLIER : 1;
+    const noEnergyPenalty = this.energyTank.hasFuel() ? 1 : EMPTY_ENERGY_SPEED_MULTIPLIER;
+    const speedMultiplier = (boosted ? BOOST_SPEED_MULTIPLIER : 1) * noEnergyPenalty;
     const targetMoveSpeed = BASE_SPEED * speedMultiplier;
     const speedBlend = 1 - Math.exp(-BOOST_SPEED_RATE * deltaSeconds);
     this.speed = Phaser.Math.Linear(this.speed, targetMoveSpeed, speedBlend);
@@ -155,15 +174,41 @@ export class Paddle extends Phaser.GameObjects.Rectangle {
     controls: Controls,
     energyTank: EnergyTank,
     weaponType: WeaponType,
+    bulletDamage: number,
+    shootCooldownMs: number,
   ): Weapon {
     switch (weaponType) {
       case WeaponType.DOUBLE_BARREL:
-        return new DoubleBarrel(scene, this, bounds, controls, energyTank);
+        return new DoubleBarrel(
+          scene,
+          this,
+          bounds,
+          controls,
+          energyTank,
+          bulletDamage,
+          shootCooldownMs,
+        );
       case WeaponType.TRIPLE_BARREL:
-        return new TripleBarrel(scene, this, bounds, controls, energyTank);
+        return new TripleBarrel(
+          scene,
+          this,
+          bounds,
+          controls,
+          energyTank,
+          bulletDamage,
+          shootCooldownMs,
+        );
       case WeaponType.SINGLE_BARREL:
       default:
-        return new SingleBarrel(scene, this, bounds, controls, energyTank);
+        return new SingleBarrel(
+          scene,
+          this,
+          bounds,
+          controls,
+          energyTank,
+          bulletDamage,
+          shootCooldownMs,
+        );
     }
   }
 

@@ -5,6 +5,9 @@ export type GameSave = {
   paddleMaxEnergy: number;
   resources: number;
   weaponType: WeaponType;
+  bulletDamage: number;
+  fireRateLevel: number;
+  workersUpgradeLevel: number;
 };
 
 const GAME_SAVE_STORAGE_KEY = 'mymong.save';
@@ -13,39 +16,9 @@ const DEFAULT_SAVE: GameSave = {
   paddleMaxEnergy: 100,
   resources: 0,
   weaponType: WeaponType.SINGLE_BARREL,
-};
-
-const toInt = (value: number, fallback: number): number => {
-  if (!Number.isFinite(value)) {
-    return fallback;
-  }
-
-  return Math.max(0, Math.floor(value));
-};
-
-const normalize = (save: Partial<GameSave>): GameSave => ({
-  paddleMaxLives: toInt(
-    save.paddleMaxLives ?? DEFAULT_SAVE.paddleMaxLives,
-    DEFAULT_SAVE.paddleMaxLives,
-  ),
-  paddleMaxEnergy: toInt(
-    save.paddleMaxEnergy ?? DEFAULT_SAVE.paddleMaxEnergy,
-    DEFAULT_SAVE.paddleMaxEnergy,
-  ),
-  resources: toInt(save.resources ?? DEFAULT_SAVE.resources, DEFAULT_SAVE.resources),
-  weaponType: normalizeWeaponType(save.weaponType),
-});
-
-const normalizeWeaponType = (weaponType: unknown): WeaponType => {
-  if (weaponType === WeaponType.DOUBLE_BARREL) {
-    return WeaponType.DOUBLE_BARREL;
-  }
-
-  if (weaponType === WeaponType.TRIPLE_BARREL) {
-    return WeaponType.TRIPLE_BARREL;
-  }
-
-  return WeaponType.SINGLE_BARREL;
+  bulletDamage: 1,
+  fireRateLevel: 0,
+  workersUpgradeLevel: 0,
 };
 
 export class GameSaveManager {
@@ -60,8 +33,7 @@ export class GameSaveManager {
         return null;
       }
 
-      const parsed = JSON.parse(raw) as Partial<GameSave>;
-      return normalize(parsed);
+      return JSON.parse(raw) as GameSave;
     } catch {
       return null;
     }
@@ -69,25 +41,24 @@ export class GameSaveManager {
 
   public static startNewGame(): GameSave {
     const save = { ...DEFAULT_SAVE };
-    this.save(save);
+    this.saveGame(save);
     return save;
   }
 
   public static saveBattleResources(battleResources: number): GameSave {
     const save = this.load() ?? this.startNewGame();
-    const normalizedResources = toInt(battleResources, 0);
     const updatedSave = {
       ...save,
-      resources: save.resources + normalizedResources,
+      resources: save.resources + battleResources,
     };
 
-    this.save(updatedSave);
+    this.saveGame(updatedSave);
     return updatedSave;
   }
 
-  private static save(save: GameSave): void {
+  public static saveGame(save: GameSave): void {
     try {
-      localStorage.setItem(GAME_SAVE_STORAGE_KEY, JSON.stringify(normalize(save)));
+      localStorage.setItem(GAME_SAVE_STORAGE_KEY, JSON.stringify(save));
     } catch {
       // Ignore storage write failures.
     }

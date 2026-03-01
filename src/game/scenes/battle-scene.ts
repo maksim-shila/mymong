@@ -93,6 +93,7 @@ export class BattleScene extends Phaser.Scene {
 
     if (allCatsSaved && allMolesKilled) {
       this.victoryScreen.playVictory(() => {
+        this.battlefield.collectFieldResources();
         GameSaveManager.saveBattleResources(this.battlefield.battleResources);
         this.scene.start(SCENE.HOME);
       });

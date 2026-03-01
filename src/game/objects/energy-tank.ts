@@ -1,8 +1,7 @@
 import { Cheats } from '@game/cheats';
 import type { Bounds } from '@game/common/types';
 
-const MAX_FUEL = 100;
-const INITIAL_FUEL = 100;
+const DEFAULT_MAX_FUEL = 100;
 
 const TANK_OFFSET_X = 80;
 const TANK_OFFSET_Y = 100;
@@ -31,9 +30,10 @@ export class EnergyTank {
   public readonly platformX: number;
   public readonly platformY: number;
 
-  constructor(scene: Phaser.Scene, bounds: Bounds) {
-    this.fuelMax = MAX_FUEL;
-    this.fuel = INITIAL_FUEL;
+  constructor(scene: Phaser.Scene, bounds: Bounds, maxFuel: number = DEFAULT_MAX_FUEL) {
+    console.log(maxFuel);
+    this.fuelMax = Math.max(1, Math.floor(maxFuel));
+    this.fuel = this.fuelMax;
 
     const tankX = bounds.x.min - TANK_OFFSET_X;
     const tankY = bounds.y.min + TANK_OFFSET_Y;
@@ -68,13 +68,17 @@ export class EnergyTank {
 
   public update(): void {
     if (Cheats.isInfinitEnergy) {
-      this.fuel = MAX_FUEL;
+      this.fuel = this.fuelMax;
     }
 
     const fillRatio = Phaser.Math.Clamp(this.fuel / this.fuelMax, 0, 1);
     const fillWidth = TANK_WIDTH - TANK_BORDER_WIDTH * 2;
     const fillHeight = (TANK_HEIGHT - TANK_BORDER_WIDTH * 2) * fillRatio;
     this.fuelFill.setDisplaySize(fillWidth, Math.max(fillHeight, 0.0001));
+  }
+
+  public isSpent(amount: number): boolean {
+    return this.fuelMax - amount > this.fuel;
   }
 
   public isFull(): boolean {

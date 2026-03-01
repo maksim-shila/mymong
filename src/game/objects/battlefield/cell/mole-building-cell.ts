@@ -18,7 +18,7 @@ const LIVES_COLOR: Record<number, number> = {
 
 const RESOURCE_DROP_CHANCE = 0.3;
 const RESOURCE_DROP_MIN_AMOUNT = 10;
-const RESOURCE_DROP_MAX_AMOUNT = 100;
+const RESOURCE_DROP_MAX_AMOUNT = 200;
 
 export class MoleBuildingCell extends Cell {
   constructor(

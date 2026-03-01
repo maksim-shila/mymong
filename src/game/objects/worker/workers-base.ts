@@ -6,6 +6,7 @@ import { DropType } from '../battlefield/drop/drop';
 import type { EnergyTank } from '../energy-tank';
 import { WorkerBaseHud } from './worker-base-hud';
 import { CollectionsUtils } from '@game/common/helpers/collections-utils';
+import { GameSaveManager } from '@game/settings/game-save';
 
 const DEFAULT_WORKERS_COUNT = 3;
 
@@ -15,6 +16,10 @@ const QUEUE_OFFSET_Y = -20;
 
 const WORKER_WIDTH = 100;
 const WORKER_HEIGHT = 100;
+const WORKER_SPEED_UPGRADE_STEP = 0.1;
+const WORKER_ENERGY_FILL_AMOUNT = 50;
+const WORKER_ENERGY_FILL_BONUS = 50;
+const WORKER_RELAX_MULTIPLIER_STEP = 0.8;
 
 const CAT_OFFSET = 100;
 
@@ -32,6 +37,8 @@ export class WorkersBase {
   private readonly workers: Worker[] = [];
   private readonly catPlaces: CatPlace[] = [];
 
+  private readonly workerEnergyFillAmount: number;
+
   private resources = 0;
   private savedCatsCount = 0;
 
@@ -43,6 +50,11 @@ export class WorkersBase {
     this.energyTank = energyTank;
 
     const baseX = bounds.x.min - BASE_OFFSET_X;
+    const workersLevel = Phaser.Math.Clamp(GameSaveManager.load()?.workersUpgradeLevel ?? 0, 0, 3);
+    const speedMultiplier = 1 + WORKER_SPEED_UPGRADE_STEP * workersLevel;
+    this.workerEnergyFillAmount =
+      WORKER_ENERGY_FILL_AMOUNT + WORKER_ENERGY_FILL_BONUS * workersLevel;
+    const relaxMultiplier = Math.pow(WORKER_RELAX_MULTIPLIER_STEP, workersLevel);
     let lastWorkerY = BASE_OFFSET_Y;
     for (let i = 0; i < DEFAULT_WORKERS_COUNT; i++) {
       const workerY = bounds.y.max - BASE_OFFSET_Y - (WORKER_HEIGHT + QUEUE_OFFSET_Y) * i;
@@ -53,6 +65,9 @@ export class WorkersBase {
         WORKER_WIDTH,
         WORKER_HEIGHT,
         energyTank,
+        speedMultiplier,
+        this.workerEnergyFillAmount,
+        relaxMultiplier,
       );
       this.workers.push(worker);
 
@@ -129,18 +144,33 @@ export class WorkersBase {
     return this.resources;
   }
 
+  public addResources(amount: number): void {
+    this.resources += amount;
+  }
+
   private tryGiveTask(worker: Worker, dropSlots: CellSlot[]): boolean {
     const catSlot = dropSlots.find((slot) => slot.drop?.type === DropType.CAT);
     const resourceSlot = dropSlots.find((slot) => slot.drop?.type === DropType.RESOURCE);
 
-    const targetSlot = catSlot ?? resourceSlot;
-    if (targetSlot) {
-      CollectionsUtils.remove(dropSlots, targetSlot);
-      worker.takeDrop(targetSlot);
+    if (catSlot) {
+      CollectionsUtils.remove(dropSlots, catSlot);
+      worker.takeDrop(catSlot);
       return true;
     }
 
-    if (!this.energyTank.isFull() && !this.fillEnergyTankRequested) {
+    if (!this.fillEnergyTankRequested && !this.energyTank.hasFuel()) {
+      this.fillEnergyTankRequested = true;
+      worker.goFillEnergyTank();
+      return true;
+    }
+
+    if (resourceSlot) {
+      CollectionsUtils.remove(dropSlots, resourceSlot);
+      worker.takeDrop(resourceSlot);
+      return true;
+    }
+
+    if (!this.fillEnergyTankRequested && this.energyTank.isSpent(this.workerEnergyFillAmount)) {
       this.fillEnergyTankRequested = true;
       worker.goFillEnergyTank();
       return true;

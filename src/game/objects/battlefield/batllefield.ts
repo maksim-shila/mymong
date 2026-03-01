@@ -9,6 +9,9 @@ import { EnergyTank } from '../energy-tank';
 import { Controls } from '@game/input/controls';
 import { WorkersBase } from '../worker/workers-base';
 import { Timer } from '@game/common/helpers/timer';
+import { GameSaveManager } from '@game/settings/game-save';
+import { DropType } from './drop/drop';
+import type { ResourceDrop } from './drop/resource-drop';
 
 const INITIAL_WIDTH = 1200;
 
@@ -20,7 +23,7 @@ const STROKE_WIDTH = 3;
 const STROKE_COLOR = 0x1e1b42;
 const STROKE_ALPHA = 0.45;
 
-const DIFFICULTY_STEP_INTERVAL_MS = 3000;
+const DIFFICULTY_STEP_INTERVAL_MS = 1000;
 const MAX_DIFFICULTY_STEPS = 20;
 const SHOT_AREA_X_OFFSET = 70;
 const SHOT_AREA_Y_OFFSET = 20;
@@ -65,7 +68,8 @@ export class Battlefield {
     };
 
     this.controls = new Controls(scene);
-    this.energyTank = new EnergyTank(scene, this.bounds);
+    const maxEnergy = GameSaveManager.load()?.paddleMaxEnergy ?? 100;
+    this.energyTank = new EnergyTank(scene, this.bounds, maxEnergy);
 
     const paddleX = viewport.worldWidth / 2;
     const paddleY = viewport.worldHeight - PADDLE_Y_OFFSET;
@@ -123,6 +127,16 @@ export class Battlefield {
 
     this.energyTank.update();
     this.collisionHandler.update();
+  }
+
+  public collectFieldResources(): void {
+    const fieldResources = this.grid.slots
+      .map((slot) => slot.drop)
+      .filter((drop) => drop !== null && drop.type === DropType.RESOURCE)
+      .map((drop) => (drop as ResourceDrop).amount)
+      .reduce((acc, current) => acc + current, 0);
+
+    this.workersBase.addResources(fieldResources);
   }
 
   private updateDifficulty(delta: number): void {

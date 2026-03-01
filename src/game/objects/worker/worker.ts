@@ -7,14 +7,13 @@ import { ResourceDrop } from '../battlefield/drop/resource-drop';
 
 const Z_INDEX = 1300;
 
-const SPEED = 400;
 const COLLECT_DROP_TIME_MS = 800;
 const SAVE_RESOURCES_TIME_MS = 1000;
 const SAVE_CAT_TIME_MS = 2000;
-const RELAX_TIME_MS = 2000;
+const BASE_RELAX_TIME_MS = 2000;
 
 const ENERGY_TANK_FILL_TIME_MS = 1000;
-const ENERGY_TANK_FILL_AMOUNT = 10;
+const BASE_SPEED = 400;
 
 const WALK_PHASE_SPEED = 16;
 const WALK_WIDTH_DELTA_RATIO = 0.2;
@@ -37,8 +36,14 @@ export class Worker extends Phaser.GameObjects.Container {
   private readonly sprite: Phaser.GameObjects.Image;
   private readonly energyTank: EnergyTank;
 
+  public targetCatPosition: { x: number; y: number } | null = null;
+
   private readonly homeX: number;
   private readonly homeY: number;
+  private readonly speed: number;
+  private readonly energyFillAmount: number;
+  private readonly relaxTimeMs: number;
+  private readonly actionTimer = new Timer();
 
   private spriteWidth: number;
   private spriteHeight: number;
@@ -46,8 +51,6 @@ export class Worker extends Phaser.GameObjects.Container {
 
   private targetCellSlot: CellSlot | null = null;
   private savedDrop: Drop | null = null;
-  private readonly actionTimer = new Timer();
-  public targetCatPosition: { x: number; y: number } | null = null;
 
   constructor(
     scene: Phaser.Scene,
@@ -56,6 +59,9 @@ export class Worker extends Phaser.GameObjects.Container {
     width: number,
     height: number,
     energyTank: EnergyTank,
+    speedMultiplier: number,
+    energyFillAmount: number,
+    relaxMultiplier: number,
   ) {
     super(scene, x, y);
 
@@ -71,6 +77,9 @@ export class Worker extends Phaser.GameObjects.Container {
     this.homeY = y;
     this.spriteWidth = width;
     this.spriteHeight = height;
+    this.speed = BASE_SPEED * speedMultiplier;
+    this.energyFillAmount = energyFillAmount;
+    this.relaxTimeMs = Math.max(100, Math.floor(BASE_RELAX_TIME_MS * relaxMultiplier));
 
     this.state = WorkerState.IDLE;
 
@@ -144,7 +153,7 @@ export class Worker extends Phaser.GameObjects.Container {
       return true;
     }
 
-    const tickFuelAmount = (ENERGY_TANK_FILL_AMOUNT / ENERGY_TANK_FILL_TIME_MS) * delta;
+    const tickFuelAmount = (this.energyFillAmount / ENERGY_TANK_FILL_TIME_MS) * delta;
     this.energyTank.addFuel(tickFuelAmount);
     return false;
   }
@@ -230,7 +239,7 @@ export class Worker extends Phaser.GameObjects.Container {
       return;
     }
 
-    this.actionTimer.set(RELAX_TIME_MS);
+    this.actionTimer.set(this.relaxTimeMs);
     this.state = WorkerState.RELAX;
   }
 
@@ -244,7 +253,7 @@ export class Worker extends Phaser.GameObjects.Container {
       resourcesAmount = this.savedDrop.amount;
     }
 
-    this.actionTimer.set(RELAX_TIME_MS);
+    this.actionTimer.set(this.relaxTimeMs);
     this.state = WorkerState.RELAX;
     this.savedDrop = null;
     return resourcesAmount;
@@ -257,7 +266,7 @@ export class Worker extends Phaser.GameObjects.Container {
   }
 
   private move(targetX: number, targetY: number, delta: number): boolean {
-    const step = SPEED * (delta / 1000);
+    const step = this.speed * (delta / 1000);
     const dx = targetX - this.x;
     const dy = targetY - this.y;
     const distance = Math.hypot(dx, dy);

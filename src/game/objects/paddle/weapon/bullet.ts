@@ -9,8 +9,9 @@ const STROKE_ALPHA = 0.85;
 
 export class Bullet extends Phaser.GameObjects.Rectangle {
   private readonly arcadeBody: Phaser.Physics.Arcade.Body;
+  private readonly bulletDamage: number;
 
-  constructor(scene: Phaser.Scene, x: number, y: number) {
+  constructor(scene: Phaser.Scene, x: number, y: number, bulletDamage: number) {
     super(scene, x, y, WIDTH, HEIGHT, FILL_COLOR, 1);
 
     scene.add.existing(this);
@@ -22,10 +23,11 @@ export class Bullet extends Phaser.GameObjects.Rectangle {
     this.arcadeBody = this.body as Phaser.Physics.Arcade.Body;
     this.arcadeBody.setAllowGravity(false);
     this.arcadeBody.setVelocity(0, -SPEED);
+    this.bulletDamage = Math.max(1, Math.floor(bulletDamage));
   }
 
   public get damage(): number {
-    return 1;
+    return this.bulletDamage;
   }
 
   public override update(): void {

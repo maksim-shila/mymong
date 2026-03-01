@@ -8,14 +8,18 @@ const Y_OFFSET_RATIO = 0.25;
 const X_OFFSET_RATIO = 0.35;
 
 export class DoubleBarrel extends Weapon {
+  protected override shotCost = 5;
+
   constructor(
     scene: Phaser.Scene,
     paddle: Paddle,
     bounds: Bounds,
     controls: Controls,
     energyTank: EnergyTank,
+    bulletDamage: number,
+    shootCooldownMs: number,
   ) {
-    super(scene, paddle, bounds, controls, energyTank);
+    super(scene, paddle, bounds, controls, energyTank, bulletDamage, shootCooldownMs);
   }
 
   protected override shoot(): void {

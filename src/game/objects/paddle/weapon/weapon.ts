@@ -5,9 +5,7 @@ import { Timer } from '@game/common/helpers/timer';
 import type { Paddle } from '../paddle';
 import { Bullet } from './bullet';
 
-const SHOOT_COOLDOWN_MS = 200;
-
-const FUEL_PER_SHOT = 1;
+const DEFAULT_SHOOT_COOLDOWN_MS = 200;
 
 export enum WeaponType {
   SINGLE_BARREL = 'single-barrel',
@@ -21,10 +19,13 @@ export abstract class Weapon {
   private readonly bounds: Bounds;
   private readonly controls: Controls;
   private readonly energyTank: EnergyTank;
+  private readonly bulletDamage: number;
+
+  protected abstract shotCost: number;
 
   private readonly bullets: Bullet[] = [];
 
-  private readonly shootCooldownTimer = new Timer(SHOOT_COOLDOWN_MS);
+  private readonly shootCooldownTimer: Timer;
 
   constructor(
     scene: Phaser.Scene,
@@ -32,12 +33,18 @@ export abstract class Weapon {
     bounds: Bounds,
     controls: Controls,
     energyTank: EnergyTank,
+    bulletDamage: number,
+    shootCooldownMs: number,
   ) {
     this.scene = scene;
     this.paddle = paddle;
     this.bounds = bounds;
     this.controls = controls;
     this.energyTank = energyTank;
+    this.bulletDamage = Math.max(1, Math.floor(bulletDamage));
+    this.shootCooldownTimer = new Timer(
+      Math.max(20, Math.floor(shootCooldownMs || DEFAULT_SHOOT_COOLDOWN_MS)),
+    );
   }
 
   public getBullets(): readonly Bullet[] {
@@ -49,7 +56,7 @@ export abstract class Weapon {
 
     const shootPressed = this.controls.keyDown(Key.SHOOT);
     if (shootPressed && this.shootCooldownTimer.done) {
-      if (this.energyTank.tryConsume(FUEL_PER_SHOT)) {
+      if (this.energyTank.tryConsume(this.shotCost)) {
         this.shoot();
         this.shootCooldownTimer.reset();
       }
@@ -77,7 +84,7 @@ export abstract class Weapon {
   protected abstract shoot(): void;
 
   protected spawnBullet(bulletX: number, bulletY: number): void {
-    const bullet = new Bullet(this.scene, bulletX, bulletY);
+    const bullet = new Bullet(this.scene, bulletX, bulletY, this.bulletDamage);
     this.bullets.push(bullet);
   }
 
