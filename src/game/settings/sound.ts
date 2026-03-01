@@ -2,7 +2,6 @@ export type SoundSettings = {
   master: number;
   music: number;
   effects: number;
-  muteAll: boolean;
 };
 
 const SOUND_SETTINGS_STORAGE_KEY = 'mymong.sound';
@@ -11,7 +10,6 @@ const DEFAULT_SOUND_SETTINGS: SoundSettings = {
   master: 100,
   music: 100,
   effects: 100,
-  muteAll: false,
 };
 
 const clampPercent = (value: number): number => Phaser.Math.Clamp(Math.floor(value), 0, 100);
@@ -20,7 +18,6 @@ const normalize = (settings: Partial<SoundSettings>): SoundSettings => ({
   master: clampPercent(settings.master ?? DEFAULT_SOUND_SETTINGS.master),
   music: clampPercent(settings.music ?? DEFAULT_SOUND_SETTINGS.music),
   effects: clampPercent(settings.effects ?? DEFAULT_SOUND_SETTINGS.effects),
-  muteAll: settings.muteAll ?? DEFAULT_SOUND_SETTINGS.muteAll,
 });
 
 export class SoundManager {
@@ -47,18 +44,10 @@ export class SoundManager {
   }
 
   public static getEffectsVolume(settings: SoundSettings = SoundManager.load()): number {
-    if (settings.muteAll) {
-      return 0;
-    }
-
     return (settings.master / 100) * (settings.effects / 100);
   }
 
   public static getMusicVolume(settings: SoundSettings = SoundManager.load()): number {
-    if (settings.muteAll) {
-      return 0;
-    }
-
     return (settings.master / 100) * (settings.music / 100);
   }
 

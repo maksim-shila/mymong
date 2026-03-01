@@ -1,4 +1,5 @@
 import { BattleScene } from '@game/scenes/battle-scene';
+import { HomeScene } from '@game/scenes/home-scene';
 import { LoadingScene } from '@game/scenes/loading-scene';
 import { MainMenuScene } from '@game/scenes/main-menu-scene';
 import { DisplayMenu } from '@game/scenes/menu/display-menu';
@@ -18,6 +19,7 @@ export const SCENE = {
   LOADING: 'LoadingScene',
   READY: 'ReadyScene',
   BATTLE: 'BattleScene',
+  HOME: 'HomeScene',
 } as const;
 
 export const SCENES: Phaser.Scene[] = [
@@ -30,4 +32,5 @@ export const SCENES: Phaser.Scene[] = [
   new LoadingScene(SCENE.LOADING),
   new ReadyScene(SCENE.READY),
   new BattleScene(SCENE.BATTLE),
+  new HomeScene(SCENE.HOME),
 ];

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { loadResolution, loadVSyncEnabled } from '@game/settings/resolution';
 import { SCENES } from './scenes';
+import './styles/fonts.css';
 
 const selectedResolution = loadResolution();
 const vSyncEnabled = loadVSyncEnabled();
@@ -42,4 +43,25 @@ const config: Phaser.Types.Core.GameConfig = {
   scene: SCENES,
 };
 
-new Phaser.Game(config);
+const waitForFredoka = async (): Promise<void> => {
+  if (typeof document === 'undefined' || !('fonts' in document)) {
+    return;
+  }
+
+  try {
+    await Promise.all([
+      document.fonts.load('400 16px Fredoka'),
+      document.fonts.load('600 16px Fredoka'),
+      document.fonts.load('700 16px Fredoka'),
+    ]);
+  } catch {
+    // Ignore font loading failures and continue startup.
+  }
+};
+
+const bootstrap = async (): Promise<void> => {
+  await waitForFredoka();
+  new Phaser.Game(config);
+};
+
+void bootstrap();

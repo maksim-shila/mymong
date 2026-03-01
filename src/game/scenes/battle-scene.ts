@@ -76,7 +76,7 @@ export class BattleScene extends Phaser.Scene {
 
     if (this.battlefield.isPaddleDead) {
       this.defeatScreen.playDefeat(() => {
-        this.scene.start(SCENE.MAIN_MENU);
+        this.scene.start(SCENE.HOME);
       });
     }
   }
@@ -91,7 +91,7 @@ export class BattleScene extends Phaser.Scene {
 
     if (allCatsSaved && allMolesKilled) {
       this.victoryScreen.playVictory(() => {
-        this.scene.start(SCENE.MAIN_MENU);
+        this.scene.start(SCENE.HOME);
       });
       return;
     }

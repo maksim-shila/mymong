@@ -36,15 +36,6 @@ export class SoundMenu extends OptionsMenuBase {
         { type: 'slider', label: 'Master', onSelect: () => undefined },
         { type: 'slider', label: 'Music', onSelect: () => undefined },
         { type: 'slider', label: 'Effects', onSelect: () => undefined },
-        {
-          type: 'button',
-          label: `Mute All: ${this.pendingSettings.muteAll ? 'Yes' : 'No'}`,
-          onSelect: () => {
-            this.pendingSettings.muteAll = !this.pendingSettings.muteAll;
-            SoundManager.save(this.pendingSettings);
-            this.refreshMenuRequested = true;
-          },
-        },
       ],
       onBack: () => this.scene.start(SCENE.OPTIONS),
     };
