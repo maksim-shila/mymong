@@ -8,7 +8,7 @@ const FINAL_TEXT_FONT_SIZE = '64px';
 const FINAL_FADE_DURATION_MS = 3000;
 const FINAL_HOLD_DURATION_MS = 3000;
 
-const FINAL_LINES = ["You saved them. You're good.", "Now let's go home"] as const;
+const FINAL_LINES = ["You saved them. You're good.", "Now let's go home."] as const;
 
 export class FinalScene extends Phaser.Scene {
   private text!: Phaser.GameObjects.Text;
