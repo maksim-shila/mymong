@@ -81,7 +81,8 @@ export class BattleScene extends Phaser.Scene {
           this.battlefield.battleResources,
           this.battlefield.savedCatsCount,
         );
-        this.scene.start(SCENE.HOME);
+
+        this.goHome();
       });
     }
   }
@@ -101,8 +102,10 @@ export class BattleScene extends Phaser.Scene {
           this.battlefield.battleResources,
           this.battlefield.savedCatsCount,
         );
-        this.scene.start(SCENE.HOME);
+
+        this.goHome();
       });
+
       return;
     }
 
@@ -125,5 +128,11 @@ export class BattleScene extends Phaser.Scene {
   private resumeGameplay(): void {
     this.physics.world.resume();
     this.tweens.resumeAll();
+  }
+
+  private goHome(): void {
+    this.hasShownCatsSavedMessage = false;
+    this.hasShownMolesDestroyedMessage = false;
+    this.scene.start(SCENE.HOME);
   }
 }

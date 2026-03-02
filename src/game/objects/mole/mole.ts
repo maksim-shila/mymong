@@ -117,7 +117,14 @@ export class Mole {
     const step = SPEED * (delta / 1000);
     const hasArrived = this.move(this.targetCellSlot.x, this.targetCellSlot.y, step);
     if (hasArrived) {
-      this.state = MoleState.BUILD;
+      // If cell slot has drop - try steel it
+      const drop = this.targetCellSlot.drop;
+      if (drop) {
+        this.state = MoleState.STEAL_DROP;
+        this.stealDropTimer.reset();
+      } else {
+        this.state = MoleState.BUILD;
+      }
     }
   }
 
@@ -156,14 +163,6 @@ export class Mole {
     // Just safe-check: if, by some reason, target slot is null - return to base
     if (!this.targetCellSlot) {
       this.state = MoleState.MOVE_TO_BASE;
-      return;
-    }
-
-    // If cell slot has drop - try steel it
-    const drop = this.targetCellSlot.drop;
-    if (drop) {
-      this.state = MoleState.STEAL_DROP;
-      this.stealDropTimer.reset();
       return;
     }
 
