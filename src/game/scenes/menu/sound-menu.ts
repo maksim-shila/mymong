@@ -57,8 +57,7 @@ export class SoundMenu extends OptionsMenuBase {
     context.optionButtons[MUSIC_INDEX].setOrigin(0, 0.5).setX(labelLeftX);
     context.optionButtons[EFFECTS_INDEX].setOrigin(0, 0.5).setX(labelLeftX);
 
-    this.masterSlider = new Slider({
-      scene: this,
+    this.masterSlider = new Slider(this, {
       x: sliderX,
       y: context.optionRowY(MASTER_INDEX),
       width: SLIDER_WIDTH,
@@ -68,8 +67,7 @@ export class SoundMenu extends OptionsMenuBase {
         SoundManager.save(this.pendingSettings);
       },
     });
-    this.musicSlider = new Slider({
-      scene: this,
+    this.musicSlider = new Slider(this, {
       x: sliderX,
       y: context.optionRowY(MUSIC_INDEX),
       width: SLIDER_WIDTH,
@@ -79,8 +77,7 @@ export class SoundMenu extends OptionsMenuBase {
         SoundManager.save(this.pendingSettings);
       },
     });
-    this.effectsSlider = new Slider({
-      scene: this,
+    this.effectsSlider = new Slider(this, {
       x: sliderX,
       y: context.optionRowY(EFFECTS_INDEX),
       width: SLIDER_WIDTH,
