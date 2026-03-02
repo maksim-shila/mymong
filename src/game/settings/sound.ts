@@ -56,6 +56,10 @@ export class SoundManager {
     key: string,
     config?: Phaser.Types.Sound.SoundConfig,
   ): void {
+    if (!scene.cache.audio.exists(key)) {
+      return;
+    }
+
     const settings = SoundManager.load();
     const volume = SoundManager.getEffectsVolume(settings) * (config?.volume ?? 1);
     if (volume <= 0) {

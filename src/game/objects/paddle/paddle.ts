@@ -88,7 +88,7 @@ export class Paddle extends Phaser.GameObjects.Rectangle {
     this.ui = new PaddleUI(scene, this);
     this.livesUI = new PaddleLivesUI(scene, bounds, maxLives);
     this.shield = new PaddleShield(scene, this, this.energyTank);
-    this.hitAnimation = new PaddleHitAnimation(this.ui);
+    this.hitAnimation = new PaddleHitAnimation(this.scene, this.ui);
     this.deathAnimation = new PaddleDeathAnimation(
       this.scene,
       this.width,

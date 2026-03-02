@@ -1,5 +1,7 @@
 import { Cheats } from '@game/cheats';
 import type { Bounds } from '@game/common/types';
+import { AUDIO } from '@game/assets/common-assets';
+import { SoundManager } from '@game/settings/sound';
 
 export const ENERGY_TANK_BASE_FUEL = 100;
 export const ENERGY_TANK_LEVEL_STEP = 20;
@@ -24,6 +26,7 @@ const TANK_Z_INDEX = 1120;
 const PLATFORM_Z_INDEX = 1119;
 
 export class EnergyTank {
+  private readonly scene: Phaser.Scene;
   private readonly fuelFill: Phaser.GameObjects.Rectangle;
 
   private readonly fuelMax: number;
@@ -33,6 +36,7 @@ export class EnergyTank {
   public readonly platformY: number;
 
   constructor(scene: Phaser.Scene, bounds: Bounds, level: number) {
+    this.scene = scene;
     this.fuelMax = Math.floor(ENERGY_TANK_BASE_FUEL + level * ENERGY_TANK_LEVEL_STEP);
     this.fuel = this.fuelMax;
 
@@ -95,8 +99,12 @@ export class EnergyTank {
       return false;
     }
 
+    const fuelBefore = this.fuel;
     const consumed = Math.min(this.fuel, amount);
     this.fuel -= consumed;
+    if (fuelBefore > 0 && this.fuel <= 0) {
+      SoundManager.playEffect(this.scene, AUDIO.OUT_OF_ENERGY);
+    }
 
     return true;
   }
@@ -106,7 +114,11 @@ export class EnergyTank {
       return false;
     }
 
+    const fuelBefore = this.fuel;
     this.fuel -= amount;
+    if (fuelBefore > 0 && this.fuel <= 0) {
+      SoundManager.playEffect(this.scene, AUDIO.OUT_OF_ENERGY);
+    }
     return true;
   }
 

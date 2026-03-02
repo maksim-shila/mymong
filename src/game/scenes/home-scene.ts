@@ -2,6 +2,8 @@ import { GameMenu } from '@game/scenes/menu/game-menu';
 import { applyResolutionCamera, type ResolutionViewport } from '@game/settings/resolution';
 import { GameSaveManager } from '@game/settings/game-save';
 import { SCENE } from '../../scenes';
+import { MusicManager } from '@game/settings/music';
+import { SOUNDTRACK } from '@game/assets/soundtrack-assets';
 
 const HOME_BACKGROUND_COLOR = 'rgb(137, 187, 225)';
 const CARD_STROKE_COLOR = 0xffffff;
@@ -46,6 +48,16 @@ export class HomeScene extends Phaser.Scene {
   }
 
   public create(): void {
+    const save = GameSaveManager.load();
+    const totalSavedCats = save?.totalSavedCats ?? 0;
+    const catoratoriaOnlyMode = totalSavedCats >= CATORATORIA_UNLOCK_CATS;
+
+    if (catoratoriaOnlyMode) {
+      MusicManager.stop();
+    } else {
+      MusicManager.play(this, SOUNDTRACK.HOME);
+    }
+
     this.cameras.main.setBackgroundColor(HOME_BACKGROUND_COLOR);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.stopCatoratoriaBlink();

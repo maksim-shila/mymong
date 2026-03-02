@@ -91,9 +91,7 @@ export class MenuComponent {
       selectedIndex = Phaser.Math.Clamp(index, 0, buttons.length - 1);
 
       if (shouldPlaySelectionSound && selectedIndex !== previousSelectedIndex) {
-        if (this.scene.cache.audio.exists(AUDIO.MENU_SWITCH)) {
-          SoundManager.playEffect(this.scene, AUDIO.MENU_SWITCH);
-        }
+        SoundManager.playEffect(this.scene, AUDIO.MENU_SWITCH);
       }
 
       onSelectedIndexChanged?.(selectedIndex);
@@ -197,9 +195,7 @@ export class MenuComponent {
   }
 
   private playSelectSound(): void {
-    if (this.scene.cache.audio.exists(AUDIO.MENU_SELECT)) {
-      SoundManager.playEffect(this.scene, AUDIO.MENU_SELECT);
-    }
+    SoundManager.playEffect(this.scene, AUDIO.MENU_SELECT);
   }
 
   private ensureMenuFontApplied(text: Phaser.GameObjects.Text): void {

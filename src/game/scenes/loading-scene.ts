@@ -1,4 +1,5 @@
 import { CommonAssets } from '@game/assets/common-assets';
+import { MusicManager } from '@game/settings/music';
 import { applyResolutionCamera, type ResolutionViewport } from '@game/settings/resolution';
 import catLoadingImage from '@assets/image/cat-loading.png';
 import { SCENE } from '../../scenes';
@@ -22,6 +23,7 @@ export class LoadingScene extends Phaser.Scene {
   }
 
   preload(): void {
+    MusicManager.stop();
     this.cameras.main.setBackgroundColor(GAME_BACKGROUND_COLOR);
 
     const viewport = applyResolutionCamera(this);

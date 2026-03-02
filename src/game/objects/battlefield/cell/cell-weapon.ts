@@ -1,6 +1,8 @@
 import type { Bounds } from '@game/common/types';
 import { CollectionsUtils } from '@game/common/helpers/collections-utils';
 import { CellBullet } from './cell-bullet';
+import { AUDIO } from '@game/assets/common-assets';
+import { SoundManager } from '@game/settings/sound';
 
 const BULLET_SPEED = 300;
 
@@ -15,7 +17,10 @@ export class CellWeapon {
   }
 
   public shoot(fromX: number, fromY: number, targetX: number, targetY: number): void {
-    this.spawnBullet(fromX, fromY, targetX, targetY);
+    const shotDone = this.spawnBullet(fromX, fromY, targetX, targetY);
+    if (shotDone) {
+      SoundManager.playEffect(this.scene, AUDIO.CELL_SHOT);
+    }
   }
 
   public getBullets(): readonly CellBullet[] {
@@ -46,15 +51,16 @@ export class CellWeapon {
     this.bullets.length = 0;
   }
 
-  private spawnBullet(fromX: number, fromY: number, toX: number, toY: number): void {
+  private spawnBullet(fromX: number, fromY: number, toX: number, toY: number): boolean {
     const dx = toX - fromX;
     const dy = toY - fromY;
     if (dx === 0 && dy === 0) {
-      return;
+      return false;
     }
 
     const bullet = new CellBullet(this.scene, fromX, fromY, toX, toY, BULLET_SPEED);
     this.bullets.push(bullet);
+    return true;
   }
 
   private isInBounds(x: number, y: number): boolean {

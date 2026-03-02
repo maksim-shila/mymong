@@ -1,4 +1,5 @@
-import { TEXTURE } from '@game/assets/common-assets';
+import { AUDIO, TEXTURE } from '@game/assets/common-assets';
+import { SoundManager } from '@game/settings/sound';
 
 const SIZE_MULTIPLIER = 2.5;
 const HIT_FRAME_DURATION_MS = 100;
@@ -27,6 +28,8 @@ export class CellHitAnimation {
   }
 
   public show(x: number, y: number): void {
+    SoundManager.playEffect(this.scene, AUDIO.EXPLOSION);
+
     const sprite = this.scene.add.image(x, y, HIT_FRAMES[0]);
     sprite.setDisplaySize(this.width, this.height);
     sprite.setDepth(this.depth);

@@ -5,6 +5,8 @@ import { VictoryScreen } from '@game/objects/screens/victory-screen';
 import { GameMenu } from './menu/game-menu';
 import { DefeatScreen } from '@game/objects/screens/defeat-screen';
 import { GameSaveManager } from '@game/settings/game-save';
+import { MusicManager } from '@game/settings/music';
+import { SOUNDTRACK } from '@game/assets/soundtrack-assets';
 
 const BATTLE_BACKGROUND_COLOR = 'rgb(137, 187, 225)';
 
@@ -24,6 +26,7 @@ export class BattleScene extends Phaser.Scene {
 
   public create(): void {
     this.cameras.main.setBackgroundColor(BATTLE_BACKGROUND_COLOR);
+    MusicManager.play(this, SOUNDTRACK.BATTLE);
     this.viewport = applyResolutionCamera(this);
     this.battlefield = new Battlefield(this, this.viewport);
     this.victoryScreen = new VictoryScreen(this, this.viewport);

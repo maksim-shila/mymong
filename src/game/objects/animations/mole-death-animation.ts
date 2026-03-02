@@ -1,4 +1,5 @@
-import { TEXTURE } from '@game/assets/common-assets';
+import { AUDIO, TEXTURE } from '@game/assets/common-assets';
+import { SoundManager } from '@game/settings/sound';
 
 const MOLE_SPIRIT_SIZE = 120;
 const MOLE_SPIRIT_DURATION_MS = 1500;
@@ -16,6 +17,8 @@ export class MoleDeathAnimation {
   }
 
   public show(x: number, y: number): void {
+    SoundManager.playEffect(this.scene, AUDIO.MOLE_DEATH);
+
     const spirit = this.scene.add.image(x, y, TEXTURE.MOLE_SPIRIT);
     spirit.setDisplaySize(MOLE_SPIRIT_SIZE, MOLE_SPIRIT_SIZE);
     spirit.setDepth(MOLE_SPIRIT_Z_INDEX);

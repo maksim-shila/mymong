@@ -5,6 +5,8 @@ import { CollectionsUtils } from '@game/common/helpers/collections-utils';
 import { CagedCatAnimation } from '@game/objects/animations/caged-cat-animation';
 import { TEXTURE } from '@game/assets/common-assets';
 import catImage from '@assets/image/cat-saved.png';
+import { MusicManager } from '@game/settings/music';
+import { SOUNDTRACK } from '@game/assets/soundtrack-assets';
 
 const CATORATORIA_BACKGROUND_COLOR = 'rgb(137, 187, 225)';
 const GRID_COLUMNS = 8;
@@ -63,6 +65,7 @@ export class CatoratoriaScene extends Phaser.Scene {
     this.createGrid(viewport);
     const isVictory = (save.totalSavedCats ?? 0) >= WIN_CATS_COUNT;
     if (isVictory) {
+      MusicManager.play(this, SOUNDTRACK.FINAL);
       this.startFinalSequence();
       return;
     }

@@ -1,4 +1,6 @@
 import type { PaddleUI } from './paddle-ui';
+import { AUDIO } from '@game/assets/common-assets';
+import { SoundManager } from '@game/settings/sound';
 
 const SHAKE_DURATION_MS = 240;
 const SHAKE_AMPLITUDE_X_PX = 20;
@@ -10,6 +12,7 @@ const SHAKE_NOISE_Y_PX = 4;
 const SHAKE_NOISE_ANGLE_DEG = 4;
 
 export class PaddleHitAnimation {
+  private readonly scene: Phaser.Scene;
   private readonly ui: PaddleUI;
 
   private durationMs = 0;
@@ -24,11 +27,14 @@ export class PaddleHitAnimation {
 
   private onComplete: (() => void) | null = null;
 
-  constructor(ui: PaddleUI) {
+  constructor(scene: Phaser.Scene, ui: PaddleUI) {
+    this.scene = scene;
     this.ui = ui;
   }
 
   public start(onComplete?: () => void): void {
+    SoundManager.playEffect(this.scene, AUDIO.SHIP_HIT);
+
     this.durationMs = SHAKE_DURATION_MS;
     this.elapsedMs = 0;
     this.active = this.durationMs > 0;

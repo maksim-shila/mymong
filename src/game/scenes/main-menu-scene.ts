@@ -2,6 +2,8 @@ import { applyResolutionCamera } from '@game/settings/resolution';
 import { SCENE } from '../../scenes';
 import { MenuComponent, type MenuOption } from '@game/scenes/menu/menu';
 import { GameSaveManager } from '@game/settings/game-save';
+import { preloadSoundtrackAssets, SOUNDTRACK } from '@game/assets/soundtrack-assets';
+import { MusicManager } from '@game/settings/music';
 
 const MENU_GAME_TITLE_Y = 0.34;
 const MENU_GAME_TITLE_FONT_SIZE = '80px';
@@ -19,10 +21,11 @@ export class MainMenuScene extends Phaser.Scene {
 
   public preload(): void {
     this.menu.preload();
+    preloadSoundtrackAssets(this);
   }
 
   public create(): void {
-    this.sound.stopAll();
+    MusicManager.play(this, SOUNDTRACK.MENU);
     const viewport = applyResolutionCamera(this);
     const worldWidth = viewport.worldWidth;
     const worldHeight = viewport.worldHeight;

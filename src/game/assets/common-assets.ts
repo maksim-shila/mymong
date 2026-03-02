@@ -18,6 +18,13 @@ import moleSpiritImage from '@assets/image/mole-spirit.png';
 import heartImage from '@assets/image/heart.png';
 import menuSwitchAudio from '@assets/audio/menu-switch.mp3';
 import menuSelectAudio from '@assets/audio/menu-select.mp3';
+import explosionAudio from '@assets/audio/explosion.mp3';
+import moleDeathAudio from '@assets/audio/mole-death.mp3';
+import shotAudio from '@assets/audio/shot.mp3';
+import shipHitAudio from '@assets/audio/ship-hit.mp3';
+import outOfEnergyAudio from '@assets/audio/out-of-energy.mp3';
+import cellShotAudio from '@assets/audio/cell-shot.mp3';
+import gameOverAudio from '@assets/audio/game-over.mp3';
 
 export const TEXTURE = {
   SHIP: 'ship',
@@ -43,6 +50,13 @@ export const TEXTURE = {
 export const AUDIO = {
   MENU_SWITCH: 'menu-switch',
   MENU_SELECT: 'menu-select',
+  EXPLOSION: 'explosion',
+  MOLE_DEATH: 'mole-death',
+  SHOT: 'shot',
+  SHIP_HIT: 'ship-hit',
+  OUT_OF_ENERGY: 'out-of-energy',
+  CELL_SHOT: 'cell-shot',
+  GAME_OVER: 'game-over',
 } as const;
 
 export class CommonAssets {
@@ -71,5 +85,12 @@ export class CommonAssets {
 
     scene.load.audio(AUDIO.MENU_SWITCH, menuSwitchAudio);
     scene.load.audio(AUDIO.MENU_SELECT, menuSelectAudio);
+    scene.load.audio(AUDIO.EXPLOSION, explosionAudio);
+    scene.load.audio(AUDIO.MOLE_DEATH, moleDeathAudio);
+    scene.load.audio(AUDIO.SHOT, shotAudio);
+    scene.load.audio(AUDIO.SHIP_HIT, shipHitAudio);
+    scene.load.audio(AUDIO.OUT_OF_ENERGY, outOfEnergyAudio);
+    scene.load.audio(AUDIO.CELL_SHOT, cellShotAudio);
+    scene.load.audio(AUDIO.GAME_OVER, gameOverAudio);
   }
 }

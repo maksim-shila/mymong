@@ -2,6 +2,7 @@ import { SoundManager, type SoundSettings } from '@game/settings/sound';
 import { SCENE } from '../../../scenes';
 import { Slider } from './components/slider';
 import { OptionsMenuBase, type MenuOptions } from './options-menu-base';
+import { MusicManager } from '@game/settings/music';
 
 const SLIDER_WIDTH = 340;
 const SOUND_AREA_WIDTH = 780;
@@ -65,6 +66,7 @@ export class SoundMenu extends OptionsMenuBase {
       onChange: (value) => {
         this.pendingSettings.master = value;
         SoundManager.save(this.pendingSettings);
+        MusicManager.syncVolume();
       },
     });
     this.musicSlider = new Slider(this, {
@@ -75,6 +77,7 @@ export class SoundMenu extends OptionsMenuBase {
       onChange: (value) => {
         this.pendingSettings.music = value;
         SoundManager.save(this.pendingSettings);
+        MusicManager.syncVolume();
       },
     });
     this.effectsSlider = new Slider(this, {
