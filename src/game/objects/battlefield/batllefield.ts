@@ -144,12 +144,12 @@ export class Battlefield {
   }
 
   private updateDifficulty(delta: number): void {
-    if (!this.difficultyTimer.tick(delta)) {
+    if (this.difficultyStep >= MAX_DIFFICULTY_STEPS) {
       return;
     }
 
-    this.difficultyTimer.reset();
-    if (this.difficultyStep < MAX_DIFFICULTY_STEPS) {
+    if (this.difficultyTimer.tick(delta)) {
+      this.difficultyTimer.reset();
       this.difficultyStep += 1;
       this.grid.setDifficulty(this.difficultyStep / MAX_DIFFICULTY_STEPS);
     }

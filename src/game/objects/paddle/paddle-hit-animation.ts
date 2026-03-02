@@ -22,11 +22,13 @@ export class PaddleHitAnimation {
   private randomY = 1;
   private randomAngle = 1;
 
+  private onComplete: (() => void) | null = null;
+
   constructor(ui: PaddleUI) {
     this.ui = ui;
   }
 
-  public start(): void {
+  public start(onComplete?: () => void): void {
     this.durationMs = SHAKE_DURATION_MS;
     this.elapsedMs = 0;
     this.active = this.durationMs > 0;
@@ -36,6 +38,8 @@ export class PaddleHitAnimation {
     this.randomX = Phaser.Math.FloatBetween(0.92, 1.08);
     this.randomY = Phaser.Math.FloatBetween(0.9, 1.1);
     this.randomAngle = Phaser.Math.FloatBetween(0.9, 1.1);
+
+    this.onComplete = onComplete ?? null;
   }
 
   public update(deltaMs: number): void {
@@ -81,6 +85,7 @@ export class PaddleHitAnimation {
     this.ui.setHitAlpha(1);
 
     if (this.elapsedMs >= this.durationMs) {
+      this.onComplete?.();
       this.stop();
     }
   }

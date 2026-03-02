@@ -56,6 +56,7 @@ export class CellWeapon {
     const bullet = new CellBullet(this.scene, fromX, fromY, toX, toY, BULLET_SPEED);
     this.bullets.push(bullet);
   }
+
   private isInBounds(x: number, y: number): boolean {
     return (
       x >= this.bounds.x.min &&

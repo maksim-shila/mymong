@@ -9,7 +9,6 @@ const VALUE_TEXT_OFFSET_X = 48;
 const VALUE_TEXT_SIZE = '28px';
 
 type SliderConfig = {
-  scene: Phaser.Scene;
   x: number;
   y: number;
   width: number;
@@ -33,8 +32,8 @@ export class Slider {
   private selected = false;
   private value = 0;
 
-  constructor(config: SliderConfig) {
-    this.scene = config.scene;
+  constructor(scene: Phaser.Scene, config: SliderConfig) {
+    this.scene = scene;
     this.x = config.x;
     this.y = config.y;
     this.width = config.width;

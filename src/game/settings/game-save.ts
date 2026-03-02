@@ -27,7 +27,7 @@ const DEFAULT_SAVE: GameSave = {
 
 export class GameSaveManager {
   public static hasSave(): boolean {
-    return this.load() !== null;
+    return localStorage.getItem(GAME_SAVE_STORAGE_KEY) !== null;
   }
 
   public static load(): GameSave {

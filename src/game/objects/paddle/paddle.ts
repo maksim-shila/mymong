@@ -12,6 +12,7 @@ import { MAX_LIVES } from '../battlefield/cell/cat-cage-cell';
 import { Cheats } from '@game/cheats';
 import { PaddleLivesUI } from './paddle-lives-ui';
 import { GameSaveManager } from '@game/settings/game-save';
+import { PaddleDeathAnimation } from './paddle-death-animation';
 
 const BASE_WIDTH = 135;
 const BASE_HEIGHT = 135;
@@ -44,6 +45,7 @@ export class Paddle extends Phaser.GameObjects.Rectangle {
   private readonly ui: PaddleUI;
   private readonly livesUI: PaddleLivesUI;
   private readonly hitAnimation: PaddleHitAnimation;
+  private readonly deathAnimation: PaddleDeathAnimation;
 
   private readonly arcadeBody: Phaser.Physics.Arcade.Body;
 
@@ -87,6 +89,12 @@ export class Paddle extends Phaser.GameObjects.Rectangle {
     this.livesUI = new PaddleLivesUI(scene, bounds, maxLives);
     this.shield = new PaddleShield(scene, this, this.energyTank);
     this.hitAnimation = new PaddleHitAnimation(this.ui);
+    this.deathAnimation = new PaddleDeathAnimation(
+      this.scene,
+      this.width,
+      this.height,
+      this.ui.depth + 1,
+    );
 
     this.setOrigin(0.5);
     this.speed = BASE_SPEED;
@@ -114,41 +122,44 @@ export class Paddle extends Phaser.GameObjects.Rectangle {
 
     const deltaSeconds = delta / 1000;
 
-    const leftPressed = this.controls.keyDown(Key.LEFT);
-    const rightPressed = this.controls.keyDown(Key.RIGHT);
-    const boostPressed = this.controls.keyDown(Key.BOOST);
-
-    const direction = leftPressed ? -1 : rightPressed ? 1 : 0;
-
     let boosted = false;
-    const wantsBoost = boostPressed && direction !== 0;
-    if (wantsBoost) {
-      const fuelNeeded = BOOST_FUEL_CONSUMPTION_PER_SEC * deltaSeconds;
-      if (this.energyTank.tryConsume(fuelNeeded)) {
-        boosted = true;
+    const preventMove = this.deathAnimation.shown;
+    if (!preventMove) {
+      const leftPressed = this.controls.keyDown(Key.LEFT);
+      const rightPressed = this.controls.keyDown(Key.RIGHT);
+      const boostPressed = this.controls.keyDown(Key.BOOST);
+
+      const direction = leftPressed ? -1 : rightPressed ? 1 : 0;
+
+      const wantsBoost = boostPressed && direction !== 0;
+      if (wantsBoost) {
+        const fuelNeeded = BOOST_FUEL_CONSUMPTION_PER_SEC * deltaSeconds;
+        if (this.energyTank.tryConsume(fuelNeeded)) {
+          boosted = true;
+        }
       }
+
+      // Compute speed
+      const noEnergyPenalty = this.energyTank.hasFuel() ? 1 : EMPTY_ENERGY_SPEED_MULTIPLIER;
+      const speedMultiplier = (boosted ? BOOST_SPEED_MULTIPLIER : 1) * noEnergyPenalty;
+      const targetMoveSpeed = BASE_SPEED * speedMultiplier;
+      const speedBlend = 1 - Math.exp(-BOOST_SPEED_RATE * deltaSeconds);
+      this.speed = Phaser.Math.Linear(this.speed, targetMoveSpeed, speedBlend);
+
+      // Compute angle
+      const targetAngleDeg = direction * MOVE_ANGLE_DEG;
+      const angleBlend = 1 - Math.exp(-MOVE_ANGLE_RATE * deltaSeconds);
+      this.angle = Phaser.Math.Linear(this.angle, targetAngleDeg, angleBlend);
+
+      // Compute position
+      const offsetX = this.speed * deltaSeconds * direction;
+
+      const halfWidth = this.width / 2;
+      const minX = this.bounds.x.min + halfWidth;
+      const maxX = this.bounds.x.max - halfWidth;
+
+      this.x = Phaser.Math.Clamp(this.x + offsetX, minX, maxX);
     }
-
-    // Compute speed
-    const noEnergyPenalty = this.energyTank.hasFuel() ? 1 : EMPTY_ENERGY_SPEED_MULTIPLIER;
-    const speedMultiplier = (boosted ? BOOST_SPEED_MULTIPLIER : 1) * noEnergyPenalty;
-    const targetMoveSpeed = BASE_SPEED * speedMultiplier;
-    const speedBlend = 1 - Math.exp(-BOOST_SPEED_RATE * deltaSeconds);
-    this.speed = Phaser.Math.Linear(this.speed, targetMoveSpeed, speedBlend);
-
-    // Compute angle
-    const targetAngleDeg = direction * MOVE_ANGLE_DEG;
-    const angleBlend = 1 - Math.exp(-MOVE_ANGLE_RATE * deltaSeconds);
-    this.angle = Phaser.Math.Linear(this.angle, targetAngleDeg, angleBlend);
-
-    // Compute position
-    const offsetX = this.speed * deltaSeconds * direction;
-
-    const halfWidth = this.width / 2;
-    const minX = this.bounds.x.min + halfWidth;
-    const maxX = this.bounds.x.max - halfWidth;
-
-    this.x = Phaser.Math.Clamp(this.x + offsetX, minX, maxX);
 
     this.arcadeBody.updateFromGameObject();
     this.shield.update(delta);
@@ -164,6 +175,15 @@ export class Paddle extends Phaser.GameObjects.Rectangle {
   public onHit(damage: number): void {
     damage = Math.max(1, Math.floor(damage));
     this.lives = Math.max(0, this.lives - damage);
+
+    if (this.lives === 0) {
+      if (!this.deathAnimation.shown) {
+        this.hitAnimation.start(() => this.ui.destroy());
+        this.deathAnimation.show(this.x, this.y);
+      }
+      return;
+    }
+
     this.shield.tryActivate();
     this.hitAnimation.start();
   }

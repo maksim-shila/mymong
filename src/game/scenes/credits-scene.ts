@@ -14,10 +14,10 @@ const FINAL_HOLD_DURATION_MS = 3000;
 const CREDITS_TEXT = `Game Design, Programming
 Maksim Shyla
 
-2D Artist and best wife evere
+2D Artist and best wife ever
 Tatsiana Shyla
 
-Ещё нихуя не сделали, но очень ждём:
+Ещё нихуя не сделали, но очень ждём
 Anton Zabuldygin
 Nick Simerov`;
 

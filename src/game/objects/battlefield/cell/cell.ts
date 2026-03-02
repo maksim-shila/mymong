@@ -130,7 +130,7 @@ export abstract class Cell extends Phaser.GameObjects.Rectangle {
 
     const shouldShoot = Math.random() <= this.shotChance;
     const jitter = Phaser.Math.Between(-SHOT_CD_JITTER_MAX, SHOT_CD_JITTER_MAX);
-    const nextShotCooldown = Math.max(0, this.shotCooldownMs + jitter);
+    const nextShotCooldown = Math.max(this.shotCooldownMs, this.shotCooldownMs + jitter);
     this.shotCooldownTimer.set(nextShotCooldown);
     return shouldShoot;
   }

@@ -24,6 +24,8 @@ export class PaddleUI {
   private readonly trailSnapshots: TrailSnapshot[] = [];
 
   private readonly trailSnapshotTimer = new Timer(BT_INTERVAL_MS);
+  public readonly depth: number;
+
   private hitOffsetX = 0;
   private hitOffsetY = 0;
   private hitAngleOffset = 0;
@@ -31,10 +33,11 @@ export class PaddleUI {
 
   constructor(scene: Phaser.Scene, paddle: Phaser.GameObjects.Rectangle) {
     this.paddle = paddle;
+    this.depth = SHIP_Z_INDEX;
 
     this.shipSprite = scene.add.image(paddle.x, paddle.y, TEXTURE.SHIP);
     this.shipSprite.setDisplaySize(paddle.width, paddle.height);
-    this.shipSprite.setDepth(SHIP_Z_INDEX);
+    this.shipSprite.setDepth(this.depth);
 
     for (let i = 0; i < BT_COUNT; i += 1) {
       const ghost = scene.add.image(paddle.x, paddle.y, TEXTURE.SHIP);
@@ -75,6 +78,10 @@ export class PaddleUI {
     this.hitOffsetY = 0;
     this.hitAngleOffset = 0;
     this.hitAlpha = 1;
+  }
+
+  public destroy(): void {
+    this.shipSprite.destroy();
   }
 
   private updateTrailSnapshots(delta: number, emitSnapshots: boolean): void {
