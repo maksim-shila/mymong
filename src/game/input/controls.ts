@@ -4,7 +4,8 @@ export enum Key {
   LEFT = 'LEFT',
   RIGHT = 'RIGHT',
   SHOOT = 'SHOOT',
-  BOOST = 'BOOST',
+  DASH_LEFT = 'DASH_LEFT',
+  DASH_RIGHT = 'DASH_RIGHT',
   PAUSE = 'PAUSE',
 }
 
@@ -27,7 +28,8 @@ export class Controls {
         keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
       ],
       [Key.SHOOT]: [keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.K)],
-      [Key.BOOST]: [keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT)],
+      [Key.DASH_LEFT]: [keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.J)],
+      [Key.DASH_RIGHT]: [keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.L)],
       [Key.PAUSE]: [keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P)],
     };
   }

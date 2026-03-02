@@ -82,8 +82,6 @@ export class PaddleHitAnimation {
       this.ui.setHitAngleOffset(angleOffset);
     }
 
-    this.ui.setHitAlpha(1);
-
     if (this.elapsedMs >= this.durationMs) {
       this.onComplete?.();
       this.stop();

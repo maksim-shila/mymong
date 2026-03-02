@@ -16,6 +16,8 @@ const BT_INTERVAL_MS = 34;
 const BT_LIFE_MS = 180;
 const BT_ALPHA = 0.48;
 
+const DASH_ALPHA = 0.7;
+
 export class PaddleUI {
   private readonly paddle: Phaser.GameObjects.Rectangle;
 
@@ -29,7 +31,8 @@ export class PaddleUI {
   private hitOffsetX = 0;
   private hitOffsetY = 0;
   private hitAngleOffset = 0;
-  private hitAlpha = 1;
+
+  private alpha = 1;
 
   constructor(scene: Phaser.Scene, paddle: Phaser.GameObjects.Rectangle) {
     this.paddle = paddle;
@@ -48,12 +51,14 @@ export class PaddleUI {
     }
   }
 
-  draw(delta: number, isBoostActive: boolean): void {
+  draw(delta: number, isDashActive: boolean): void {
+    this.alpha = isDashActive ? DASH_ALPHA : 1;
+
     this.shipSprite.setPosition(this.paddle.x + this.hitOffsetX, this.paddle.y + this.hitOffsetY);
     this.shipSprite.setAngle(this.paddle.angle + this.hitAngleOffset);
-    this.shipSprite.setAlpha(this.hitAlpha);
+    this.shipSprite.setAlpha(this.alpha);
 
-    this.updateTrailSnapshots(delta, isBoostActive);
+    this.updateTrailSnapshots(delta, isDashActive);
     this.drawBoostTrail();
   }
 
@@ -69,15 +74,10 @@ export class PaddleUI {
     this.hitAngleOffset = angleOffset;
   }
 
-  public setHitAlpha(alpha: number): void {
-    this.hitAlpha = Phaser.Math.Clamp(alpha, 0, 1);
-  }
-
   public resetHitEffects(): void {
     this.hitOffsetX = 0;
     this.hitOffsetY = 0;
     this.hitAngleOffset = 0;
-    this.hitAlpha = 1;
   }
 
   public destroy(): void {
@@ -127,7 +127,7 @@ export class PaddleUI {
 
       ghost.setPosition(snapshot.x + this.hitOffsetX, snapshot.y + this.hitOffsetY);
       ghost.setAngle(snapshot.angle + this.hitAngleOffset);
-      ghost.setAlpha(BT_ALPHA * alphaBlend * this.hitAlpha);
+      ghost.setAlpha(BT_ALPHA * alphaBlend * this.alpha);
     }
   }
 }
