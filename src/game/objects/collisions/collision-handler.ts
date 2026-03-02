@@ -45,6 +45,10 @@ export class CollisionHandler {
   }
 
   private handleEnemyBulletsVsPaddle(): void {
+    if (this.paddle.dashActive) {
+      return;
+    }
+
     const shield = this.paddle.shield;
 
     for (const slot of this.grid.slots) {

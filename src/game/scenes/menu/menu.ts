@@ -170,6 +170,7 @@ export class MenuComponent {
     keyboard.on('keydown-S', moveDown);
     keyboard.on('keydown-DOWN', moveDown);
     keyboard.on('keydown-ENTER', activate);
+    keyboard.on('keydown-K', activate);
     keyboard.on('keydown-SPACE', activate);
     if (enableWheel) {
       this.scene.input.on('wheel', wheel);
@@ -184,6 +185,7 @@ export class MenuComponent {
       keyboard.off('keydown-S', moveDown);
       keyboard.off('keydown-DOWN', moveDown);
       keyboard.off('keydown-ENTER', activate);
+      keyboard.off('keydown-K', activate);
       keyboard.off('keydown-SPACE', activate);
       if (enableWheel) {
         this.scene.input.off('wheel', wheel);

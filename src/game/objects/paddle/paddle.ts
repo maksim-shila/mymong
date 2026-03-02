@@ -147,10 +147,6 @@ export class Paddle extends Phaser.GameObjects.Rectangle {
   }
 
   public onHit(damage: number): void {
-    if (this.dashActive) {
-      return;
-    }
-
     damage = Math.max(1, Math.floor(damage));
     this.lives = Math.max(0, this.lives - damage);
 

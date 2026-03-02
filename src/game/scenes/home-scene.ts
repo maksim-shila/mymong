@@ -219,6 +219,7 @@ export class HomeScene extends Phaser.Scene {
     keyboard.on('keydown-D', moveRight);
     keyboard.on('keydown-RIGHT', moveRight);
     keyboard.on('keydown-ENTER', select);
+    keyboard.on('keydown-K', select);
 
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       keyboard.off('keydown-W', moveUp);
@@ -230,6 +231,7 @@ export class HomeScene extends Phaser.Scene {
       keyboard.off('keydown-D', moveRight);
       keyboard.off('keydown-RIGHT', moveRight);
       keyboard.off('keydown-ENTER', select);
+      keyboard.off('keydown-K', select);
     });
   }
 

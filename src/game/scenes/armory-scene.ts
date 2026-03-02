@@ -237,6 +237,7 @@ export class ArmoryScene extends Phaser.Scene {
     keyboard.on('keydown-S', moveDown);
     keyboard.on('keydown-DOWN', moveDown);
     keyboard.on('keydown-ENTER', activate);
+    keyboard.on('keydown-K', activate);
     keyboard.on('keydown-SPACE', activate);
     keyboard.on('keydown-ESC', back);
 
@@ -246,6 +247,7 @@ export class ArmoryScene extends Phaser.Scene {
       keyboard.off('keydown-S', moveDown);
       keyboard.off('keydown-DOWN', moveDown);
       keyboard.off('keydown-ENTER', activate);
+      keyboard.off('keydown-K', activate);
       keyboard.off('keydown-SPACE', activate);
       keyboard.off('keydown-ESC', back);
     });

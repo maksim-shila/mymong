@@ -29,8 +29,8 @@ export class CellSlot {
     }
 
     const cell = this.cell;
+    this.drop = this.drop ?? cell.getDrop();
     cell.break(() => {
-      this.drop = this.drop ?? cell.getDrop();
       this.cell = null;
     });
   }
