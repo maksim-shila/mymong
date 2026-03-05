@@ -24,4 +24,3 @@ export const preloadSoundtrackAssets = (scene: Phaser.Scene): void => {
     }
   }
 };
-

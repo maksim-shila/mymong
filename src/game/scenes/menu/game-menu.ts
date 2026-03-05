@@ -1,9 +1,5 @@
 import type { ResolutionViewport } from '@game/settings/resolution';
-import {
-  MENU_COLOR_DEFAULT,
-  MENU_FONT_FAMILY,
-  MenuComponent,
-} from './menu';
+import { MENU_COLOR_DEFAULT, MENU_FONT_FAMILY, MenuComponent } from './menu';
 
 const MENU_OVERLAY_ALPHA = 0.45;
 const MENU_OVERLAY_COLOR = 0x808080;
@@ -84,7 +80,6 @@ export class GameMenu {
       entries: this.entries,
       buttons: this.buttons,
       initialSelectedIndex: 0,
-      enableWheel: false,
       canNavigate: () => this.opened,
     });
 

@@ -26,31 +26,46 @@ export class MainMenuScene extends Phaser.Scene {
 
   public create(): void {
     MusicManager.play(this, SOUNDTRACK.MENU);
+
     const viewport = applyResolutionCamera(this);
     const worldWidth = viewport.worldWidth;
     const worldHeight = viewport.worldHeight;
 
-    this.menu.createMenuText(
-      worldWidth / 2,
-      worldHeight * MENU_GAME_TITLE_Y,
-      'MYMONG',
-      MENU_GAME_TITLE_FONT_SIZE,
-    );
+    const titleX = worldWidth / 2;
+    const titleY = worldHeight * MENU_GAME_TITLE_Y;
+    this.menu.createMenuText(titleX, titleY, 'MYMONG', MENU_GAME_TITLE_FONT_SIZE);
 
-    const entries: MenuOption[] = [];
+    const entries: MenuOption[] = [
+      {
+        label: 'New Game',
+        onSelect: () => {
+          GameSaveManager.startNewGame();
+          this.scene.start(SCENE.LOADING);
+        },
+      },
+      {
+        label: 'Options',
+        onSelect: () => {
+          this.scene.start(SCENE.OPTIONS);
+        },
+      },
+      {
+        label: 'Exit',
+        onSelect: () => {
+          this.exitGame();
+        },
+      },
+    ];
+
     if (GameSaveManager.hasSave()) {
-      entries.push({ label: 'Continue', onSelect: () => this.scene.start(SCENE.HOME) });
+      entries.unshift({
+        label: 'Continue',
+        onSelect: () => {
+          this.scene.start(SCENE.HOME);
+        },
+      });
     }
 
-    entries.push({
-      label: 'New Game',
-      onSelect: () => {
-        GameSaveManager.startNewGame();
-        this.scene.start(SCENE.LOADING);
-      },
-    });
-    entries.push({ label: 'Options', onSelect: () => this.scene.start(SCENE.OPTIONS) });
-    entries.push({ label: 'Exit', onSelect: () => this.exitGame() });
     const buttons = entries.map((entry, index) =>
       this.menu.createMenuText(
         worldWidth / 2,
@@ -64,7 +79,6 @@ export class MainMenuScene extends Phaser.Scene {
       entries,
       buttons,
       initialSelectedIndex: 0,
-      enableWheel: false,
     });
   }
 

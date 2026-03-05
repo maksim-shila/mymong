@@ -70,7 +70,9 @@ export abstract class OptionsMenuBase extends Phaser.Scene {
 
     this.beforeCreate(viewport);
 
-    const buildActions = (optionsModel: MenuOptions): Array<{ option: MenuOption; slot: number }> => {
+    const buildActions = (
+      optionsModel: MenuOptions,
+    ): Array<{ option: MenuOption; slot: number }> => {
       const actionsModel: Array<{ option: MenuOption; slot: number }> = [];
       if (optionsModel.onSaveChanges) {
         actionsModel.push({
@@ -124,11 +126,7 @@ export abstract class OptionsMenuBase extends Phaser.Scene {
       const visibleRows = Math.max(1, Math.floor(sectionHeight / optionsStepPx) + 1);
       const maxScrollStartIndex = Math.max(0, options.length - visibleRows);
 
-      optionsScrollStartIndex = Phaser.Math.Clamp(
-        optionsScrollStartIndex,
-        0,
-        maxScrollStartIndex,
-      );
+      optionsScrollStartIndex = Phaser.Math.Clamp(optionsScrollStartIndex, 0, maxScrollStartIndex);
 
       const firstY = optionsSectionTopY - optionsScrollStartIndex * optionsStepPx;
 
@@ -205,7 +203,6 @@ export abstract class OptionsMenuBase extends Phaser.Scene {
         options,
         actions.map((action) => action.option),
       ),
-      enableWheel: true,
     });
 
     this.afterOptionsCreated({

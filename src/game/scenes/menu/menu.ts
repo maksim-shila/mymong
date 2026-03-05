@@ -26,7 +26,6 @@ type MenuNavigationConfig = {
 };
 
 export class MenuComponent {
-  private static fontReadyPromise: Promise<void> | null = null;
   private readonly scene: Phaser.Scene;
 
   constructor(scene: Phaser.Scene) {
@@ -58,7 +57,6 @@ export class MenuComponent {
       .setDepth(2)
       .setInteractive({ useHandCursor: true });
 
-    this.ensureMenuFontApplied(text);
     return text;
   }
 
@@ -69,7 +67,6 @@ export class MenuComponent {
       onBack,
       onSelectedIndexChanged,
       initialSelectedIndex = 0,
-      enableWheel = true,
       canNavigate,
     } = config;
 
@@ -98,22 +95,6 @@ export class MenuComponent {
       renderSelection();
     };
 
-    for (let i = 0; i < buttons.length; i += 1) {
-      buttons[i].on('pointerover', () => {
-        if (canNavigate && !canNavigate()) {
-          return;
-        }
-        setSelected(i);
-      });
-      buttons[i].on('pointerdown', () => {
-        if (canNavigate && !canNavigate()) {
-          return;
-        }
-        this.playSelectSound();
-        entries[i].onSelect();
-      });
-    }
-
     setSelected(initialSelectedIndex);
     shouldPlaySelectionSound = true;
 
@@ -126,41 +107,33 @@ export class MenuComponent {
       if (canNavigate && !canNavigate()) {
         return;
       }
+
       setSelected(selectedIndex - 1);
     };
+
     const moveDown = () => {
       if (canNavigate && !canNavigate()) {
         return;
       }
+
       setSelected(selectedIndex + 1);
     };
+
     const activate = () => {
       if (canNavigate && !canNavigate()) {
         return;
       }
-      this.playSelectSound();
+
+      SoundManager.playEffect(this.scene, AUDIO.MENU_SELECT);
       entries[selectedIndex].onSelect();
     };
+
     const back = () => {
       if (canNavigate && !canNavigate()) {
         return;
       }
+
       onBack?.();
-    };
-    const wheel = (_pointer: Phaser.Input.Pointer, _objects: unknown, _dx: number, dy: number) => {
-      if (canNavigate && !canNavigate()) {
-        return;
-      }
-
-      if (dy === 0) {
-        return;
-      }
-
-      if (dy > 0) {
-        moveDown();
-      } else {
-        moveUp();
-      }
     };
 
     keyboard.on('keydown-W', moveUp);
@@ -170,9 +143,6 @@ export class MenuComponent {
     keyboard.on('keydown-ENTER', activate);
     keyboard.on('keydown-K', activate);
     keyboard.on('keydown-SPACE', activate);
-    if (enableWheel) {
-      this.scene.input.on('wheel', wheel);
-    }
     if (onBack) {
       keyboard.on('keydown-ESC', back);
     }
@@ -185,46 +155,9 @@ export class MenuComponent {
       keyboard.off('keydown-ENTER', activate);
       keyboard.off('keydown-K', activate);
       keyboard.off('keydown-SPACE', activate);
-      if (enableWheel) {
-        this.scene.input.off('wheel', wheel);
-      }
       if (onBack) {
         keyboard.off('keydown-ESC', back);
       }
     });
-  }
-
-  private playSelectSound(): void {
-    SoundManager.playEffect(this.scene, AUDIO.MENU_SELECT);
-  }
-
-  private ensureMenuFontApplied(text: Phaser.GameObjects.Text): void {
-    void MenuComponent.getFontReadyPromise().then(() => {
-      if (!text.scene || !text.active) {
-        return;
-      }
-
-      // Force text re-render once the web font is ready.
-      text.setFontFamily(MENU_FONT_FAMILY);
-      text.setText(text.text);
-    });
-  }
-
-  private static getFontReadyPromise(): Promise<void> {
-    if (this.fontReadyPromise) {
-      return this.fontReadyPromise;
-    }
-
-    if (typeof document === 'undefined' || !('fonts' in document)) {
-      this.fontReadyPromise = Promise.resolve();
-      return this.fontReadyPromise;
-    }
-
-    this.fontReadyPromise = document.fonts
-      .load('400 16px Fredoka')
-      .then(() => undefined)
-      .catch(() => undefined);
-
-    return this.fontReadyPromise;
   }
 }

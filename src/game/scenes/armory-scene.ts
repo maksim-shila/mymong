@@ -510,11 +510,7 @@ export class ArmoryScene extends Phaser.Scene {
       return;
     }
 
-    this.saveState.energyTankLevel = Phaser.Math.Clamp(
-      currentLevel + 1,
-      0,
-      ENERGY_TANK_MAX_LEVEL,
-    );
+    this.saveState.energyTankLevel = Phaser.Math.Clamp(currentLevel + 1, 0, ENERGY_TANK_MAX_LEVEL);
     this.saveState.resources -= price;
     this.dirty = true;
     this.refreshRows();
