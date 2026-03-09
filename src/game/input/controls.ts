@@ -8,6 +8,7 @@ export class Controls {
   private readonly scene: Phaser.Scene;
   private readonly inputSources: InputSource[];
   private readonly onUpdateEvent: () => void;
+  private inputEnabled = true;
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -28,23 +29,55 @@ export class Controls {
     }
   }
 
+  disableInput(): void {
+    this.inputEnabled = false;
+  }
+
+  enableInput(): void {
+    this.inputEnabled = true;
+  }
+
   keyDown(key: Key): boolean {
+    if (!this.inputEnabled) {
+      return false;
+    }
+
     return this.inputSources.some((source) => source.keyDown(key));
   }
 
   keyJustDown(key: Key): boolean {
+    if (!this.inputEnabled) {
+      return false;
+    }
+
     return this.inputSources.some((source) => source.keyJustDown(key));
   }
 
   onKeyDown(key: Key, handler: () => void): void {
+    const wrappedHandler = () => {
+      if (!this.inputEnabled) {
+        return;
+      }
+
+      handler();
+    };
+
     for (const source of this.inputSources) {
-      source.onKeyDown(key, handler);
+      source.onKeyDown(key, wrappedHandler);
     }
   }
 
   onAnyKeyDown(handler: () => void): void {
+    const wrappedHandler = () => {
+      if (!this.inputEnabled) {
+        return;
+      }
+
+      handler();
+    };
+
     for (const source of this.inputSources) {
-      source.onAnyKeyDown(handler);
+      source.onAnyKeyDown(wrappedHandler);
     }
   }
 }

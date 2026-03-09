@@ -52,15 +52,15 @@ export class GamepadInputSource implements InputSource {
     this.scene = scene;
     this.gamepad = scene.input.gamepad ?? undefined;
     this.previousDownState = {
-      [Key.UP]: false,
-      [Key.DOWN]: false,
-      [Key.LEFT]: false,
-      [Key.RIGHT]: false,
-      [Key.MENU_CONFIRM]: false,
-      [Key.MENU_BACK]: false,
-      [Key.SHOOT]: false,
-      [Key.DASH_LEFT]: false,
-      [Key.DASH_RIGHT]: false,
+      [Key.UP]: this.isAnyPadKeyDown(Key.UP),
+      [Key.DOWN]: this.isAnyPadKeyDown(Key.DOWN),
+      [Key.LEFT]: this.isAnyPadKeyDown(Key.LEFT),
+      [Key.RIGHT]: this.isAnyPadKeyDown(Key.RIGHT),
+      [Key.MENU_CONFIRM]: this.isAnyPadKeyDown(Key.MENU_CONFIRM),
+      [Key.MENU_BACK]: this.isAnyPadKeyDown(Key.MENU_BACK),
+      [Key.SHOOT]: this.isAnyPadKeyDown(Key.SHOOT),
+      [Key.DASH_LEFT]: this.isAnyPadKeyDown(Key.DASH_LEFT),
+      [Key.DASH_RIGHT]: this.isAnyPadKeyDown(Key.DASH_RIGHT),
     };
 
     for (const key of Object.values(Key)) {
@@ -90,7 +90,7 @@ export class GamepadInputSource implements InputSource {
   }
 
   public keyDown(key: Key): boolean {
-    return this.getConnectedPads().some((pad) => GamepadInputSource.KEY_BINDINGS[key].isDown(pad));
+    return this.isAnyPadKeyDown(key);
   }
 
   public keyJustDown(key: Key): boolean {
@@ -121,6 +121,10 @@ export class GamepadInputSource implements InputSource {
     }
 
     return this.gamepad.getAll().filter((pad) => pad.connected);
+  }
+
+  private isAnyPadKeyDown(key: Key): boolean {
+    return this.getConnectedPads().some((pad) => GamepadInputSource.KEY_BINDINGS[key].isDown(pad));
   }
 
   private emitKeyDown(key: Key): void {

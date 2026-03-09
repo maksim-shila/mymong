@@ -112,6 +112,14 @@ export class Battlefield {
     return this.workersBase.getSavedCatsCount();
   }
 
+  public disableInput(): void {
+    this.controls.disableInput();
+  }
+
+  public enableInput(): void {
+    this.controls.enableInput();
+  }
+
   public update(delta: number): void {
     this.updateDifficulty(delta);
 

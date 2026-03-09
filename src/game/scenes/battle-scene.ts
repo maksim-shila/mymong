@@ -75,6 +75,7 @@ export class BattleScene extends Phaser.Scene {
     }
 
     if (this.battlefield.isPaddleDead) {
+      this.battlefield.disableInput();
       this.defeatScreen.playDefeat(() => {
         GameSaveManager.saveBattleResources(
           this.battlefield.battleResources,
@@ -95,6 +96,7 @@ export class BattleScene extends Phaser.Scene {
     const allMolesKilled = this.battlefield.allMolesKilled;
 
     if (allCatsSaved && allMolesKilled) {
+      this.battlefield.disableInput();
       this.victoryScreen.playVictory(() => {
         this.battlefield.collectFieldResources();
         GameSaveManager.saveBattleResources(
