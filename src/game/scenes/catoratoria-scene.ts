@@ -1,3 +1,4 @@
+import { Key, Controls } from '@game/input/controls';
 import { applyResolutionCamera, type ResolutionViewport } from '@game/settings/resolution';
 import { SCENE } from '../../scenes';
 import { GameSaveManager } from '@game/settings/game-save';
@@ -31,6 +32,7 @@ export class CatoratoriaScene extends Phaser.Scene {
   private cages: boolean[] = [];
   private readonly cats: CagedCatAnimation[] = [];
   private backButton: Phaser.GameObjects.Text | null = null;
+  private controls!: Controls;
 
   constructor(name: string) {
     super(name);
@@ -41,6 +43,7 @@ export class CatoratoriaScene extends Phaser.Scene {
   }
 
   public create(): void {
+    this.controls = new Controls(this);
     this.cameras.main.setBackgroundColor(CATORATORIA_BACKGROUND_COLOR);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.cleanup();
@@ -158,17 +161,8 @@ export class CatoratoriaScene extends Phaser.Scene {
   }
 
   private bindEscapeKey(): void {
-    const keyboard = this.input.keyboard;
-    if (!keyboard) {
-      return;
-    }
-
     const back = () => this.scene.start(SCENE.HOME);
-    keyboard.on('keydown-ESC', back);
-
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-      keyboard.off('keydown-ESC', back);
-    });
+    this.controls.onKeyDown(Key.MENU_BACK, back);
   }
 
   private cleanup(): void {
@@ -182,3 +176,5 @@ export class CatoratoriaScene extends Phaser.Scene {
     this.backButton = null;
   }
 }
+
+

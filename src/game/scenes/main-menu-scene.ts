@@ -1,6 +1,6 @@
 import { applyResolutionCamera } from '@game/settings/resolution';
 import { SCENE } from '../../scenes';
-import { MenuComponent, type MenuOption } from '@game/scenes/menu/menu';
+import { MenuComponent } from '@game/scenes/menu/menu-component';
 import { GameSaveManager } from '@game/settings/game-save';
 import { preloadSoundtrackAssets, SOUNDTRACK } from '@game/assets/soundtrack-assets';
 import { MusicManager } from '@game/settings/music';
@@ -35,7 +35,7 @@ export class MainMenuScene extends Phaser.Scene {
     const titleY = worldHeight * MENU_GAME_TITLE_Y;
     this.menu.createMenuText(titleX, titleY, 'MYMONG', MENU_GAME_TITLE_FONT_SIZE);
 
-    const entries: MenuOption[] = [
+    const entries = [
       {
         label: 'New Game',
         onSelect: () => {
@@ -66,18 +66,18 @@ export class MainMenuScene extends Phaser.Scene {
       });
     }
 
-    const buttons = entries.map((entry, index) =>
-      this.menu.createMenuText(
+    const options = entries.map((entry, index) => ({
+      onSelect: entry.onSelect,
+      control: this.menu.createMenuText(
         worldWidth / 2,
         worldHeight * (MENU_OPTIONS_START_Y + MENU_OPTIONS_STEP_Y * index),
         entry.label,
         MENU_OPTION_FONT_SIZE,
       ),
-    );
+    }));
 
     this.menu.setupMenuNavigation({
-      entries,
-      buttons,
+      options,
       initialSelectedIndex: 0,
     });
   }
@@ -87,3 +87,6 @@ export class MainMenuScene extends Phaser.Scene {
     this.game.destroy(true);
   }
 }
+
+
+

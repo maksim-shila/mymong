@@ -1,3 +1,4 @@
+import { Key, Controls } from '@game/input/controls';
 import { SoundManager, type SoundSettings } from '@game/settings/sound';
 import { SCENE } from '../../../scenes';
 import { Slider } from './components/slider';
@@ -22,6 +23,7 @@ export class SoundMenu extends OptionsMenuBase {
   private effectsSlider?: Slider;
 
   private selectedIndex = 0;
+  private controls!: Controls;
 
   constructor(sceneName: string) {
     super(sceneName);
@@ -34,9 +36,9 @@ export class SoundMenu extends OptionsMenuBase {
   protected override getMenuOptions(): MenuOptions {
     return {
       options: [
-        { type: 'slider', label: 'Master', onSelect: () => undefined },
-        { type: 'slider', label: 'Music', onSelect: () => undefined },
-        { type: 'slider', label: 'Effects', onSelect: () => undefined },
+        { label: 'Master', onSelect: () => undefined },
+        { label: 'Music', onSelect: () => undefined },
+        { label: 'Effects', onSelect: () => undefined },
       ],
       onBack: () => this.scene.start(SCENE.OPTIONS),
     };
@@ -91,26 +93,16 @@ export class SoundMenu extends OptionsMenuBase {
       },
     });
 
+    this.controls = new Controls(this);
     this.syncSliderSelection();
-
-    const keyboard = this.input.keyboard;
-    if (!keyboard) {
-      return;
-    }
 
     const adjustLeft = () => this.adjustSlider(-SLIDER_STEP);
     const adjustRight = () => this.adjustSlider(SLIDER_STEP);
 
-    keyboard.on('keydown-LEFT', adjustLeft);
-    keyboard.on('keydown-A', adjustLeft);
-    keyboard.on('keydown-RIGHT', adjustRight);
-    keyboard.on('keydown-D', adjustRight);
+    this.controls.onKeyDown(Key.LEFT, adjustLeft);
+    this.controls.onKeyDown(Key.RIGHT, adjustRight);
 
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-      keyboard.off('keydown-LEFT', adjustLeft);
-      keyboard.off('keydown-A', adjustLeft);
-      keyboard.off('keydown-RIGHT', adjustRight);
-      keyboard.off('keydown-D', adjustRight);
       this.masterSlider?.destroy();
       this.musicSlider?.destroy();
       this.effectsSlider?.destroy();
@@ -147,3 +139,9 @@ export class SoundMenu extends OptionsMenuBase {
     this.effectsSlider?.setSelected(this.selectedIndex === EFFECTS_INDEX);
   }
 }
+
+
+
+
+
+

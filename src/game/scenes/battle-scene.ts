@@ -1,3 +1,4 @@
+import { Key, Controls } from '@game/input/controls';
 import { Battlefield } from '@game/objects/battlefield/batllefield';
 import { applyResolutionCamera, type ResolutionViewport } from '@game/settings/resolution';
 import { SCENE } from '../../scenes';
@@ -16,6 +17,7 @@ export class BattleScene extends Phaser.Scene {
   private victoryScreen!: VictoryScreen;
   private defeatScreen!: DefeatScreen;
   private gameMenu!: GameMenu;
+  private controls!: Controls;
 
   private hasShownMolesDestroyedMessage = false;
   private hasShownCatsSavedMessage = false;
@@ -25,6 +27,7 @@ export class BattleScene extends Phaser.Scene {
   }
 
   public create(): void {
+    this.controls = new Controls(this);
     this.cameras.main.setBackgroundColor(BATTLE_BACKGROUND_COLOR);
     MusicManager.play(this, SOUNDTRACK.BATTLE);
     this.viewport = applyResolutionCamera(this);
@@ -39,11 +42,6 @@ export class BattleScene extends Phaser.Scene {
       },
     });
 
-    const keyboard = this.input.keyboard;
-    if (!keyboard) {
-      return;
-    }
-
     const togglePauseMenu = () => {
       if (this.victoryScreen.isVictoryStarted || this.defeatScreen.isDefeatStarted) {
         return;
@@ -51,10 +49,7 @@ export class BattleScene extends Phaser.Scene {
       this.gameMenu.toggle();
     };
 
-    keyboard.on('keydown-ESC', togglePauseMenu);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-      keyboard.off('keydown-ESC', togglePauseMenu);
-    });
+    this.controls.onKeyDown(Key.MENU_BACK, togglePauseMenu);
   }
 
   public override update(_: number, delta: number): void {
@@ -139,3 +134,6 @@ export class BattleScene extends Phaser.Scene {
     this.scene.start(SCENE.HOME);
   }
 }
+
+
+

@@ -1,3 +1,4 @@
+import { Key, Controls } from '@game/input/controls';
 import { GameMenu } from '@game/scenes/menu/game-menu';
 import { applyResolutionCamera, type ResolutionViewport } from '@game/settings/resolution';
 import { GameSaveManager } from '@game/settings/game-save';
@@ -39,6 +40,7 @@ export class HomeScene extends Phaser.Scene {
   private static readonly GRID_COLUMNS = 2;
 
   private gameMenu!: GameMenu;
+  private controls!: Controls;
   private cards: HomeCard[] = [];
   private selectedCardIndex = -1;
   private catoratoriaBlinkTween: Phaser.Tweens.Tween | null = null;
@@ -48,6 +50,7 @@ export class HomeScene extends Phaser.Scene {
   }
 
   public create(): void {
+    this.controls = new Controls(this);
     const save = GameSaveManager.load();
     const totalSavedCats = save?.totalSavedCats ?? 0;
     const catoratoriaOnlyMode = totalSavedCats >= CATORATORIA_UNLOCK_CATS;
@@ -195,56 +198,25 @@ export class HomeScene extends Phaser.Scene {
   }
 
   private bindEscapeKey(): void {
-    const keyboard = this.input.keyboard;
-    if (!keyboard) {
-      return;
-    }
-
     const togglePauseMenu = () => {
       this.gameMenu.toggle();
     };
 
-    keyboard.on('keydown-ESC', togglePauseMenu);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-      keyboard.off('keydown-ESC', togglePauseMenu);
-    });
+    this.controls.onKeyDown(Key.MENU_BACK, togglePauseMenu);
   }
 
   private bindNavigationKeys(): void {
-    const keyboard = this.input.keyboard;
-    if (!keyboard) {
-      return;
-    }
-
     const moveUp = () => this.moveSelection(0, -1);
     const moveDown = () => this.moveSelection(0, 1);
     const moveLeft = () => this.moveSelection(-1, 0);
     const moveRight = () => this.moveSelection(1, 0);
     const select = () => this.selectCurrentCard();
 
-    keyboard.on('keydown-W', moveUp);
-    keyboard.on('keydown-UP', moveUp);
-    keyboard.on('keydown-S', moveDown);
-    keyboard.on('keydown-DOWN', moveDown);
-    keyboard.on('keydown-A', moveLeft);
-    keyboard.on('keydown-LEFT', moveLeft);
-    keyboard.on('keydown-D', moveRight);
-    keyboard.on('keydown-RIGHT', moveRight);
-    keyboard.on('keydown-ENTER', select);
-    keyboard.on('keydown-K', select);
-
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-      keyboard.off('keydown-W', moveUp);
-      keyboard.off('keydown-UP', moveUp);
-      keyboard.off('keydown-S', moveDown);
-      keyboard.off('keydown-DOWN', moveDown);
-      keyboard.off('keydown-A', moveLeft);
-      keyboard.off('keydown-LEFT', moveLeft);
-      keyboard.off('keydown-D', moveRight);
-      keyboard.off('keydown-RIGHT', moveRight);
-      keyboard.off('keydown-ENTER', select);
-      keyboard.off('keydown-K', select);
-    });
+    this.controls.onKeyDown(Key.UP, moveUp);
+    this.controls.onKeyDown(Key.DOWN, moveDown);
+    this.controls.onKeyDown(Key.LEFT, moveLeft);
+    this.controls.onKeyDown(Key.RIGHT, moveRight);
+    this.controls.onKeyDown(Key.MENU_CONFIRM, select);
   }
 
   private moveSelection(columnDelta: number, rowDelta: number): void {
@@ -360,3 +332,8 @@ export class HomeScene extends Phaser.Scene {
   }
 
 }
+
+
+
+
+

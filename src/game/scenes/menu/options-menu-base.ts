@@ -1,5 +1,5 @@
 import { applyResolutionCamera, type ResolutionViewport } from '@game/settings/resolution';
-import { MenuComponent, type MenuOption } from './menu';
+import { MenuComponent } from './menu-component';
 
 const MENU_TITLE_Y = 0.22;
 const MENU_OPTIONS_SECTION_TOP_Y = 0.34;
@@ -12,8 +12,13 @@ const MENU_ACTION_SLOTS = 2;
 const MENU_TITLE_FONT_SIZE = '62px';
 const MENU_OPTION_FONT_SIZE = '42px';
 
+type MenuOptionModel = {
+  label: string;
+  onSelect: () => void;
+};
+
 export type MenuOptions = {
-  options: MenuOption[];
+  options: MenuOptionModel[];
   onBack?: () => void;
   onSaveChanges?: () => void;
 };
@@ -30,7 +35,7 @@ export abstract class OptionsMenuBase extends Phaser.Scene {
 
   protected abstract getTitle(): string;
   protected abstract getMenuOptions(): MenuOptions;
-  protected getInitialSelectedIndex(_options: MenuOption[], _actions: MenuOption[]): number {
+  protected getInitialSelectedIndex(_options: MenuOptionModel[], _actions: MenuOptionModel[]): number {
     return 0;
   }
   protected onMenuSelectionChanged(_selectedIndex: number): void {}
@@ -72,8 +77,8 @@ export abstract class OptionsMenuBase extends Phaser.Scene {
 
     const buildActions = (
       optionsModel: MenuOptions,
-    ): Array<{ option: MenuOption; slot: number }> => {
-      const actionsModel: Array<{ option: MenuOption; slot: number }> = [];
+    ): Array<{ option: MenuOptionModel; slot: number }> => {
+      const actionsModel: Array<{ option: MenuOptionModel; slot: number }> = [];
       if (optionsModel.onSaveChanges) {
         actionsModel.push({
           option: { label: 'SaveChanges', onSelect: optionsModel.onSaveChanges },
@@ -90,9 +95,9 @@ export abstract class OptionsMenuBase extends Phaser.Scene {
       return actionsModel;
     };
 
-    let menuOptions = this.getMenuOptions();
-    const options = menuOptions.options;
-    const actions = buildActions(menuOptions);
+    let menuModel = this.getMenuOptions();
+    const options = menuModel.options;
+    const actions = buildActions(menuModel);
 
     const optionsSectionTopY = worldHeight * MENU_OPTIONS_SECTION_TOP_Y;
     const optionsStepPx = worldHeight * MENU_OPTIONS_STEP_Y;
@@ -117,8 +122,18 @@ export abstract class OptionsMenuBase extends Phaser.Scene {
         MENU_OPTION_FONT_SIZE,
       ),
     );
-    const entries = [...options, ...actions.map((action) => action.option)];
-    const buttons = [...optionButtons, ...actionButtons];
+
+    const navigationOptions = [
+      ...options.map((option, index) => ({
+        onSelect: option.onSelect,
+        control: optionButtons[index],
+      })),
+      ...actions.map((action, index) => ({
+        onSelect: action.option.onSelect,
+        control: actionButtons[index],
+      })),
+    ];
+
     let optionsScrollStartIndex = 0;
 
     const layoutOptionButtons = () => {
@@ -167,17 +182,17 @@ export abstract class OptionsMenuBase extends Phaser.Scene {
     };
 
     this.refreshMenuEntries = () => {
-      const nextMenuOptions = this.getMenuOptions();
-      const nextActions = buildActions(nextMenuOptions);
+      const nextMenuModel = this.getMenuOptions();
+      const nextActions = buildActions(nextMenuModel);
 
       for (let i = 0; i < optionButtons.length; i += 1) {
-        const nextOption = nextMenuOptions.options[i];
+        const nextOption = nextMenuModel.options[i];
         if (!nextOption) {
           continue;
         }
 
         optionButtons[i].setText(nextOption.label);
-        entries[i] = nextOption;
+        navigationOptions[i] = { onSelect: nextOption.onSelect, control: navigationOptions[i].control };
       }
 
       for (let i = 0; i < actionButtons.length; i += 1) {
@@ -188,16 +203,18 @@ export abstract class OptionsMenuBase extends Phaser.Scene {
         }
 
         actionButtons[i].setText(nextAction.option.label);
-        entries[actionIndex] = nextAction.option;
+        navigationOptions[actionIndex] = {
+          onSelect: nextAction.option.onSelect,
+          control: navigationOptions[actionIndex].control,
+        };
       }
 
-      menuOptions = nextMenuOptions;
+      menuModel = nextMenuModel;
     };
 
     this.menu.setupMenuNavigation({
-      entries,
-      buttons,
-      onBack: () => menuOptions.onBack?.(),
+      options: navigationOptions,
+      onBack: () => menuModel.onBack?.(),
       onSelectedIndexChanged,
       initialSelectedIndex: this.getInitialSelectedIndex(
         options,

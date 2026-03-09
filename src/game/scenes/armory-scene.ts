@@ -1,4 +1,5 @@
-import { MENU_COLOR_DEFAULT, MENU_COLOR_SELECTED, MenuComponent } from '@game/scenes/menu/menu';
+import { Key, Controls } from '@game/input/controls';
+import { MENU_COLOR_DEFAULT, MENU_COLOR_SELECTED, MenuComponent } from '@game/scenes/menu/menu-component';
 import { WeaponType } from '@game/objects/paddle/weapon/weapon';
 import { ENERGY_TANK_MAX_LEVEL } from '@game/objects/energy-tank';
 import { GameSaveManager, type GameSave } from '@game/settings/game-save';
@@ -118,6 +119,7 @@ const ARMORY_ROWS: readonly ArmoryRowModel[] = [
 
 export class ArmoryScene extends Phaser.Scene {
   private readonly menu: MenuComponent;
+  private controls!: Controls;
 
   private saveState!: GameSave;
   private resourcesText!: Phaser.GameObjects.Text;
@@ -140,6 +142,7 @@ export class ArmoryScene extends Phaser.Scene {
     const worldWidth = viewport.worldWidth;
     const worldHeight = viewport.worldHeight;
 
+    this.controls = new Controls(this);
     this.saveState = GameSaveManager.load() ?? GameSaveManager.startNewGame();
     this.createResourcesText(viewport);
     this.createRows(worldWidth, worldHeight);
@@ -222,35 +225,15 @@ export class ArmoryScene extends Phaser.Scene {
   }
 
   private bindKeyboard(): void {
-    const keyboard = this.input.keyboard;
-    if (!keyboard) {
-      return;
-    }
-
     const moveUp = () => this.moveSelection(-1);
     const moveDown = () => this.moveSelection(1);
     const activate = () => this.activateSelection(this.selectedRowIndex);
     const back = () => this.exitToHome();
 
-    keyboard.on('keydown-W', moveUp);
-    keyboard.on('keydown-UP', moveUp);
-    keyboard.on('keydown-S', moveDown);
-    keyboard.on('keydown-DOWN', moveDown);
-    keyboard.on('keydown-ENTER', activate);
-    keyboard.on('keydown-K', activate);
-    keyboard.on('keydown-SPACE', activate);
-    keyboard.on('keydown-ESC', back);
-
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-      keyboard.off('keydown-W', moveUp);
-      keyboard.off('keydown-UP', moveUp);
-      keyboard.off('keydown-S', moveDown);
-      keyboard.off('keydown-DOWN', moveDown);
-      keyboard.off('keydown-ENTER', activate);
-      keyboard.off('keydown-K', activate);
-      keyboard.off('keydown-SPACE', activate);
-      keyboard.off('keydown-ESC', back);
-    });
+    this.controls.onKeyDown(Key.UP, moveUp);
+    this.controls.onKeyDown(Key.DOWN, moveDown);
+    this.controls.onKeyDown(Key.MENU_CONFIRM, activate);
+    this.controls.onKeyDown(Key.MENU_BACK, back);
   }
 
   private refreshRows(): void {
@@ -557,3 +540,7 @@ export class ArmoryScene extends Phaser.Scene {
     this.dirty = false;
   }
 }
+
+
+
+

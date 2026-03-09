@@ -1,5 +1,5 @@
 import type { ResolutionViewport } from '@game/settings/resolution';
-import { MENU_COLOR_DEFAULT, MENU_FONT_FAMILY, MenuComponent } from './menu';
+import { MENU_COLOR_DEFAULT, MENU_FONT_FAMILY, MenuComponent } from './menu-component';
 
 const MENU_OVERLAY_ALPHA = 0.45;
 const MENU_OVERLAY_COLOR = 0x808080;
@@ -77,11 +77,13 @@ export class GameMenu {
     );
 
     this.menu.setupMenuNavigation({
-      entries: this.entries,
-      buttons: this.buttons,
+      options: this.entries.map((entry, index) => ({
+        onSelect: entry.onSelect,
+        control: this.buttons[index],
+      })),
       initialSelectedIndex: 0,
-      canNavigate: () => this.opened,
     });
+    this.menu.disableNavigation();
 
     scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.destroy();
@@ -98,6 +100,7 @@ export class GameMenu {
     }
 
     this.opened = true;
+    this.menu.enableNavigation();
     this.onOpen?.();
     this.overlay.setVisible(true);
     this.overlay.setFillStyle(MENU_OVERLAY_COLOR, MENU_OVERLAY_ALPHA);
@@ -113,6 +116,7 @@ export class GameMenu {
     }
 
     this.opened = false;
+    this.menu.disableNavigation();
     this.onClose?.();
     this.overlay.setVisible(false);
     this.titleText.setVisible(false);
@@ -137,3 +141,6 @@ export class GameMenu {
     }
   }
 }
+
+
+
