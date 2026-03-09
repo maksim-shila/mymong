@@ -135,10 +135,28 @@ export abstract class OptionsMenuBase extends Phaser.Scene {
     ];
 
     let optionsScrollStartIndex = 0;
+    const getVisibleRows = () => {
+      const sectionHeight = Math.max(0, optionsSectionBottomY - optionsSectionTopY);
+      return Math.max(1, Math.floor(sectionHeight / optionsStepPx) + 1);
+    };
+
+    const alignScrollToSelectedOption = (selectedIndex: number) => {
+      if (selectedIndex >= options.length) {
+        return;
+      }
+
+      const visibleRows = getVisibleRows();
+      const visibleEndIndex = optionsScrollStartIndex + visibleRows - 1;
+
+      if (selectedIndex < optionsScrollStartIndex) {
+        optionsScrollStartIndex = selectedIndex;
+      } else if (selectedIndex > visibleEndIndex) {
+        optionsScrollStartIndex = selectedIndex - visibleRows + 1;
+      }
+    };
 
     const layoutOptionButtons = () => {
-      const sectionHeight = Math.max(0, optionsSectionBottomY - optionsSectionTopY);
-      const visibleRows = Math.max(1, Math.floor(sectionHeight / optionsStepPx) + 1);
+      const visibleRows = getVisibleRows();
       const maxScrollStartIndex = Math.max(0, options.length - visibleRows);
 
       optionsScrollStartIndex = Phaser.Math.Clamp(optionsScrollStartIndex, 0, maxScrollStartIndex);
@@ -167,15 +185,7 @@ export abstract class OptionsMenuBase extends Phaser.Scene {
         return;
       }
 
-      const sectionHeight = Math.max(0, optionsSectionBottomY - optionsSectionTopY);
-      const visibleRows = Math.max(1, Math.floor(sectionHeight / optionsStepPx) + 1);
-      const visibleEndIndex = optionsScrollStartIndex + visibleRows - 1;
-
-      if (selectedIndex < optionsScrollStartIndex) {
-        optionsScrollStartIndex = selectedIndex;
-      } else if (selectedIndex > visibleEndIndex) {
-        optionsScrollStartIndex = selectedIndex - visibleRows + 1;
-      }
+      alignScrollToSelectedOption(selectedIndex);
 
       this.onMenuSelectionChanged(selectedIndex);
       layoutOptionButtons();
@@ -210,17 +220,22 @@ export abstract class OptionsMenuBase extends Phaser.Scene {
       }
 
       menuModel = nextMenuModel;
+      layoutOptionButtons();
     };
+
+    const initialSelectedIndex = this.getInitialSelectedIndex(
+      options,
+      actions.map((action) => action.option),
+    );
 
     this.menu.setupMenuNavigation({
       options: navigationOptions,
       onBack: () => menuModel.onBack?.(),
       onSelectedIndexChanged,
-      initialSelectedIndex: this.getInitialSelectedIndex(
-        options,
-        actions.map((action) => action.option),
-      ),
+      initialSelectedIndex,
     });
+    alignScrollToSelectedOption(initialSelectedIndex);
+    layoutOptionButtons();
 
     this.afterOptionsCreated({
       worldWidth,
