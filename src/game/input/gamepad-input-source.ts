@@ -9,44 +9,34 @@ export class GamepadInputSource implements InputSource {
   private static readonly KEY_BINDINGS: Record<
     Key,
     {
-      buttonIndexes: number[];
       isDown: (pad: Phaser.Input.Gamepad.Gamepad) => boolean;
     }
   > = {
     [Key.UP]: {
-      buttonIndexes: [Phaser.Input.Gamepad.Configs.XBOX_360.UP],
       isDown: (pad) => pad.up || pad.leftStick.y <= -GamepadInputSource.AXIS_DEAD_ZONE,
     },
     [Key.DOWN]: {
-      buttonIndexes: [Phaser.Input.Gamepad.Configs.XBOX_360.DOWN],
       isDown: (pad) => pad.down || pad.leftStick.y >= GamepadInputSource.AXIS_DEAD_ZONE,
     },
     [Key.LEFT]: {
-      buttonIndexes: [Phaser.Input.Gamepad.Configs.XBOX_360.LEFT],
       isDown: (pad) => pad.left || pad.leftStick.x <= -GamepadInputSource.AXIS_DEAD_ZONE,
     },
     [Key.RIGHT]: {
-      buttonIndexes: [Phaser.Input.Gamepad.Configs.XBOX_360.RIGHT],
       isDown: (pad) => pad.right || pad.leftStick.x >= GamepadInputSource.AXIS_DEAD_ZONE,
     },
     [Key.MENU_CONFIRM]: {
-      buttonIndexes: [Phaser.Input.Gamepad.Configs.XBOX_360.A],
       isDown: (pad) => pad.A,
     },
     [Key.MENU_BACK]: {
-      buttonIndexes: [Phaser.Input.Gamepad.Configs.XBOX_360.B, GamepadInputSource.BUTTON_BACK],
       isDown: (pad) => pad.B || pad.isButtonDown(GamepadInputSource.BUTTON_BACK),
     },
     [Key.SHOOT]: {
-      buttonIndexes: [Phaser.Input.Gamepad.Configs.XBOX_360.A],
       isDown: (pad) => pad.X,
     },
     [Key.DASH_LEFT]: {
-      buttonIndexes: [Phaser.Input.Gamepad.Configs.XBOX_360.LB],
       isDown: (pad) => pad.L1 >= GamepadInputSource.SHOULDER_THRESHOLD,
     },
     [Key.DASH_RIGHT]: {
-      buttonIndexes: [Phaser.Input.Gamepad.Configs.XBOX_360.RB],
       isDown: (pad) => pad.R1 >= GamepadInputSource.SHOULDER_THRESHOLD,
     },
   };
@@ -54,29 +44,49 @@ export class GamepadInputSource implements InputSource {
   private readonly scene: Phaser.Scene;
   private readonly gamepad?: Phaser.Input.Gamepad.GamepadPlugin;
   private readonly justPressedKeys = new Set<Key>();
-  private readonly onButtonDownEvent: (
-    pad: Phaser.Input.Gamepad.Gamepad,
-    button: Phaser.Input.Gamepad.Button,
-  ) => void;
+  private readonly previousDownState: Record<Key, boolean>;
+  private readonly keyDownHandlers = new Map<Key, Set<() => void>>();
+  private readonly anyKeyDownHandlers = new Set<() => void>();
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
     this.gamepad = scene.input.gamepad ?? undefined;
-
-    this.onButtonDownEvent = (
-      _pad: Phaser.Input.Gamepad.Gamepad,
-      button: Phaser.Input.Gamepad.Button,
-    ) => {
-      for (const key of this.keysByButtonIndex(button.index)) {
-        this.justPressedKeys.add(key);
-      }
+    this.previousDownState = {
+      [Key.UP]: false,
+      [Key.DOWN]: false,
+      [Key.LEFT]: false,
+      [Key.RIGHT]: false,
+      [Key.MENU_CONFIRM]: false,
+      [Key.MENU_BACK]: false,
+      [Key.SHOOT]: false,
+      [Key.DASH_LEFT]: false,
+      [Key.DASH_RIGHT]: false,
     };
 
-    this.gamepad?.on(Phaser.Input.Gamepad.Events.BUTTON_DOWN, this.onButtonDownEvent);
+    for (const key of Object.values(Key)) {
+      this.keyDownHandlers.set(key, new Set());
+    }
+
     this.scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-      this.gamepad?.off(Phaser.Input.Gamepad.Events.BUTTON_DOWN, this.onButtonDownEvent);
       this.justPressedKeys.clear();
+      this.keyDownHandlers.clear();
+      this.anyKeyDownHandlers.clear();
     });
+  }
+
+  public update(): void {
+    this.justPressedKeys.clear();
+
+    for (const key of Object.values(Key)) {
+      const isDownNow = this.keyDown(key);
+      const wasDown = this.previousDownState[key];
+
+      if (isDownNow && !wasDown) {
+        this.emitKeyDown(key);
+      }
+
+      this.previousDownState[key] = isDownNow;
+    }
   }
 
   public keyDown(key: Key): boolean {
@@ -84,46 +94,24 @@ export class GamepadInputSource implements InputSource {
   }
 
   public keyJustDown(key: Key): boolean {
-    if (!this.justPressedKeys.has(key)) {
-      return false;
-    }
-
-    this.justPressedKeys.delete(key);
-    return true;
+    return this.justPressedKeys.has(key);
   }
 
   public onKeyDown(key: Key, handler: () => void): void {
-    if (!this.gamepad) {
-      return;
-    }
-
-    const listener = (
-      _pad: Phaser.Input.Gamepad.Gamepad,
-      button: Phaser.Input.Gamepad.Button,
-    ): void => {
-      if (GamepadInputSource.KEY_BINDINGS[key].buttonIndexes.includes(button.index)) {
-        handler();
-      }
-    };
-
-    this.gamepad.on(Phaser.Input.Gamepad.Events.BUTTON_DOWN, listener);
+    this.keyDownHandlers.get(key)?.add(handler);
     this.scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-      this.gamepad?.off(Phaser.Input.Gamepad.Events.BUTTON_DOWN, listener);
+      this.keyDownHandlers.get(key)?.delete(handler);
     });
   }
 
   public onAnyKeyDown(handler: () => void): void {
-    if (!this.gamepad) {
-      return;
-    }
-
     const listener = (): void => {
+      this.anyKeyDownHandlers.delete(listener);
       handler();
     };
-
-    this.gamepad.once(Phaser.Input.Gamepad.Events.BUTTON_DOWN, listener);
+    this.anyKeyDownHandlers.add(listener);
     this.scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-      this.gamepad?.off(Phaser.Input.Gamepad.Events.BUTTON_DOWN, listener);
+      this.anyKeyDownHandlers.delete(listener);
     });
   }
 
@@ -135,14 +123,21 @@ export class GamepadInputSource implements InputSource {
     return this.gamepad.getAll().filter((pad) => pad.connected);
   }
 
-  private keysByButtonIndex(buttonIndex: number): Key[] {
-    const keys: Key[] = [];
-    for (const key of Object.values(Key)) {
-      if (GamepadInputSource.KEY_BINDINGS[key].buttonIndexes.includes(buttonIndex)) {
-        keys.push(key);
+  private emitKeyDown(key: Key): void {
+    this.justPressedKeys.add(key);
+
+    const handlers = this.keyDownHandlers.get(key);
+    if (handlers) {
+      for (const handler of handlers) {
+        handler();
       }
     }
 
-    return keys;
+    if (this.anyKeyDownHandlers.size > 0) {
+      const anyHandlers = Array.from(this.anyKeyDownHandlers);
+      for (const anyHandler of anyHandlers) {
+        anyHandler();
+      }
+    }
   }
 }

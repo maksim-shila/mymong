@@ -50,6 +50,8 @@ export class KeyboardInputSource implements InputSource {
     return this.bindings[key].some((binding) => binding.isDown);
   }
 
+  update(): void {}
+
   keyJustDown(key: Key): boolean {
     return this.bindings[key].some((binding) => Phaser.Input.Keyboard.JustDown(binding));
   }

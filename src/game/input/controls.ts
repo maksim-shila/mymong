@@ -5,10 +5,27 @@ import { Key } from './key';
 import { KeyboardInputSource } from './keyboard-input-source';
 
 export class Controls {
+  private readonly scene: Phaser.Scene;
   private readonly inputSources: InputSource[];
+  private readonly onUpdateEvent: () => void;
 
   constructor(scene: Phaser.Scene) {
+    this.scene = scene;
     this.inputSources = [new KeyboardInputSource(scene), new GamepadInputSource(scene)];
+    this.onUpdateEvent = () => {
+      this.update();
+    };
+
+    this.scene.events.on(Phaser.Scenes.Events.UPDATE, this.onUpdateEvent);
+    this.scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.scene.events.off(Phaser.Scenes.Events.UPDATE, this.onUpdateEvent);
+    });
+  }
+
+  update(): void {
+    for (const source of this.inputSources) {
+      source.update();
+    }
   }
 
   keyDown(key: Key): boolean {

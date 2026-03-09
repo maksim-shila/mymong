@@ -60,13 +60,14 @@ export class Dash {
   }
 
   private tryStart(): void {
+    const dashLeftPressed = this.controls.keyJustDown(Key.DASH_LEFT);
+    const dashRightPressed = this.controls.keyJustDown(Key.DASH_RIGHT);
+    const direction = dashLeftPressed ? -1 : dashRightPressed ? 1 : 0;
+
     if (this.active || this.cooldownRemainingMs > 0) {
       return;
     }
 
-    const dashLeftPressed = this.controls.keyJustDown(Key.DASH_LEFT);
-    const dashRightPressed = this.controls.keyJustDown(Key.DASH_RIGHT);
-    const direction = dashLeftPressed ? -1 : dashRightPressed ? 1 : 0;
     if (direction === 0) {
       return;
     }
