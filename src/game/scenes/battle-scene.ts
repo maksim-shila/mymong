@@ -1,4 +1,5 @@
-import { Key, Controls } from '@game/input/controls';
+import { Controls } from '@game/input/controls';
+import { Key } from '@game/input/key';
 import { Battlefield } from '@game/objects/battlefield/batllefield';
 import { applyResolutionCamera, type ResolutionViewport } from '@game/settings/resolution';
 import { SCENE } from '../../scenes';

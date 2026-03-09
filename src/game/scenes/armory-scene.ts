@@ -1,4 +1,5 @@
-import { Key, Controls } from '@game/input/controls';
+import { Controls } from '@game/input/controls';
+import { Key } from '@game/input/key';
 import { MENU_COLOR_DEFAULT, MENU_COLOR_SELECTED, MenuComponent } from '@game/scenes/menu/menu-component';
 import { WeaponType } from '@game/objects/paddle/weapon/weapon';
 import { ENERGY_TANK_MAX_LEVEL } from '@game/objects/energy-tank';

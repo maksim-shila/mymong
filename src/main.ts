@@ -37,6 +37,9 @@ const config: Phaser.Types.Core.GameConfig = {
       debug: false,
     },
   },
+  input: {
+    gamepad: true,
+  },
   fps: {
     forceSetTimeOut: !vSyncEnabled,
     target: 60,

@@ -1,0 +1,11 @@
+export enum Key {
+  UP = 'UP',
+  DOWN = 'DOWN',
+  LEFT = 'LEFT',
+  RIGHT = 'RIGHT',
+  MENU_CONFIRM = 'MENU_CONFIRM',
+  MENU_BACK = 'MENU_BACK',
+  SHOOT = 'SHOOT',
+  DASH_LEFT = 'DASH_LEFT',
+  DASH_RIGHT = 'DASH_RIGHT',
+}

@@ -1,5 +1,6 @@
 import type { Bounds, Direction } from '@game/common/types';
-import { Key, type Controls } from '@game/input/controls';
+import type { Controls } from '@game/input/controls';
+import { Key } from '@game/input/key';
 import type { EnergyTank } from '@game/objects/energy-tank';
 import type { Paddle } from '../paddle';
 

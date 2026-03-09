@@ -1,4 +1,5 @@
-import { Key, type Controls } from '@game/input/controls';
+import type { Controls } from '@game/input/controls';
+import { Key } from '@game/input/key';
 import { PaddleUI } from './paddle-ui';
 import { Weapon, WeaponType } from './weapon/weapon';
 import { SingleBarrel } from './weapon/single-barrel';

@@ -1,4 +1,5 @@
-import { Key, Controls } from '@game/input/controls';
+import { Controls } from '@game/input/controls';
+import { Key } from '@game/input/key';
 import { AUDIO } from '@game/assets/common-assets';
 import { SoundManager } from '@game/settings/sound';
 import menuSwitchAudio from '@assets/audio/menu-switch.mp3';

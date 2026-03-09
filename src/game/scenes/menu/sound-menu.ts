@@ -1,4 +1,5 @@
-import { Key, Controls } from '@game/input/controls';
+import { Controls } from '@game/input/controls';
+import { Key } from '@game/input/key';
 import { SoundManager, type SoundSettings } from '@game/settings/sound';
 import { SCENE } from '../../../scenes';
 import { Slider } from './components/slider';

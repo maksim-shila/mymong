@@ -1,4 +1,5 @@
-import { Key, Controls } from '@game/input/controls';
+import { Controls } from '@game/input/controls';
+import { Key } from '@game/input/key';
 import { applyResolutionCamera, type ResolutionViewport } from '@game/settings/resolution';
 import { SCENE } from '../../scenes';
 import { GameSaveManager } from '@game/settings/game-save';
