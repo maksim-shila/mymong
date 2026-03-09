@@ -5,6 +5,7 @@ import { MoleBaseHud } from './mole-base-hud';
 import { CollectionsUtils } from '@game/common/helpers/collections-utils';
 import { Timer } from '@game/common/helpers/timer';
 import { MoleDeathAnimation } from '../animations/mole-death-animation';
+import type { BattleContext } from '../battlefield/battle-context';
 
 const DEFAULT_MOLES_COUNT = 5;
 const MOLES_DEQUEUE_COOLDOWN_MS = 300;
@@ -26,7 +27,7 @@ export class MoleBase {
 
   private readonly molesDequeueCooldownTimer = new Timer(MOLES_DEQUEUE_COOLDOWN_MS);
 
-  constructor(scene: Phaser.Scene, grid: CellsGrid, bounds: Bounds) {
+  constructor(scene: Phaser.Scene, grid: CellsGrid, bounds: Bounds, battleContext: BattleContext) {
     this.scene = scene;
     this.grid = grid;
     this.hud = new MoleBaseHud(this.scene, bounds);
@@ -35,7 +36,7 @@ export class MoleBase {
     for (let i = 0; i < DEFAULT_MOLES_COUNT; i++) {
       const moleX = bounds.x.max + MOLE_BASE_OFFSET_X;
       const moleY = bounds.y.min + MOLE_BASE_OFFSET_Y + (MOLE_HEIGHT + MOLE_QUEUE_OFFSET_Y) * i;
-      const mole = new Mole(this.scene, moleX, moleY, MOLE_WIDTH, MOLE_HEIGHT, bounds);
+      const mole = new Mole(this.scene, moleX, moleY, MOLE_WIDTH, MOLE_HEIGHT, battleContext);
       this.moles.push(mole);
     }
 

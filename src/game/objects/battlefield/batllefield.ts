@@ -12,6 +12,7 @@ import { Timer } from '@game/common/helpers/timer';
 import { GameSaveManager } from '@game/settings/game-save';
 import { DropType } from './drop/drop';
 import type { ResourceDrop } from './drop/resource-drop';
+import { BattleContext } from './battle-context';
 
 const INITIAL_WIDTH = 1200;
 
@@ -36,6 +37,7 @@ export class Battlefield {
   public readonly energyTank: EnergyTank;
 
   public readonly bounds: Bounds;
+  public readonly battleContext: BattleContext;
 
   private readonly moleBase: MoleBase;
   private readonly workersBase: WorkersBase;
@@ -66,6 +68,7 @@ export class Battlefield {
       width: maxX - minX,
       height: maxY - minY,
     };
+    this.battleContext = new BattleContext(this.bounds);
 
     this.controls = new Controls(scene);
     const energyLevel = GameSaveManager.load()?.energyTankLevel ?? 0;
@@ -75,12 +78,12 @@ export class Battlefield {
     const paddleY = viewport.worldHeight - PADDLE_Y_OFFSET;
     this.paddle = new Paddle(scene, paddleX, paddleY, this.controls, this.bounds, this.energyTank);
 
-    const fieldGenerator = new GridGenerator(scene, this.bounds);
+    const fieldGenerator = new GridGenerator(scene, this.battleContext);
     this.grid = fieldGenerator.createGrid();
 
     this.collisionHandler = new CollisionHandler(scene, this.paddle, this.grid);
 
-    this.moleBase = new MoleBase(scene, this.grid, this.bounds);
+    this.moleBase = new MoleBase(scene, this.grid, this.bounds, this.battleContext);
     this.workersBase = new WorkersBase(scene, this.grid, this.bounds, this.energyTank);
 
     // Draw bounds
@@ -159,7 +162,7 @@ export class Battlefield {
     if (this.difficultyTimer.tick(delta)) {
       this.difficultyTimer.reset();
       this.difficultyStep += 1;
-      this.grid.setDifficulty(this.difficultyStep / MAX_DIFFICULTY_STEPS);
+      this.battleContext.difficulty = this.difficultyStep / MAX_DIFFICULTY_STEPS;
     }
   }
 }

@@ -1,4 +1,3 @@
-import type { Bounds } from '@game/common/types';
 import { MAX_LIVES, CatCageCell } from './cat-cage-cell';
 import {
   MOLE_BUILDING_MAX_LIVES,
@@ -6,11 +5,12 @@ import {
   MoleBuildingCell,
 } from './mole-building-cell';
 import type { CellSlot } from './cell-slot';
+import type { BattleContext } from '../battle-context';
 
 export class CellFactory {
   constructor(
     private readonly scene: Phaser.Scene,
-    private readonly bounds: Bounds,
+    private readonly battleContext: BattleContext,
   ) {}
 
   public createCatCage(slot: CellSlot): CatCageCell {
@@ -22,7 +22,7 @@ export class CellFactory {
       slot.width,
       slot.height,
       lives,
-      this.bounds,
+      this.battleContext,
     );
     slot.cell = cell;
     return cell;
@@ -37,7 +37,7 @@ export class CellFactory {
       slot.width,
       slot.height,
       lives,
-      this.bounds,
+      this.battleContext,
     );
     slot.cell = cell;
     return cell;

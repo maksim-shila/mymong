@@ -1,7 +1,8 @@
 import type { Drop } from '../drop/drop';
 import { ResourceDrop } from '../drop/resource-drop';
-import { Cell } from './cell';
-import type { Bounds, MinMax } from '@game/common/types';
+import { CellBase } from './cell';
+import type { MinMax } from '@game/common/types';
+import type { BattleContext } from '../battle-context';
 
 export const MOLE_BUILDING_MIN_LIVES = 5;
 export const MOLE_BUILDING_MAX_LIVES = 25;
@@ -20,7 +21,7 @@ const RESOURCE_DROP_CHANCE = 0.3;
 const RESOURCE_DROP_MIN_AMOUNT = 10;
 const RESOURCE_DROP_MAX_AMOUNT = 200;
 
-export class MoleBuildingCell extends Cell {
+export class MoleBuildingCell extends CellBase {
   constructor(
     scene: Phaser.Scene,
     x: number,
@@ -28,9 +29,9 @@ export class MoleBuildingCell extends Cell {
     width: number,
     height: number,
     lives: number,
-    bounds: Bounds,
+    battleContext: BattleContext,
   ) {
-    super(scene, x, y, width, height, lives, bounds);
+    super(scene, x, y, width, height, lives, battleContext);
   }
 
   public override getDrop(): Drop | null {

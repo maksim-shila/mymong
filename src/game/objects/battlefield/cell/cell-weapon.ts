@@ -1,19 +1,19 @@
-import type { Bounds } from '@game/common/types';
 import { CollectionsUtils } from '@game/common/helpers/collections-utils';
 import { CellBullet } from './cell-bullet';
 import { AUDIO } from '@game/assets/common-assets';
 import { SoundManager } from '@game/settings/sound';
+import type { BattleContext } from '../battle-context';
 
 const BULLET_SPEED = 300;
 
 export class CellWeapon {
   private readonly scene: Phaser.Scene;
-  private readonly bounds: Bounds;
+  private readonly battleContext: BattleContext;
   private readonly bullets: CellBullet[] = [];
 
-  constructor(scene: Phaser.Scene, bounds: Bounds) {
+  constructor(scene: Phaser.Scene, battleContext: BattleContext) {
     this.scene = scene;
-    this.bounds = bounds;
+    this.battleContext = battleContext;
   }
 
   public shoot(fromX: number, fromY: number, targetX: number, targetY: number): void {
@@ -64,11 +64,12 @@ export class CellWeapon {
   }
 
   private isInBounds(x: number, y: number): boolean {
+    const { bounds } = this.battleContext;
     return (
-      x >= this.bounds.x.min &&
-      x <= this.bounds.x.max &&
-      y >= this.bounds.y.min &&
-      y <= this.bounds.y.max
+      x >= bounds.x.min &&
+      x <= bounds.x.max &&
+      y >= bounds.y.min &&
+      y <= bounds.y.max
     );
   }
 }

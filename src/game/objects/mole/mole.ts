@@ -1,8 +1,8 @@
-import type { Bounds } from '@game/common/types';
 import { CellFactory } from '../battlefield/cell/cell-factory';
 import type { CellSlot } from '../battlefield/cell/cell-slot';
 import { Drop, DropType } from '../battlefield/drop/drop';
 import { Timer } from '@game/common/helpers/timer';
+import type { BattleContext } from '../battlefield/battle-context';
 
 export enum MoleState {
   IDLE,
@@ -54,9 +54,9 @@ export class Mole {
     y: number,
     width: number,
     height: number,
-    bounds: Bounds,
+    battleContext: BattleContext,
   ) {
-    this.cellFactory = new CellFactory(scene, bounds);
+    this.cellFactory = new CellFactory(scene, battleContext);
 
     this.debugCollider = scene.add.rectangle(x, y, width, height, 0xffffff, 0);
     scene.physics.add.existing(this.debugCollider);

@@ -2,8 +2,8 @@ import { Timer } from '@game/common/helpers/timer';
 import { CagedCatAnimation } from '../../animations/caged-cat-animation';
 import { CatDrop } from '../drop/cat-drop';
 import type { Drop } from '../drop/drop';
-import { Cell } from './cell';
-import type { Bounds } from '@game/common/types';
+import { CellBase } from './cell';
+import type { BattleContext } from '../battle-context';
 
 export const MAX_LIVES = 30;
 
@@ -12,7 +12,7 @@ const HEAL_CD_MS = 2000;
 
 const CAT_IMG_SCALE = 0.72;
 
-export class CatCageCell extends Cell {
+export class CatCageCell extends CellBase {
   private readonly catAnimation: CagedCatAnimation;
   private readonly healTimer = new Timer();
   private catDrop: CatDrop | null = null;
@@ -24,9 +24,9 @@ export class CatCageCell extends Cell {
     width: number,
     height: number,
     lives: number,
-    bounds: Bounds,
+    battleContext: BattleContext,
   ) {
-    super(scene, x, y, width, height, lives, bounds);
+    super(scene, x, y, width, height, lives, battleContext);
 
     this.setFillStyle(FILL_COLOR, 1);
 

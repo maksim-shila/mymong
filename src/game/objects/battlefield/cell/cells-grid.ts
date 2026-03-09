@@ -8,8 +8,6 @@ export class CellsGrid {
   private readonly columns: number;
   private readonly rows: number;
 
-  private difficulty = 0;
-
   constructor(
     columns: number,
     rows: number,
@@ -27,13 +25,8 @@ export class CellsGrid {
 
   public update(delta: number, shotAreaX: MinMax, shotAreaY: MinMax): void {
     for (const slot of this.slots) {
-      slot.cell?.setDifficulty(this.difficulty);
       slot.update(delta, shotAreaX, shotAreaY);
     }
-  }
-
-  public setDifficulty(difficulty: number): void {
-    this.difficulty = Phaser.Math.Clamp(difficulty, 0, 1);
   }
 
   private init(width: number, height: number, startX: number, startY: number): void {

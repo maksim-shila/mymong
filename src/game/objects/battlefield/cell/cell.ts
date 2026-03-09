@@ -2,8 +2,9 @@ import type { Drop } from '../drop/drop';
 import { Timer } from '@game/common/helpers/timer';
 import { CellWeapon } from './cell-weapon';
 import type { CellBullet } from './cell-bullet';
-import type { Bounds, MinMax } from '@game/common/types';
+import type { MinMax } from '@game/common/types';
 import { CellHitAnimation } from '../../animations/cell-hit-animation';
+import type { BattleContext } from '../battle-context';
 
 const DEFAULT_FILL_COLOR = 0xff7a33;
 const CONSTRUCTING_MIN_ALPHA = 0.2;
@@ -26,7 +27,23 @@ const HIT_ANIMATION_LIVES_STEP = 5;
 const HIT_FLASH_ALPHA = 0.35;
 const HIT_FLASH_DURATION_MS = 80;
 
-export abstract class Cell extends Phaser.GameObjects.Rectangle {
+export interface Cell {
+  lives: number;
+  constructing: boolean;
+
+  readonly collider: Phaser.GameObjects.Rectangle;
+  readonly bullets: readonly CellBullet[];
+
+  update(delta: number, shotAreaX: MinMax, shotAreaY: MinMax): void;
+  isDead(): boolean;
+  getDrop(): Drop | null;
+  destroyBullet(bullet: CellBullet): void;
+  onHit(damage: number): void;
+  break(onComplete?: () => void): void;
+}
+
+export abstract class CellBase extends Phaser.GameObjects.Rectangle implements Cell {
+  private readonly battleContext: BattleContext;
   private readonly arcadeBody: Phaser.Physics.Arcade.StaticBody;
 
   private readonly shotCooldownTimer: Timer;
@@ -35,8 +52,6 @@ export abstract class Cell extends Phaser.GameObjects.Rectangle {
 
   private breaking = false;
   private constructingBlinkTimeMs = 0;
-  private shotChance: number;
-  private shotCooldownMs: number;
 
   public lives: number;
   public constructing = false;
@@ -48,9 +63,10 @@ export abstract class Cell extends Phaser.GameObjects.Rectangle {
     width: number,
     height: number,
     lives: number,
-    bounds: Bounds,
+    battleContext: BattleContext,
   ) {
     super(scene, x, y, width, height, DEFAULT_FILL_COLOR);
+    this.battleContext = battleContext;
 
     scene.add.existing(this);
 
@@ -61,13 +77,10 @@ export abstract class Cell extends Phaser.GameObjects.Rectangle {
     scene.physics.add.existing(this, true);
     this.arcadeBody = this.body as Phaser.Physics.Arcade.StaticBody;
 
-    this.weapon = new CellWeapon(scene, bounds);
+    this.weapon = new CellWeapon(scene, battleContext);
     this.hitAnimation = new CellHitAnimation(scene, this.width, this.height, this.depth + 1);
 
-    this.shotChance = SHOT_CHANCE_MIN;
-    this.shotCooldownMs = SHOT_CD_MAX_MS;
-
-    const firstShotCooldown = Phaser.Math.Between(1000, this.shotCooldownMs);
+    const firstShotCooldown = Phaser.Math.Between(1000, SHOT_CD_MAX_MS);
     this.shotCooldownTimer = new Timer(firstShotCooldown);
 
     this.lives = lives;
@@ -114,11 +127,6 @@ export abstract class Cell extends Phaser.GameObjects.Rectangle {
     this.weapon.destroyBullet(bullet);
   }
 
-  public setDifficulty(difficulty: number): void {
-    this.shotChance = Phaser.Math.Linear(SHOT_CHANCE_MIN, SHOT_CHANCE_MAX, difficulty);
-    this.shotCooldownMs = Phaser.Math.Linear(SHOT_CD_MAX_MS, SHOT_CD_MIN_MS, difficulty);
-  }
-
   public shouldShoot(delta: number): boolean {
     if (this.constructing || this.isDead()) {
       return false;
@@ -128,9 +136,13 @@ export abstract class Cell extends Phaser.GameObjects.Rectangle {
       return false;
     }
 
-    const shouldShoot = Math.random() <= this.shotChance;
+    const difficulty = this.battleContext.difficulty;
+    const shotChance = Phaser.Math.Linear(SHOT_CHANCE_MIN, SHOT_CHANCE_MAX, difficulty);
+    const shotCooldownMs = Phaser.Math.Linear(SHOT_CD_MAX_MS, SHOT_CD_MIN_MS, difficulty);
+
+    const shouldShoot = Math.random() <= shotChance;
     const jitter = Phaser.Math.Between(-SHOT_CD_JITTER_MAX, SHOT_CD_JITTER_MAX);
-    const nextShotCooldown = Math.max(this.shotCooldownMs, this.shotCooldownMs + jitter);
+    const nextShotCooldown = Math.max(shotCooldownMs, shotCooldownMs + jitter);
     this.shotCooldownTimer.set(nextShotCooldown);
     return shouldShoot;
   }
