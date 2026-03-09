@@ -7,8 +7,7 @@
   "scripts": {
     "dev": "vite",
     "dev:app": "concurrently -k \"vite\" \"wait-on tcp:5173 && electron .\"",
-    "build:web": "tsc && vite build",
-    "build": "npm run build:web",
+    "build": "tsc && vite build",
     "dist:app": "npm run build:web && electron-packager . MyMong --platform=win32 --arch=x64 --out=release --overwrite --prune=true --ignore=\"^/src$\" --ignore=\"^/assets$\" --ignore=\"^/\\.vscode$\" --ignore=\"^/\\.git$\"",
     "preview": "vite preview",
     "format": "prettier --write .",

@@ -2,7 +2,7 @@
 import { resolve } from 'node:path';
 
 export default defineConfig({
-  base: './',
+  base: process.env.NODE_ENV === 'production' ? '/mymong/' : '/',
   resolve: {
     alias: {
       '@game': resolve(__dirname, 'src/game'),
@@ -13,4 +13,3 @@ export default defineConfig({
     host: true,
   },
 });
-
