@@ -72,8 +72,7 @@ export class GameMenu {
         .setOrigin(0.5)
         .setDepth(MENU_DEPTH + 1)
         .setStroke(MENU_STROKE_COLOR, MENU_STROKE_WIDTH)
-        .setVisible(false)
-        .setInteractive({ useHandCursor: true }),
+        .setVisible(false),
     );
 
     this.menu.setupMenuNavigation({

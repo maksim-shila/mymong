@@ -203,23 +203,6 @@ export class ArmoryScene extends Phaser.Scene {
         onSelect: () => this.selectRowById(row.id),
       };
 
-      labelText.on('pointerover', () => {
-        const rowIndex = this.rows.findIndex((entry) => entry === runtime);
-        if (rowIndex < 0 || !this.rows[rowIndex].enabled) {
-          return;
-        }
-        this.selectedRowIndex = rowIndex;
-        this.renderSelection();
-      });
-
-      labelText.on('pointerdown', () => {
-        const rowIndex = this.rows.findIndex((entry) => entry === runtime);
-        if (rowIndex < 0 || !this.rows[rowIndex].enabled) {
-          return;
-        }
-        this.activateSelection(rowIndex);
-      });
-
       return runtime;
     });
   }
@@ -282,15 +265,6 @@ export class ArmoryScene extends Phaser.Scene {
       row.enabled = enabled;
       row.labelText.setColor(enabled ? MENU_COLOR_DEFAULT : DISABLED_TEXT_COLOR);
       row.priceText.setText(price).setColor(enabled ? RESOURCES_TEXT_COLOR : DISABLED_TEXT_COLOR);
-      if (enabled) {
-        if (!row.labelText.input) {
-          row.labelText.setInteractive({ useHandCursor: true });
-        } else {
-          row.labelText.input.enabled = true;
-        }
-      } else if (row.labelText.input) {
-        row.labelText.input.enabled = false;
-      }
     }
 
     if (!this.rows[this.selectedRowIndex]?.enabled) {

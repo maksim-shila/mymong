@@ -22,7 +22,6 @@ const BACK_Y_RATIO = 0.9;
 const TEXT_FONT_FAMILY = 'Fredoka, Arial, Helvetica, sans-serif';
 const BACK_FONT_SIZE = '44px';
 const BACK_COLOR_DEFAULT = '#ffffff';
-const BACK_COLOR_HOVER = '#fff27a';
 
 const CAT_IMG_SCALE = 0.72;
 const WIN_CATS_COUNT = 32;
@@ -31,7 +30,6 @@ const WIN_FADE_DURATION_MS = 5000;
 export class CatoratoriaScene extends Phaser.Scene {
   private cages: boolean[] = [];
   private readonly cats: CagedCatAnimation[] = [];
-  private backButton: Phaser.GameObjects.Text | null = null;
   private controls!: Controls;
 
   constructor(name: string) {
@@ -146,18 +144,13 @@ export class CatoratoriaScene extends Phaser.Scene {
     const x = viewport.viewX + viewport.viewWidth / 2;
     const y = viewport.viewY + viewport.viewHeight * BACK_Y_RATIO;
 
-    this.backButton = this.add
+    this.add
       .text(x, y, 'Back', {
         fontFamily: TEXT_FONT_FAMILY,
         fontSize: BACK_FONT_SIZE,
         color: BACK_COLOR_DEFAULT,
       })
-      .setOrigin(0.5)
-      .setInteractive({ useHandCursor: true });
-
-    this.backButton.on('pointerover', () => this.backButton?.setColor(BACK_COLOR_HOVER));
-    this.backButton.on('pointerout', () => this.backButton?.setColor(BACK_COLOR_DEFAULT));
-    this.backButton.on('pointerdown', () => this.scene.start(SCENE.HOME));
+      .setOrigin(0.5);
   }
 
   private bindEscapeKey(): void {
@@ -172,8 +165,6 @@ export class CatoratoriaScene extends Phaser.Scene {
     this.cats.length = 0;
     this.cages = [];
 
-    this.backButton?.removeAllListeners();
-    this.backButton = null;
   }
 }
 

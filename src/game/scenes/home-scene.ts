@@ -166,28 +166,6 @@ export class HomeScene extends Phaser.Scene {
       return { border, label, isInteractive, onSelect };
     }
 
-    border.setInteractive({ useHandCursor: true });
-
-    border.on('pointerover', () => {
-      const hoveredIndex = this.cards.findIndex((card) => card.border === border);
-      if (hoveredIndex === -1) {
-        return;
-      }
-      this.selectedCardIndex = hoveredIndex;
-      this.renderSelection();
-    });
-
-    border.on('pointerout', () => {
-      this.renderSelection();
-    });
-
-    border.on('pointerdown', () => {
-      if (this.gameMenu.isOpen) {
-        return;
-      }
-      onSelect?.();
-    });
-
     return { border, label, isInteractive, onSelect };
   }
 
@@ -286,12 +264,6 @@ export class HomeScene extends Phaser.Scene {
       const card = this.cards[i];
       const isCatoratoria = i === CATORATORIA_CARD_INDEX;
       card.isInteractive = isCatoratoria;
-
-      if (isCatoratoria) {
-        card.border.setInteractive({ useHandCursor: true });
-      } else if (card.border.input) {
-        card.border.disableInteractive();
-      }
     }
 
     const catoratoriaCard = this.cards[CATORATORIA_CARD_INDEX];

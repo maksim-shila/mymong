@@ -58,8 +58,7 @@ export class MenuComponent {
         color: MENU_COLOR_DEFAULT,
       })
       .setOrigin(0.5)
-      .setDepth(2)
-      .setInteractive({ useHandCursor: true });
+      .setDepth(2);
 
     return text;
   }

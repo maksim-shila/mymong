@@ -28,7 +28,6 @@ export class Slider {
   private readonly knob: Phaser.GameObjects.Arc;
   private readonly valueText: Phaser.GameObjects.Text;
 
-  private dragging = false;
   private selected = false;
   private value = 0;
 
@@ -42,15 +41,13 @@ export class Slider {
     this.trackBg = this.scene.add
       .rectangle(this.x, this.y, this.width, TRACK_HEIGHT, TRACK_BG_COLOR)
       .setOrigin(0.5)
-      .setDepth(2)
-      .setInteractive({ useHandCursor: true });
+      .setDepth(2);
 
     this.trackFill = this.scene.add.graphics().setDepth(2);
 
     this.knob = this.scene.add
       .circle(this.x - this.width / 2, this.y, KNOB_RADIUS, KNOB_COLOR)
-      .setDepth(3)
-      .setInteractive({ useHandCursor: true });
+      .setDepth(3);
 
     this.valueText = this.scene.add
       .text(this.x + this.width / 2 + VALUE_TEXT_OFFSET_X, this.y, '0', {
@@ -60,35 +57,6 @@ export class Slider {
       })
       .setOrigin(0.5)
       .setDepth(2);
-
-    const onPointerDown = (pointer: Phaser.Input.Pointer) => {
-      this.dragging = true;
-      this.setValueFromPointer(this.getPointerWorldX(pointer));
-    };
-    const onPointerMove = (pointer: Phaser.Input.Pointer) => {
-      if (!this.dragging) {
-        return;
-      }
-
-      this.setValueFromPointer(this.getPointerWorldX(pointer));
-    };
-    const onPointerUp = () => {
-      this.dragging = false;
-    };
-
-    this.trackBg.on('pointerdown', onPointerDown);
-    this.knob.on('pointerdown', onPointerDown);
-    this.scene.input.on('pointermove', onPointerMove);
-    this.scene.input.on('pointerup', onPointerUp);
-    this.scene.input.on('pointerupoutside', onPointerUp);
-
-    this.scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-      this.trackBg.off('pointerdown', onPointerDown);
-      this.knob.off('pointerdown', onPointerDown);
-      this.scene.input.off('pointermove', onPointerMove);
-      this.scene.input.off('pointerup', onPointerUp);
-      this.scene.input.off('pointerupoutside', onPointerUp);
-    });
 
     this.setValue(config.initialValue, false);
   }
@@ -130,17 +98,6 @@ export class Slider {
     this.trackFill.destroy();
     this.knob.destroy();
     this.valueText.destroy();
-  }
-
-  private setValueFromPointer(pointerX: number): void {
-    const leftX = this.x - this.width / 2;
-    const normalized = Phaser.Math.Clamp((pointerX - leftX) / this.width, 0, 1);
-    this.setValue(normalized * 100);
-  }
-
-  private getPointerWorldX(pointer: Phaser.Input.Pointer): number {
-    const worldPoint = this.scene.cameras.main.getWorldPoint(pointer.x, pointer.y);
-    return worldPoint.x;
   }
 
   private redrawFill(): void {
