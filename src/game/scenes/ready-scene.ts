@@ -1,3 +1,4 @@
+import { Controls } from '@game/input/controls';
 import { applyResolutionCamera, type ResolutionViewport } from '@game/settings/resolution';
 import { SCENE } from '../../scenes';
 
@@ -11,11 +12,14 @@ const PRESS_ANY_KEY_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
 };
 
 export class ReadyScene extends Phaser.Scene {
+  private controls!: Controls;
+
   constructor(name: string) {
     super(name);
   }
 
   create(): void {
+    this.controls = new Controls(this);
     this.cameras.main.setBackgroundColor(GAME_BACKGROUND_COLOR);
 
     const viewport = applyResolutionCamera(this);
@@ -49,12 +53,7 @@ export class ReadyScene extends Phaser.Scene {
       ease: 'Sine.easeInOut',
     });
 
-    const keyboard = this.input.keyboard;
-    if (!keyboard) {
-      return;
-    }
-
-    keyboard.once('keydown', () => {
+    this.controls.onAnyKeyDown(() => {
       this.scene.start(SCENE.BATTLE);
     });
   }

@@ -15,6 +15,7 @@ export enum Key {
 
 export class Controls {
   private readonly scene: Phaser.Scene;
+  private readonly keyboard: Phaser.Input.Keyboard.KeyboardPlugin;
   private readonly bindings: Record<Key, Phaser.Input.Keyboard.Key[]>;
 
   constructor(scene: Phaser.Scene) {
@@ -23,6 +24,7 @@ export class Controls {
     if (!keyboard) {
       throw new Error('Keyboard input is not available');
     }
+    this.keyboard = keyboard;
 
     const shootBindings = [keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.K)];
 
@@ -71,5 +73,12 @@ export class Controls {
         binding.off('down', handler);
       });
     }
+  }
+
+  onAnyKeyDown(handler: () => void): void {
+    this.keyboard.once('keydown', handler);
+    this.scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.keyboard.off('keydown', handler);
+    });
   }
 }

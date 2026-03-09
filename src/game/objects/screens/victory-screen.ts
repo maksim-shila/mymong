@@ -1,3 +1,4 @@
+import { Controls } from '@game/input/controls';
 import type { ResolutionViewport } from '@game/settings/resolution';
 
 const PHASE_MESSAGE_DURATION_MS = 3000;
@@ -26,6 +27,7 @@ const PRESS_ANY_KEY_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
 
 export class VictoryScreen {
   private readonly scene: Phaser.Scene;
+  private readonly controls: Controls;
   private readonly phaseMessageText: Phaser.GameObjects.Text;
   private readonly victoryOverlay: Phaser.GameObjects.Rectangle;
   private readonly victoryTitleText: Phaser.GameObjects.Text;
@@ -37,6 +39,7 @@ export class VictoryScreen {
 
   constructor(scene: Phaser.Scene, viewport: ResolutionViewport) {
     this.scene = scene;
+    this.controls = new Controls(scene);
 
     const centerX = viewport.viewX + viewport.viewWidth / 2;
     const centerY = viewport.viewY + viewport.viewHeight / 2;
@@ -135,12 +138,7 @@ export class VictoryScreen {
       onComplete: () => {
         this.gameplayTimeScale = 0;
         this.victoryCompleted = true;
-        const keyboard = this.scene.input.keyboard;
-        if (!keyboard) {
-          return;
-        }
-
-        keyboard.once('keydown', () => {
+        this.controls.onAnyKeyDown(() => {
           onAnyKey();
         });
       },

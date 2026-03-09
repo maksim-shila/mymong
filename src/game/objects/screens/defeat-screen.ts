@@ -1,3 +1,4 @@
+import { Controls } from '@game/input/controls';
 import type { ResolutionViewport } from '@game/settings/resolution';
 import { AUDIO } from '@game/assets/common-assets';
 import { SoundManager } from '@game/settings/sound';
@@ -14,6 +15,7 @@ const DEFEAT_TITLE_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
 
 export class DefeatScreen {
   private readonly scene: Phaser.Scene;
+  private readonly controls: Controls;
   private readonly defeatOverlay: Phaser.GameObjects.Rectangle;
   private readonly defeatTitleText: Phaser.GameObjects.Text;
 
@@ -23,6 +25,7 @@ export class DefeatScreen {
 
   constructor(scene: Phaser.Scene, viewport: ResolutionViewport) {
     this.scene = scene;
+    this.controls = new Controls(scene);
 
     const centerX = viewport.viewX + viewport.viewWidth / 2;
     const centerY = viewport.viewY + viewport.viewHeight / 2;
@@ -77,12 +80,7 @@ export class DefeatScreen {
       onComplete: () => {
         this.gameplayTimeScale = 0;
         this.defeatCompleted = true;
-        const keyboard = this.scene.input.keyboard;
-        if (!keyboard) {
-          return;
-        }
-
-        keyboard.once('keydown', () => {
+        this.controls.onAnyKeyDown(() => {
           onAnyKey();
         });
       },
