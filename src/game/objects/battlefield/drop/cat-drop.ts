@@ -1,15 +1,22 @@
 import { Drop, DropType } from './drop';
-import type { CagedCatAnimation } from '../../animations/caged-cat-animation';
+import { FreeCatAnimation } from '../../animations/free-cat-animation';
 
 export class CatDrop extends Drop {
   public override readonly type: DropType = DropType.CAT;
 
-  private readonly catAnimation: CagedCatAnimation;
+  private readonly catAnimation: FreeCatAnimation;
 
-  constructor(catAnimation: CagedCatAnimation) {
+  constructor(
+    scene: Phaser.Scene,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    depth: number,
+  ) {
     super();
 
-    this.catAnimation = catAnimation;
+    this.catAnimation = new FreeCatAnimation(scene, x, y, width, height, depth);
   }
 
   public override destroy(): void {

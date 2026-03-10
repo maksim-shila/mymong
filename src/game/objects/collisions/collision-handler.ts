@@ -1,6 +1,7 @@
 import type { Paddle } from '../paddle/paddle';
 import type { CellsGrid } from '../battlefield/cell/cells-grid';
-import type { CellBullet } from '../battlefield/cell/cell-bullet';
+import type { PaddleShield } from '../paddle/paddle-shield';
+import type { Cell } from '../battlefield/cell/cell';
 
 export class CollisionHandler {
   private readonly physics: Phaser.Physics.Arcade.ArcadePhysics;
@@ -24,23 +25,21 @@ export class CollisionHandler {
 
     for (const bullet of weapon.getBullets()) {
       const hitSlot = cellSlots.find((slot) => {
-        if (!slot.cell) {
+        const cell = slot.cell;
+        if (cell === null || !this.isCellHittable(cell)) {
           return false;
         }
 
-        return this.physics.overlap(bullet, slot.cell.collider);
+        return this.physics.overlap(bullet, cell.collider);
       });
 
-      if (!hitSlot?.cell) {
+      const hitCell = hitSlot?.cell;
+      if (!hitCell) {
         continue;
       }
 
       weapon.destroyBullet(bullet);
-
-      hitSlot.cell.onHit(bullet.damage);
-      if (hitSlot.cell.isDead()) {
-        hitSlot.breakCell();
-      }
+      hitCell.onHit(bullet.damage);
     }
   }
 
@@ -50,30 +49,42 @@ export class CollisionHandler {
     }
 
     const shield = this.paddle.shield;
+    const cells = this.grid.slots.map((slot) => slot.cell).filter((cell) => cell !== null);
 
-    for (const slot of this.grid.slots) {
-      const cell = slot.cell;
-      if (!cell) {
+    // Ship is invulnerable while shield active
+    if (shield.active) {
+      this.handleShieldHits(shield, cells);
+    } else {
+      this.handleShipHits(this.paddle, cells);
+    }
+  }
+
+  private handleShieldHits(shield: PaddleShield, cells: Cell[]) {
+    for (const cell of cells) {
+      cell.bullets
+        .filter((bullet) => this.physics.overlap(bullet.collider, shield.collider))
+        .forEach((bullet) => cell.destroyBullet(bullet));
+    }
+  }
+
+  private handleShipHits(ship: Paddle, cells: Cell[]) {
+    for (const cell of cells) {
+      const hitBullet = cell.bullets.find((bullet) =>
+        this.physics.overlap(bullet.collider, this.paddle.collider),
+      );
+
+      if (!hitBullet) {
         continue;
       }
 
-      const bulletsToDestroy: CellBullet[] = [];
+      cell.destroyBullet(hitBullet);
+      ship.onHit(hitBullet.damage);
 
-      for (const bullet of cell.bullets) {
-        if (shield.active && this.physics.overlap(bullet.collider, shield.collider)) {
-          bulletsToDestroy.push(bullet);
-          continue;
-        }
-
-        if (this.physics.overlap(bullet.collider, this.paddle.collider)) {
-          bulletsToDestroy.push(bullet);
-          this.paddle.onHit(bullet.damage);
-        }
-      }
-
-      for (const bullet of bulletsToDestroy) {
-        cell.destroyBullet(bullet);
-      }
+      return; // Avoid multihit per frame
     }
+  }
+
+  private isCellHittable(cell: Cell) {
+    return cell.isActive;
   }
 }

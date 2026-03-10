@@ -7,6 +7,7 @@ import type { EnergyTank } from '../energy-tank';
 import { WorkerBaseHud } from './worker-base-hud';
 import { CollectionsUtils } from '@game/common/helpers/collections-utils';
 import { GameSaveManager } from '@game/settings/game-save';
+import { FreeCatAnimation } from '../animations/free-cat-animation';
 
 const DEFAULT_WORKERS_COUNT = 3;
 
@@ -22,6 +23,9 @@ const WORKER_ENERGY_FILL_BONUS = 30;
 const WORKER_RELAX_MULTIPLIER_STEP = 0.8;
 
 const CAT_OFFSET = 100;
+const SAVED_CAT_WIDTH = 100;
+const SAVED_CAT_HEIGHT = 100;
+const SAVED_CAT_DEPTH = 1300;
 
 type CatPlace = {
   x: number;
@@ -36,6 +40,7 @@ export class WorkersBase {
 
   private readonly workers: Worker[] = [];
   private readonly catPlaces: CatPlace[] = [];
+  private readonly savedCats: FreeCatAnimation[] = [];
 
   private readonly workerEnergyFillAmount: number;
 
@@ -117,8 +122,18 @@ export class WorkersBase {
           worker.moveToBase(delta);
           break;
         case WorkerState.SAVE_CAT:
-          const savedDrop = worker.saveCat(delta);
-          if (savedDrop?.type === DropType.CAT) {
+          const catPosition = worker.saveCat(delta);
+          if (catPosition) {
+            this.savedCats.push(
+              new FreeCatAnimation(
+                this.scene,
+                catPosition.x,
+                catPosition.y,
+                SAVED_CAT_WIDTH,
+                SAVED_CAT_HEIGHT,
+                SAVED_CAT_DEPTH,
+              ),
+            );
             this.savedCatsCount += 1;
           }
           break;

@@ -3,6 +3,7 @@ import type { CellSlot } from '../battlefield/cell/cell-slot';
 import { Drop, DropType } from '../battlefield/drop/drop';
 import { Timer } from '@game/common/helpers/timer';
 import type { BattleContext } from '../battlefield/battle-context';
+import { CellState } from '../battlefield/cell/cell';
 
 export enum MoleState {
   IDLE,
@@ -172,7 +173,7 @@ export class Mole {
       const cell = isCatStolen
         ? this.cellFactory.createCatCage(this.targetCellSlot)
         : this.cellFactory.createMoleBuilding(this.targetCellSlot);
-      cell.constructing = true;
+      cell.state = CellState.CONSTRUCTING;
       this.buildingCellLives = cell.lives;
       cell.lives = 1;
       this.buildingTimer.reset();
@@ -182,7 +183,7 @@ export class Mole {
     const buildingCell = this.targetCellSlot.cell;
 
     // If cell destroyed until building - mole takes hit
-    if (buildingCell.isDead()) {
+    if (!buildingCell.isActive) {
       this.lives--;
       const isDead = this.lives <= 0;
 
@@ -190,8 +191,12 @@ export class Mole {
       if (isDead) {
         this.state = MoleState.DEAD;
         if (this.stolenDrop) {
-          this.targetCellSlot.drop = this.stolenDrop;
-          this.stolenDrop.show();
+          if (this.targetCellSlot.drop === null) {
+            this.targetCellSlot.drop = this.stolenDrop;
+            this.stolenDrop.show();
+          } else {
+            this.stolenDrop.destroy();
+          }
         }
       } else {
         this.state = MoleState.MOVE_TO_BASE;
@@ -217,7 +222,7 @@ export class Mole {
     buildingCell.lives += 1;
     const buildingCompleted = buildingCell.lives === this.buildingCellLives;
     if (buildingCompleted) {
-      buildingCell.constructing = false;
+      buildingCell.state = CellState.ALIVE;
       this.targetCellSlot.targetedByMole = false;
       this.targetCellSlot = null;
 

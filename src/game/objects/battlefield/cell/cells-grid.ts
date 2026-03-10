@@ -1,5 +1,6 @@
 import { CellSlot } from './cell-slot';
 import type { MinMax } from '@game/common/types';
+import type { CellDropGenerator } from './cell-drop-generator';
 
 export class CellsGrid {
   public readonly slots: CellSlot[] = [];
@@ -9,6 +10,7 @@ export class CellsGrid {
   private readonly rows: number;
 
   constructor(
+    cellDropGenerator: CellDropGenerator,
     columns: number,
     rows: number,
     cellWidth: number,
@@ -20,7 +22,7 @@ export class CellsGrid {
     this.columns = columns;
     this.rows = rows;
     this.catsCount = catsCount;
-    this.init(cellWidth, cellHeight, startX, startY);
+    this.init(cellDropGenerator, cellWidth, cellHeight, startX, startY);
   }
 
   public update(delta: number, shotAreaX: MinMax, shotAreaY: MinMax): void {
@@ -29,14 +31,22 @@ export class CellsGrid {
     }
   }
 
-  private init(width: number, height: number, startX: number, startY: number): void {
+  private init(
+    cellDropGenerator: CellDropGenerator,
+    width: number,
+    height: number,
+    startX: number,
+    startY: number,
+  ): void {
     for (let rowIndex = 0; rowIndex < this.rows; rowIndex++) {
       for (let colIndex = 0; colIndex < this.columns; colIndex++) {
         const x = startX + colIndex * width;
         const y = startY - rowIndex * height;
 
         const slotIndex = rowIndex * this.columns + colIndex;
-        this.slots.push(new CellSlot(slotIndex, rowIndex, colIndex, width, height, x, y));
+        this.slots.push(
+          new CellSlot(cellDropGenerator, slotIndex, rowIndex, colIndex, width, height, x, y),
+        );
       }
     }
   }

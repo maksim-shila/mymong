@@ -1,6 +1,4 @@
-import type { Drop } from '../drop/drop';
-import { ResourceDrop } from '../drop/resource-drop';
-import { CellBase } from './cell';
+import { CellBase, CellType } from './cell';
 import type { MinMax } from '@game/common/types';
 import type { BattleContext } from '../battle-context';
 
@@ -17,11 +15,9 @@ const LIVES_COLOR: Record<number, number> = {
   5: 0x12464f,
 };
 
-const RESOURCE_DROP_CHANCE = 0.3;
-const RESOURCE_DROP_MIN_AMOUNT = 10;
-const RESOURCE_DROP_MAX_AMOUNT = 200;
-
 export class MoleBuildingCell extends CellBase {
+  public override readonly type: CellType = CellType.MOLE_BUILDING;
+
   constructor(
     scene: Phaser.Scene,
     x: number,
@@ -32,16 +28,6 @@ export class MoleBuildingCell extends CellBase {
     battleContext: BattleContext,
   ) {
     super(scene, x, y, width, height, lives, battleContext);
-  }
-
-  public override getDrop(): Drop | null {
-    const hasDrop = RESOURCE_DROP_CHANCE > Math.random();
-    if (!hasDrop) {
-      return null;
-    }
-
-    const resourceAmount = Phaser.Math.Between(RESOURCE_DROP_MIN_AMOUNT, RESOURCE_DROP_MAX_AMOUNT);
-    return new ResourceDrop(this.scene, this.x, this.y, resourceAmount);
   }
 
   public override update(delta: number, shotAreaX: MinMax, shotAreaY: MinMax): void {

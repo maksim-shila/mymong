@@ -9,7 +9,7 @@ import type { BattleContext } from '../battle-context';
 
 export class CellFactory {
   constructor(
-    private readonly scene: Phaser.Scene,
+    public readonly scene: Phaser.Scene,
     private readonly battleContext: BattleContext,
   ) {}
 

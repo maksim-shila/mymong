@@ -1,6 +1,7 @@
 import type { Drop } from '../drop/drop';
-import type { Cell } from './cell';
+import { CellState, type Cell } from './cell';
 import type { MinMax } from '@game/common/types';
+import type { CellDropGenerator } from './cell-drop-generator';
 
 export class CellSlot {
   public cell: Cell | null = null;
@@ -9,6 +10,7 @@ export class CellSlot {
   public targetedByWorker = false;
 
   constructor(
+    private readonly cellDropGenerator: CellDropGenerator,
     public readonly index: number,
     public readonly row: number,
     public readonly column: number,
@@ -19,19 +21,42 @@ export class CellSlot {
   ) {}
 
   public update(delta: number, shotAreaX: MinMax, shotAreaY: MinMax): void {
-    this.cell?.update(delta, shotAreaX, shotAreaY);
-    this.drop?.update(delta);
+    this.updateCell(delta, shotAreaX, shotAreaY);
+    this.updateDrop(delta);
   }
 
-  public breakCell(): void {
+  private updateCell(delta: number, shotAreaX: MinMax, shotAreaY: MinMax) {
     if (this.cell === null) {
       return;
     }
 
-    const cell = this.cell;
-    this.drop = this.drop ?? cell.getDrop();
-    cell.break(() => {
+    if (this.cell.state === CellState.READY_TO_DESTROY) {
+      if (this.drop === null) {
+        this.drop = this.cellDropGenerator.generate(
+          this.cell.type,
+          this.x,
+          this.y,
+          this.width,
+          this.height,
+        );
+      }
+
+      this.cell.state = CellState.DESTROING;
+    }
+
+    if (this.cell.state === CellState.DESTROYED) {
       this.cell = null;
-    });
+      return;
+    }
+
+    this.cell.update(delta, shotAreaX, shotAreaY);
+  }
+
+  private updateDrop(delta: number) {
+    if (!this.drop) {
+      return;
+    }
+
+    this.drop.update(delta);
   }
 }

@@ -1,4 +1,3 @@
-import type { Drop } from '../drop/drop';
 import { Timer } from '@game/common/helpers/timer';
 import { CellWeapon } from './cell-weapon';
 import type { CellBullet } from './cell-bullet';
@@ -27,19 +26,31 @@ const HIT_ANIMATION_LIVES_STEP = 5;
 const HIT_FLASH_ALPHA = 0.35;
 const HIT_FLASH_DURATION_MS = 80;
 
+export enum CellState {
+  ALIVE,
+  CONSTRUCTING,
+  READY_TO_DESTROY,
+  DESTROING,
+  DESTROYED,
+}
+
+export enum CellType {
+  CAT_CAGE = 'cat-cage',
+  MOLE_BUILDING = 'mole-building',
+}
+
 export interface Cell {
+  readonly type: CellType;
+  readonly isActive: boolean;
   lives: number;
-  constructing: boolean;
+  state: CellState;
 
   readonly collider: Phaser.GameObjects.Rectangle;
   readonly bullets: readonly CellBullet[];
 
   update(delta: number, shotAreaX: MinMax, shotAreaY: MinMax): void;
-  isDead(): boolean;
-  getDrop(): Drop | null;
   destroyBullet(bullet: CellBullet): void;
   onHit(damage: number): void;
-  break(onComplete?: () => void): void;
 }
 
 export abstract class CellBase extends Phaser.GameObjects.Rectangle implements Cell {
@@ -50,11 +61,11 @@ export abstract class CellBase extends Phaser.GameObjects.Rectangle implements C
   private readonly weapon: CellWeapon;
   private readonly hitAnimation: CellHitAnimation;
 
-  private breaking = false;
   private constructingBlinkTimeMs = 0;
 
   public lives: number;
-  public constructing = false;
+  public abstract override readonly type: CellType;
+  public override state: CellState = CellState.ALIVE;
 
   constructor(
     scene: Phaser.Scene,
@@ -94,12 +105,16 @@ export abstract class CellBase extends Phaser.GameObjects.Rectangle implements C
     return this.weapon.getBullets();
   }
 
-  public isDead(): boolean {
-    return this.lives <= 0;
+  public get isActive(): boolean {
+    return (
+      this.state !== CellState.READY_TO_DESTROY &&
+      this.state !== CellState.DESTROING &&
+      this.state !== CellState.DESTROYED
+    );
   }
 
   public override update(delta: number, shotAreaX: MinMax, shotAreaY: MinMax): void {
-    if (this.constructing) {
+    if (this.state === CellState.CONSTRUCTING) {
       this.constructingBlinkTimeMs += delta;
       const blinkSpeedPerMs = CONSTRUCTING_BLINK_SPEED / 1000;
       const wave = (Math.sin(this.constructingBlinkTimeMs * blinkSpeedPerMs) + 1) / 2;
@@ -121,14 +136,12 @@ export abstract class CellBase extends Phaser.GameObjects.Rectangle implements C
     this.weapon.update(delta);
   }
 
-  public abstract getDrop(): Drop | null;
-
   public destroyBullet(bullet: CellBullet): void {
     this.weapon.destroyBullet(bullet);
   }
 
   public shouldShoot(delta: number): boolean {
-    if (this.constructing || this.isDead()) {
+    if (this.state !== CellState.ALIVE) {
       return false;
     }
 
@@ -148,30 +161,41 @@ export abstract class CellBase extends Phaser.GameObjects.Rectangle implements C
   }
 
   public onHit(damage: number): void {
+    if (!this.isActive) {
+      return;
+    }
+
     damage = Math.max(1, Math.floor(damage));
     this.lives = Math.max(0, this.lives - damage);
 
     this.drawFlash();
+
+    if (this.lives <= 0) {
+      this.hitAnimation.show(this.x, this.y);
+      this.break();
+      return;
+    }
 
     if (this.lives % HIT_ANIMATION_LIVES_STEP === 0) {
       this.hitAnimation.show(this.x, this.y);
     }
   }
 
-  public break(onComplete?: () => void): void {
-    if (this.breaking) {
+  protected break(): void {
+    if (!this.isActive) {
       return;
     }
 
-    this.breaking = true;
+    this.state = CellState.READY_TO_DESTROY;
     this.arcadeBody.enable = false;
+
     this.scene.tweens.add({
       targets: this,
       alpha: 0,
       duration: 1000,
       ease: 'Linear',
       onComplete: () => {
-        onComplete?.();
+        this.state = CellState.DESTROYED;
         this.destroy();
       },
     });
@@ -183,7 +207,7 @@ export abstract class CellBase extends Phaser.GameObjects.Rectangle implements C
   }
 
   private drawFlash(): void {
-    if (!this.breaking) {
+    if (this.isActive) {
       this.scene.tweens.killTweensOf(this);
       this.setAlpha(1);
       this.scene.tweens.add({

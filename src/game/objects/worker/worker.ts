@@ -4,6 +4,7 @@ import type { EnergyTank } from '../energy-tank';
 import type { CellSlot } from '../battlefield/cell/cell-slot';
 import { DropType, type Drop } from '../battlefield/drop/drop';
 import { ResourceDrop } from '../battlefield/drop/resource-drop';
+import type { Position } from '@game/common/types';
 
 const Z_INDEX = 1300;
 
@@ -199,7 +200,7 @@ export class Worker extends Phaser.GameObjects.Container {
     }
   }
 
-  public saveCat(delta: number): Drop | null {
+  public saveCat(delta: number): Position | null {
     if (!this.targetCatPosition) {
       this.state = WorkerState.MOVE_TO_BASE;
       this.savedDrop = null;
@@ -216,15 +217,18 @@ export class Worker extends Phaser.GameObjects.Container {
       return null;
     }
 
-    const savedDrop = this.savedDrop;
-    savedDrop.setPosition(this.targetCatPosition.x, this.targetCatPosition.y);
-    savedDrop.show();
+    const catPosition = {
+      x: this.targetCatPosition.x,
+      y: this.targetCatPosition.y,
+    };
+
+    this.savedDrop.destroy();
 
     this.state = WorkerState.MOVE_TO_BASE;
     this.targetCatPosition = null;
     this.savedDrop = null;
 
-    return savedDrop;
+    return catPosition;
   }
 
   public moveToBase(delta: number): void {

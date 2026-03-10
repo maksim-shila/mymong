@@ -4,9 +4,7 @@ import { applyResolutionCamera, type ResolutionViewport } from '@game/settings/r
 import { SCENE } from '../../scenes';
 import { GameSaveManager } from '@game/settings/game-save';
 import { CollectionsUtils } from '@game/common/helpers/collections-utils';
-import { CagedCatAnimation } from '@game/objects/animations/caged-cat-animation';
-import { TEXTURE } from '@game/assets/common-assets';
-import catImage from '@assets/image/cat-saved.png';
+import { FreeCatAnimation } from '@game/objects/animations/free-cat-animation';
 import { MusicManager } from '@game/settings/music';
 import { SOUNDTRACK } from '@game/assets/soundtrack-assets';
 
@@ -30,15 +28,11 @@ const WIN_FADE_DURATION_MS = 5000;
 
 export class CatoratoriaScene extends Phaser.Scene {
   private cages: boolean[] = [];
-  private readonly cats: CagedCatAnimation[] = [];
+  private readonly cats: FreeCatAnimation[] = [];
   private controls!: Controls;
 
   constructor(name: string) {
     super(name);
-  }
-
-  public preload(): void {
-    this.load.image(TEXTURE.CAT_SAVED, catImage);
   }
 
   public create(): void {
@@ -133,8 +127,7 @@ export class CatoratoriaScene extends Phaser.Scene {
         const index = row * GRID_COLUMNS + column;
         const hasCat = this.cages[index];
         if (hasCat) {
-          const cat = new CagedCatAnimation(this, x, y, catWidth, catHeight, 3000);
-          cat.setFree();
+          const cat = new FreeCatAnimation(this, x, y, catWidth, catHeight, 3000);
           this.cats.push(cat);
         }
       }
@@ -165,8 +158,5 @@ export class CatoratoriaScene extends Phaser.Scene {
     }
     this.cats.length = 0;
     this.cages = [];
-
   }
 }
-
-

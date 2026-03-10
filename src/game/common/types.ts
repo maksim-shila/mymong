@@ -8,6 +8,11 @@ export interface Offset {
   y: number;
 }
 
+export interface Position {
+  x: number;
+  y: number;
+}
+
 export interface Bounds {
   x: MinMax;
   y: MinMax;

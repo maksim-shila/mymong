@@ -2,6 +2,7 @@ import { CollectionsUtils } from '@game/common/helpers/collections-utils';
 import { CellsGrid } from './cell/cells-grid';
 import { CellFactory } from './cell/cell-factory';
 import type { BattleContext } from './battle-context';
+import { CellDropGenerator } from './cell/cell-drop-generator';
 
 const GRID_LEFT_PADDING = 40;
 const GRID_RIGHT_PADDING = GRID_LEFT_PADDING;
@@ -39,7 +40,17 @@ export class GridGenerator {
     const startY = bounds.y.max - GRID_TOP_PADDING - CELL_HEIGHT / 2;
     const catsCount = Phaser.Math.RND.between(CATS_COUNT_MIN, CATS_COUNT_MAX);
 
-    const grid = new CellsGrid(columns, rows, CELL_WIDTH, CELL_HEIGHT, startX, startY, catsCount);
+    const cellDropGenerator = new CellDropGenerator(this.cellFactory.scene);
+    const grid = new CellsGrid(
+      cellDropGenerator,
+      columns,
+      rows,
+      CELL_WIDTH,
+      CELL_HEIGHT,
+      startX,
+      startY,
+      catsCount,
+    );
 
     const catCageSlotIndices = this.pickCatCageIndices(catsCount, rows, columns);
 
