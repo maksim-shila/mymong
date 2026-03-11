@@ -4,13 +4,12 @@ import { GridEntityFactory } from './grid/grid-entity-factory';
 import type { BattleContext } from './battle-context';
 import { DropGenerator } from './grid/drop-generator';
 
-const GRID_LEFT_PADDING = 40;
-const GRID_RIGHT_PADDING = GRID_LEFT_PADDING;
 const GRID_TOP_PADDING = 500;
-const GRID_BOTTOM_PADDING = 40;
 
 const CELL_WIDTH = 120;
 const CELL_HEIGHT = CELL_WIDTH;
+const GRID_ROWS = 5;
+const GRID_COLUMNS = 9;
 
 const EMPTY_CELL_CHANCE = 0.16;
 
@@ -28,11 +27,8 @@ export class GridGenerator {
 
   public createGrid(): Grid {
     const { bounds } = this.battleContext;
-    const availableWidth = bounds.width - GRID_LEFT_PADDING - GRID_RIGHT_PADDING;
-    const availableHeight = bounds.height - GRID_TOP_PADDING - GRID_BOTTOM_PADDING;
-
-    const columns = Math.max(1, Math.floor(availableWidth / CELL_WIDTH));
-    const rows = Math.max(1, Math.floor(availableHeight / CELL_HEIGHT));
+    const columns = GRID_COLUMNS;
+    const rows = GRID_ROWS;
 
     const actualWidth = columns * CELL_WIDTH;
     const paddingX = (bounds.width - actualWidth) / 2;
@@ -54,10 +50,19 @@ export class GridGenerator {
 
     const catCageSlotIndices = this.pickCatCageIndices(catsCount, rows, columns);
     const moleStatueSlotIndices = new Set([0, columns - 1]);
+    const smokeHealerSlotIndices = new Set([
+      this.getSlotIndex(3, 3, columns),
+      this.getSlotIndex(7, 3, columns),
+    ]);
 
     for (const slot of grid.slots) {
       if (moleStatueSlotIndices.has(slot.index)) {
         this.gridEntityFactory.createMoleStatue(slot);
+        continue;
+      }
+
+      if (smokeHealerSlotIndices.has(slot.index)) {
+        this.gridEntityFactory.createSmokeHealer(slot);
         continue;
       }
 
@@ -88,5 +93,11 @@ export class GridGenerator {
 
     const shuffled = CollectionsUtils.shuffle(indices);
     return new Set(shuffled.slice(0, catsCount));
+  }
+
+  private getSlotIndex(column: number, row: number, columns: number): number {
+    const zeroBasedColumn = column - 1;
+    const zeroBasedRow = row - 1;
+    return zeroBasedRow * columns + zeroBasedColumn;
   }
 }

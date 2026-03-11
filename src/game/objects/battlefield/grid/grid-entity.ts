@@ -18,6 +18,7 @@ export enum GridEntityType {
   CAT_CAGE = 'cat-cage',
   MOLE_BUILDING = 'mole-building',
   MOLE_STATUE = 'mole-statue',
+  SMOKE_HEALER = 'smoke-healer',
 }
 
 export interface GridEntity {

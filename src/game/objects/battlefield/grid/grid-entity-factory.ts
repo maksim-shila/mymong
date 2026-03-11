@@ -1,10 +1,11 @@
 import { MAX_LIVES, CatCageCell } from './cat-cage-cell';
 import {
-  MOLE_BUILDING_MAX_LIVES,
-  MOLE_BUILDING_MIN_LIVES,
-  MoleBuildingCell,
-} from './enemy/mole-building-cell';
+  DEFAULT_MOLE_BUILDING_MAX_LIVES,
+  DEFAULT_MOLE_BUILDING_MIN_LIVES,
+} from './enemy/default-mole-building';
+import { MoleBuildingCell } from './enemy/mole-building-cell';
 import { MoleStatueCell } from './enemy/mole-statue-cell';
+import { SmokeHealerCell } from './enemy/smoke-healer-cell';
 import type { GridSlot } from './grid-slot';
 import type { BattleContext } from '../battle-context';
 
@@ -30,7 +31,10 @@ export class GridEntityFactory {
   }
 
   public createMoleBuilding(slot: GridSlot): MoleBuildingCell {
-    const lives = Phaser.Math.Between(MOLE_BUILDING_MIN_LIVES, MOLE_BUILDING_MAX_LIVES);
+    const lives = Phaser.Math.Between(
+      DEFAULT_MOLE_BUILDING_MIN_LIVES,
+      DEFAULT_MOLE_BUILDING_MAX_LIVES,
+    );
     const cell = new MoleBuildingCell(
       this.scene,
       slot.x,
@@ -40,6 +44,19 @@ export class GridEntityFactory {
       slot.depth,
       lives,
       this.battleContext,
+    );
+    slot.cell = cell;
+    return cell;
+  }
+
+  public createSmokeHealer(slot: GridSlot): SmokeHealerCell {
+    const cell = new SmokeHealerCell(
+      this.scene,
+      slot.x,
+      slot.y,
+      slot.width,
+      slot.height,
+      slot.depth,
     );
     slot.cell = cell;
     return cell;

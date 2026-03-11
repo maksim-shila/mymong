@@ -22,6 +22,7 @@ export class DropGenerator {
       case GridEntityType.CAT_CAGE:
         return new CatDrop(this.scene, x, y, width, height, CAT_DROP_DEPTH);
       case GridEntityType.MOLE_BUILDING:
+      case GridEntityType.SMOKE_HEALER:
         if (RESOURCE_DROP_CHANCE <= Math.random()) {
           return null;
         }
