@@ -1,9 +1,9 @@
-import { EnemyFactory } from '../battlefield/grid/enemy-factory';
+import { GridEntityFactory } from '../battlefield/grid/grid-entity-factory';
 import type { GridSlot } from '../battlefield/grid/grid-slot';
 import { DropType, type Drop } from '../battlefield/drop/drop';
 import { Timer } from '@game/common/helpers/timer';
 import type { BattleContext } from '../battlefield/battle-context';
-import { EnemyState } from '../battlefield/grid/enemy';
+import { GridEntityState } from '../battlefield/grid/grid-entity';
 
 export enum MoleState {
   IDLE,
@@ -29,7 +29,7 @@ const STEAL_INDICATOR_Z_INDEX = 60;
 const MOLE_LIVES = 3;
 
 export class Mole {
-  private readonly enemyFactory: EnemyFactory;
+  private readonly gridEntityFactory: GridEntityFactory;
   private readonly debugCollider: Phaser.GameObjects.Rectangle;
   private readonly debugColliderBody: Phaser.Physics.Arcade.Body;
   private readonly stealDropIndicator: Phaser.GameObjects.Arc;
@@ -57,7 +57,7 @@ export class Mole {
     height: number,
     battleContext: BattleContext,
   ) {
-    this.enemyFactory = new EnemyFactory(scene, battleContext);
+    this.gridEntityFactory = new GridEntityFactory(scene, battleContext);
 
     this.debugCollider = scene.add.rectangle(x, y, width, height, 0xffffff, 0);
     scene.physics.add.existing(this.debugCollider);
@@ -171,9 +171,9 @@ export class Mole {
     if (this.targetGridSlot.cell === null) {
       const isCatStolen = this.stolenDrop?.type === DropType.CAT;
       const cell = isCatStolen
-        ? this.enemyFactory.createCatCage(this.targetGridSlot)
-        : this.enemyFactory.createMoleBuilding(this.targetGridSlot);
-      cell.state = EnemyState.CONSTRUCTING;
+        ? this.gridEntityFactory.createCatCage(this.targetGridSlot)
+        : this.gridEntityFactory.createMoleBuilding(this.targetGridSlot);
+      cell.state = GridEntityState.CONSTRUCTING;
       this.buildingCellLives = cell.lives;
       cell.lives = 1;
       this.buildingTimer.reset();
@@ -222,7 +222,7 @@ export class Mole {
     buildingEnemy.lives += 1;
     const buildingCompleted = buildingEnemy.lives === this.buildingCellLives;
     if (buildingCompleted) {
-      buildingEnemy.state = EnemyState.ALIVE;
+      buildingEnemy.state = GridEntityState.ALIVE;
       this.targetGridSlot.targetedByMole = false;
       this.targetGridSlot = null;
 

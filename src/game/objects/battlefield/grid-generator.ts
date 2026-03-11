@@ -1,6 +1,6 @@
 import { CollectionsUtils } from '@game/common/helpers/collections-utils';
 import { Grid } from './grid/grid';
-import { EnemyFactory } from './grid/enemy-factory';
+import { GridEntityFactory } from './grid/grid-entity-factory';
 import type { BattleContext } from './battle-context';
 import { DropGenerator } from './grid/drop-generator';
 
@@ -18,12 +18,12 @@ const CATS_COUNT_MIN = 1;
 const CATS_COUNT_MAX = 4;
 
 export class GridGenerator {
-  private readonly enemyFactory: EnemyFactory;
+  private readonly gridEntityFactory: GridEntityFactory;
   private readonly battleContext: BattleContext;
 
   constructor(scene: Phaser.Scene, battleContext: BattleContext) {
     this.battleContext = battleContext;
-    this.enemyFactory = new EnemyFactory(scene, battleContext);
+    this.gridEntityFactory = new GridEntityFactory(scene, battleContext);
   }
 
   public createGrid(): Grid {
@@ -40,7 +40,7 @@ export class GridGenerator {
     const startY = bounds.y.max - GRID_TOP_PADDING - CELL_HEIGHT / 2;
     const catsCount = Phaser.Math.RND.between(CATS_COUNT_MIN, CATS_COUNT_MAX);
 
-    const enemyDropGenerator = new DropGenerator(this.enemyFactory.scene);
+    const enemyDropGenerator = new DropGenerator(this.gridEntityFactory.scene);
     const grid = new Grid(
       enemyDropGenerator,
       columns,
@@ -56,7 +56,7 @@ export class GridGenerator {
 
     for (const slot of grid.slots) {
       if (catCageSlotIndices.has(slot.index)) {
-        this.enemyFactory.createCatCage(slot);
+        this.gridEntityFactory.createCatCage(slot);
         continue;
       }
 
@@ -64,7 +64,7 @@ export class GridGenerator {
         continue;
       }
 
-      this.enemyFactory.createMoleBuilding(slot);
+      this.gridEntityFactory.createMoleBuilding(slot);
     }
 
     return grid;

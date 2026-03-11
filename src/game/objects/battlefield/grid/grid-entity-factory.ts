@@ -7,7 +7,7 @@ import {
 import type { GridSlot } from './grid-slot';
 import type { BattleContext } from '../battle-context';
 
-export class EnemyFactory {
+export class GridEntityFactory {
   constructor(
     public readonly scene: Phaser.Scene,
     private readonly battleContext: BattleContext,
@@ -15,15 +15,7 @@ export class EnemyFactory {
 
   public createCatCage(slot: GridSlot): CatCageCell {
     const lives = MAX_LIVES;
-    const cell = new CatCageCell(
-      this.scene,
-      slot.x,
-      slot.y,
-      slot.width,
-      slot.height,
-      lives,
-      this.battleContext,
-    );
+    const cell = new CatCageCell(this.scene, slot.x, slot.y, slot.width, slot.height, lives);
     slot.cell = cell;
     return cell;
   }

@@ -1,4 +1,5 @@
-import { EnemyBase, EnemyType } from './enemy';
+import { Enemy } from './enemy';
+import { GridEntityType } from './grid-entity';
 import type { MinMax } from '@game/common/types';
 import type { BattleContext } from '../battle-context';
 
@@ -15,8 +16,8 @@ const LIVES_COLOR: Record<number, number> = {
   5: 0x12464f,
 };
 
-export class MoleBuildingCell extends EnemyBase {
-  public override readonly type: EnemyType = EnemyType.MOLE_BUILDING;
+export class MoleBuildingCell extends Enemy {
+  public override readonly type: GridEntityType = GridEntityType.MOLE_BUILDING;
 
   constructor(
     scene: Phaser.Scene,

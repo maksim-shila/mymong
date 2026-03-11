@@ -1,15 +1,14 @@
 import { Timer } from '@game/common/helpers/timer';
 import { CagedCatAnimation } from '../../animations/caged-cat-animation';
-import { EnemyBase, EnemyType } from './enemy';
-import type { BattleContext } from '../battle-context';
+import { GridEntityBase, GridEntityType } from './grid-entity';
 
 export const MAX_LIVES = 30;
 
 const FILL_COLOR = 0xf5e6a6;
 const HEAL_CD_MS = 2000;
 
-export class CatCageCell extends EnemyBase {
-  public override readonly type: EnemyType = EnemyType.CAT_CAGE;
+export class CatCageCell extends GridEntityBase {
+  public override readonly type: GridEntityType = GridEntityType.CAT_CAGE;
 
   private readonly catAnimation: CagedCatAnimation;
   private readonly healTimer = new Timer();
@@ -21,12 +20,10 @@ export class CatCageCell extends EnemyBase {
     width: number,
     height: number,
     lives: number,
-    battleContext: BattleContext,
   ) {
-    super(scene, x, y, width, height, lives, battleContext);
+    super(scene, x, y, width, height, lives);
 
     this.setFillStyle(FILL_COLOR, 1);
-
     this.catAnimation = new CagedCatAnimation(scene, x, y, width, height, this.depth + 1);
   }
 
@@ -34,6 +31,8 @@ export class CatCageCell extends EnemyBase {
     if (!this.isActive) {
       return;
     }
+
+    super.update(delta, { min: 0, max: 0 }, { min: 0, max: 0 });
 
     if (this.lives < MAX_LIVES) {
       this.healTimer.setIfInactive(HEAL_CD_MS);

@@ -1,10 +1,10 @@
 import type { Drop } from '../drop/drop';
-import { EnemyState, type Enemy } from './enemy';
+import { GridEntityState, type GridEntity } from './grid-entity';
 import type { MinMax } from '@game/common/types';
 import type { DropGenerator } from './drop-generator';
 
 export class GridSlot {
-  public cell: Enemy | null = null;
+  public cell: GridEntity | null = null;
   public drop: Drop | null = null;
   public targetedByMole = false;
   public targetedByWorker = false;
@@ -30,7 +30,7 @@ export class GridSlot {
       return;
     }
 
-    if (this.cell.state === EnemyState.READY_TO_DESTROY) {
+    if (this.cell.state === GridEntityState.READY_TO_DESTROY) {
       if (this.drop === null) {
         this.drop = this.dropGenerator.generate(
           this.cell.type,
@@ -41,10 +41,10 @@ export class GridSlot {
         );
       }
 
-      this.cell.state = EnemyState.DESTROING;
+      this.cell.state = GridEntityState.DESTROING;
     }
 
-    if (this.cell.state === EnemyState.DESTROYED) {
+    if (this.cell.state === GridEntityState.DESTROYED) {
       this.cell = null;
       return;
     }
