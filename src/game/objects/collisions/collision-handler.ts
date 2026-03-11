@@ -2,7 +2,7 @@ import type { Paddle } from '../paddle/paddle';
 import type { Grid } from '../battlefield/grid/grid';
 import type { PaddleShield } from '../paddle/paddle-shield';
 import type { EnemyProjectile } from '../battlefield/grid/enemy-projectile';
-import { Enemy } from '../battlefield/grid/enemy';
+import { isShooter } from '../battlefield/grid/shooter';
 
 export class CollisionHandler {
   private readonly physics: Phaser.Physics.Arcade.ArcadePhysics;
@@ -46,11 +46,11 @@ export class CollisionHandler {
 
   private handleEnemyBulletsVsPaddle(): void {
     const shield = this.paddle.shield;
-    const enemies = this.grid.slots
+    const shooters = this.grid.slots
       .map((slot) => slot.cell)
-      .filter((cell): cell is Enemy => cell instanceof Enemy);
+      .filter(isShooter);
 
-    const projectiles = enemies.flatMap((cell) => cell.projectiles);
+    const projectiles = shooters.flatMap((cell) => cell.projectiles);
 
     // Ship is invulnerable while shield active
     if (shield.active) {

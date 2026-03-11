@@ -1,4 +1,4 @@
-import type { Bounds, MinMax } from '@game/common/types';
+import type { Bounds } from '@game/common/types';
 import { GridGenerator } from './grid-generator';
 import type { ResolutionViewport } from '@game/settings/resolution';
 import type { Grid } from './grid/grid';
@@ -26,9 +26,6 @@ const STROKE_ALPHA = 0.45;
 
 const DIFFICULTY_STEP_INTERVAL_MS = 1000;
 const MAX_DIFFICULTY_STEPS = 20;
-const SHOT_AREA_X_OFFSET = 70;
-const SHOT_AREA_Y_OFFSET = 20;
-
 export class Battlefield {
   private readonly controls: Controls;
   private readonly paddle: Paddle;
@@ -130,15 +127,7 @@ export class Battlefield {
     this.moleBase.update(delta);
     this.paddle.update(delta);
 
-    const shotAreaX: MinMax = {
-      min: Math.floor(this.paddle.x - this.paddle.width / 2 - SHOT_AREA_X_OFFSET),
-      max: Math.floor(this.paddle.x + this.paddle.width / 2 + SHOT_AREA_X_OFFSET),
-    };
-    const shotAreaY: MinMax = {
-      min: Math.floor(this.paddle.y - this.paddle.height / 2 - SHOT_AREA_Y_OFFSET),
-      max: Math.floor(this.paddle.y + this.paddle.height / 2 + SHOT_AREA_Y_OFFSET),
-    };
-    this.grid.update(delta, shotAreaX, shotAreaY);
+    this.grid.update(delta, this.paddle.x, this.paddle.y);
 
     this.energyTank.update();
     this.collisionHandler.update();

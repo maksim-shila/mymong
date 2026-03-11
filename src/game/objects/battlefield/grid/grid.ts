@@ -1,5 +1,4 @@
 import { GridSlot } from './grid-slot';
-import type { MinMax } from '@game/common/types';
 import type { DropGenerator } from './drop-generator';
 
 export class Grid {
@@ -29,11 +28,13 @@ export class Grid {
         const y = startY - rowIndex * cellHeight;
 
         const slotIndex = rowIndex * this.columns + colIndex;
+        const depth = (this.rows - rowIndex - 1) * this.columns + colIndex;
         const gridSlot = new GridSlot(
           dropGenerator,
           slotIndex,
           rowIndex,
           colIndex,
+          depth,
           cellWidth,
           cellHeight,
           x,
@@ -44,9 +45,9 @@ export class Grid {
     }
   }
 
-  public update(delta: number, shotAreaX: MinMax, shotAreaY: MinMax): void {
+  public update(delta: number, shipX: number, shipY: number): void {
     for (const slot of this.slots) {
-      slot.update(delta, shotAreaX, shotAreaY);
+      slot.update(delta, shipX, shipY);
     }
   }
 }

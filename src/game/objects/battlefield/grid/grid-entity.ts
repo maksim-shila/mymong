@@ -1,16 +1,6 @@
-import type { MinMax } from '@game/common/types';
 import { CellHitAnimation } from '../../animations/cell-hit-animation';
 
-const DEFAULT_FILL_COLOR = 0xff7a33;
-const CONSTRUCTING_MIN_ALPHA = 0.2;
-const CONSTRUCTING_MAX_ALPHA = 1;
-const CONSTUCTING_ALPHA_DELTA = CONSTRUCTING_MAX_ALPHA - CONSTRUCTING_MIN_ALPHA;
-const CONSTRUCTING_BLINK_SPEED = 10;
-
 const Z_INDEX = 5;
-const STROKE_WIDTH = 2;
-const STROKE_COLOR = 0x1f2d3d;
-const STROKE_ALPHA = 0.7;
 
 const HIT_ANIMATION_LIVES_STEP = 5;
 const HIT_FLASH_ALPHA = 0.35;
@@ -27,6 +17,7 @@ export enum GridEntityState {
 export enum GridEntityType {
   CAT_CAGE = 'cat-cage',
   MOLE_BUILDING = 'mole-building',
+  MOLE_STATUE = 'mole-statue',
 }
 
 export interface GridEntity {
@@ -37,15 +28,13 @@ export interface GridEntity {
   lives: number;
   state: GridEntityState;
 
-  update(delta: number, shotAreaX: MinMax, shotAreaY: MinMax): void;
+  update(delta: number, shipX: number, shipY: number): void;
   onHit(damage: number): void;
 }
 
 export abstract class GridEntityBase extends Phaser.GameObjects.Rectangle implements GridEntity {
   private readonly arcadeBody: Phaser.Physics.Arcade.StaticBody;
   private readonly hitAnimation: CellHitAnimation;
-
-  private constructingBlinkTimeMs = 0;
 
   public lives: number;
   public abstract override readonly type: GridEntityType;
@@ -57,15 +46,13 @@ export abstract class GridEntityBase extends Phaser.GameObjects.Rectangle implem
     y: number,
     width: number,
     height: number,
+    depth: number,
     lives: number,
   ) {
-    super(scene, x, y, width, height, DEFAULT_FILL_COLOR);
+    super(scene, x, y, width, height);
 
     scene.add.existing(this);
-
-    this.setFillStyle(DEFAULT_FILL_COLOR, 1);
-    this.setStrokeStyle(STROKE_WIDTH, STROKE_COLOR, STROKE_ALPHA);
-    this.setDepth(Z_INDEX);
+    this.setDepth(Z_INDEX + depth);
 
     scene.physics.add.existing(this, true);
     this.arcadeBody = this.body as Phaser.Physics.Arcade.StaticBody;
@@ -86,21 +73,7 @@ export abstract class GridEntityBase extends Phaser.GameObjects.Rectangle implem
     );
   }
 
-  public override update(delta: number, _shotAreaX: MinMax, _shotAreaY: MinMax): void {
-    if (this.state === GridEntityState.CONSTRUCTING) {
-      this.constructingBlinkTimeMs += delta;
-      const blinkSpeedPerMs = CONSTRUCTING_BLINK_SPEED / 1000;
-      const wave = (Math.sin(this.constructingBlinkTimeMs * blinkSpeedPerMs) + 1) / 2;
-      const alpha = CONSTRUCTING_MIN_ALPHA + wave * CONSTUCTING_ALPHA_DELTA;
-      super.setFillStyle(this.fillColor, alpha);
-      this.setStrokeStyle(0, STROKE_COLOR, STROKE_ALPHA);
-      return;
-    }
-
-    this.constructingBlinkTimeMs = 0;
-    super.setFillStyle(this.fillColor, 1);
-    this.setStrokeStyle(STROKE_WIDTH, STROKE_COLOR, STROKE_ALPHA);
-  }
+  public override update(_delta: number, _shipX: number, _shipY: number): void {}
 
   public onHit(damage: number): void {
     if (!this.isActive) {

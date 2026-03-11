@@ -4,6 +4,7 @@ import {
   MOLE_BUILDING_MIN_LIVES,
   MoleBuildingCell,
 } from './enemy/mole-building-cell';
+import { MoleStatueCell } from './enemy/mole-statue-cell';
 import type { GridSlot } from './grid-slot';
 import type { BattleContext } from '../battle-context';
 
@@ -15,7 +16,15 @@ export class GridEntityFactory {
 
   public createCatCage(slot: GridSlot): CatCageCell {
     const lives = MAX_LIVES;
-    const cell = new CatCageCell(this.scene, slot.x, slot.y, slot.width, slot.height, lives);
+    const cell = new CatCageCell(
+      this.scene,
+      slot.x,
+      slot.y,
+      slot.width,
+      slot.height,
+      slot.depth,
+      lives,
+    );
     slot.cell = cell;
     return cell;
   }
@@ -28,8 +37,22 @@ export class GridEntityFactory {
       slot.y,
       slot.width,
       slot.height,
+      slot.depth,
       lives,
       this.battleContext,
+    );
+    slot.cell = cell;
+    return cell;
+  }
+
+  public createMoleStatue(slot: GridSlot): MoleStatueCell {
+    const cell = new MoleStatueCell(
+      this.scene,
+      slot.x,
+      slot.y,
+      slot.width,
+      slot.height,
+      slot.depth,
     );
     slot.cell = cell;
     return cell;

@@ -1,6 +1,5 @@
 import type { Drop } from '../drop/drop';
 import { GridEntityState, type GridEntity } from './grid-entity';
-import type { MinMax } from '@game/common/types';
 import type { DropGenerator } from './drop-generator';
 
 export class GridSlot {
@@ -14,18 +13,19 @@ export class GridSlot {
     public readonly index: number,
     public readonly row: number,
     public readonly column: number,
+    public readonly depth: number,
     public readonly width: number,
     public readonly height: number,
     public readonly x: number,
     public readonly y: number,
   ) {}
 
-  public update(delta: number, shotAreaX: MinMax, shotAreaY: MinMax): void {
-    this.updateCell(delta, shotAreaX, shotAreaY);
+  public update(delta: number, shipX: number, shipY: number): void {
+    this.updateCell(delta, shipX, shipY);
     this.updateDrop(delta);
   }
 
-  private updateCell(delta: number, shotAreaX: MinMax, shotAreaY: MinMax) {
+  private updateCell(delta: number, shipX: number, shipY: number) {
     if (this.cell === null) {
       return;
     }
@@ -49,7 +49,7 @@ export class GridSlot {
       return;
     }
 
-    this.cell.update(delta, shotAreaX, shotAreaY);
+    this.cell.update(delta, shipX, shipY);
   }
 
   private updateDrop(delta: number) {

@@ -28,6 +28,8 @@ export class DropGenerator {
 
         const amount = Phaser.Math.Between(RESOURCE_DROP_MIN_AMOUNT, RESOURCE_DROP_MAX_AMOUNT);
         return new ResourceDrop(this.scene, x, y, amount);
+      case GridEntityType.MOLE_STATUE:
+        return null;
     }
   }
 }

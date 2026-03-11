@@ -53,8 +53,14 @@ export class GridGenerator {
     );
 
     const catCageSlotIndices = this.pickCatCageIndices(catsCount, rows, columns);
+    const moleStatueSlotIndices = new Set([0, columns - 1]);
 
     for (const slot of grid.slots) {
+      if (moleStatueSlotIndices.has(slot.index)) {
+        this.gridEntityFactory.createMoleStatue(slot);
+        continue;
+      }
+
       if (catCageSlotIndices.has(slot.index)) {
         this.gridEntityFactory.createCatCage(slot);
         continue;
@@ -73,9 +79,9 @@ export class GridGenerator {
   private pickCatCageIndices(catsCount: number, rows: number, columns: number): Set<number> {
     const indices: number[] = [];
 
-    // Skip first and last rows
+    // Skip first/last rows and first/last columns
     for (let row = 1; row < rows - 1; row += 1) {
-      for (let col = 0; col < columns; col += 1) {
+      for (let col = 1; col < columns - 1; col += 1) {
         indices.push(row * columns + col);
       }
     }
