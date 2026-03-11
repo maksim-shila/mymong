@@ -1,14 +1,14 @@
 import type { Paddle } from '../paddle/paddle';
-import type { CellsGrid } from '../battlefield/cell/cells-grid';
+import type { Grid } from '../battlefield/grid/grid';
 import type { PaddleShield } from '../paddle/paddle-shield';
-import type { CellBullet } from '../battlefield/cell/cell-bullet';
+import type { EnemyProjectile } from '../battlefield/grid/enemy-projectile';
 
 export class CollisionHandler {
   private readonly physics: Phaser.Physics.Arcade.ArcadePhysics;
   private readonly paddle: Paddle;
-  private readonly grid: CellsGrid;
+  private readonly grid: Grid;
 
-  constructor(scene: Phaser.Scene, paddle: Paddle, grid: CellsGrid) {
+  constructor(scene: Phaser.Scene, paddle: Paddle, grid: Grid) {
     this.physics = scene.physics;
     this.paddle = paddle;
     this.grid = grid;
@@ -47,38 +47,38 @@ export class CollisionHandler {
     const shield = this.paddle.shield;
     const cells = this.grid.slots.map((slot) => slot.cell).filter((cell) => cell !== null);
 
-    const bullets = cells.flatMap((cell) => cell.bullets);
+    const projectiles = cells.flatMap((cell) => cell.projectiles);
 
     // Ship is invulnerable while shield active
     if (shield.active) {
-      this.handleShieldHits(shield, bullets);
+      this.handleShieldHits(shield, projectiles);
     } else {
-      this.handleShipHits(this.paddle, bullets);
+      this.handleShipHits(this.paddle, projectiles);
     }
   }
 
-  private handleShieldHits(shield: PaddleShield, bullets: CellBullet[]): void {
-    for (const bullet of bullets) {
-      if (this.physics.overlap(bullet.collider, shield.collider)) {
-        bullet.destroy();
+  private handleShieldHits(shield: PaddleShield, projectiles: EnemyProjectile[]): void {
+    for (const projectile of projectiles) {
+      if (this.physics.overlap(projectile.collider, shield.collider)) {
+        projectile.destroy();
       }
     }
   }
 
-  private handleShipHits(ship: Paddle, bullets: CellBullet[]): void {
+  private handleShipHits(ship: Paddle, projectiles: EnemyProjectile[]): void {
     if (this.paddle.dashActive) {
       return;
     }
 
-    const hitBullet = bullets.find((bullet) =>
-      this.physics.overlap(bullet.collider, this.paddle.collider),
+    const hitProjectile = projectiles.find((projectile) =>
+      this.physics.overlap(projectile.collider, this.paddle.collider),
     );
 
-    if (!hitBullet) {
+    if (!hitProjectile) {
       return;
     }
 
-    hitBullet.destroy();
-    ship.onHit(hitBullet.damage);
+    hitProjectile.destroy();
+    ship.onHit(hitProjectile.damage);
   }
 }

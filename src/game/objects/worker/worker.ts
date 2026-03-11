@@ -1,7 +1,7 @@
 import { TEXTURE } from '@game/assets/common-assets';
 import { Timer } from '@game/common/helpers/timer';
 import type { EnergyTank } from '../energy-tank';
-import type { CellSlot } from '../battlefield/cell/cell-slot';
+import type { GridSlot } from '../battlefield/grid/grid-slot';
 import { DropType, type Drop } from '../battlefield/drop/drop';
 import { ResourceDrop } from '../battlefield/drop/resource-drop';
 import type { Position } from '@game/common/types';
@@ -50,7 +50,7 @@ export class Worker extends Phaser.GameObjects.Container {
   private spriteHeight: number;
   private walkPhase = 0;
 
-  private targetCellSlot: CellSlot | null = null;
+  private targetGridSlot: GridSlot | null = null;
   private savedDrop: Drop | null = null;
 
   constructor(
@@ -87,14 +87,14 @@ export class Worker extends Phaser.GameObjects.Container {
     scene.add.existing(this);
   }
 
-  public takeDrop(slot: CellSlot): void {
+  public takeDrop(slot: GridSlot): void {
     if (this.state !== WorkerState.IDLE) {
       return;
     }
 
     this.state = WorkerState.MOVE_TO_DROP;
     slot.targetedByWorker = true;
-    this.targetCellSlot = slot;
+    this.targetGridSlot = slot;
   }
 
   public goFillEnergyTank(): void {
@@ -121,19 +121,19 @@ export class Worker extends Phaser.GameObjects.Container {
   }
 
   public moveToDrop(delta: number): void {
-    if (this.targetCellSlot === null) {
+    if (this.targetGridSlot === null) {
       this.state = WorkerState.MOVE_TO_BASE;
       return;
     }
 
-    if (this.targetCellSlot.drop === null) {
-      this.targetCellSlot.targetedByWorker = false;
-      this.targetCellSlot = null;
+    if (this.targetGridSlot.drop === null) {
+      this.targetGridSlot.targetedByWorker = false;
+      this.targetGridSlot = null;
       this.state = WorkerState.MOVE_TO_BASE;
       return;
     }
 
-    const hasArrived = this.move(this.targetCellSlot.x, this.targetCellSlot.y, delta);
+    const hasArrived = this.move(this.targetGridSlot.x, this.targetGridSlot.y, delta);
     if (hasArrived) {
       this.actionTimer.set(COLLECT_DROP_TIME_MS);
       this.state = WorkerState.COLLECT_DROP;
@@ -160,26 +160,26 @@ export class Worker extends Phaser.GameObjects.Container {
   }
 
   public collectDrop(delta: number): void {
-    if (!this.targetCellSlot) {
+    if (!this.targetGridSlot) {
       this.state = WorkerState.MOVE_TO_BASE;
       return;
     }
 
-    const drop = this.targetCellSlot.drop;
+    const drop = this.targetGridSlot.drop;
     if (!drop) {
       this.actionTimer.set(0);
       this.state = WorkerState.MOVE_TO_BASE;
-      this.targetCellSlot.targetedByWorker = false;
-      this.targetCellSlot = null;
+      this.targetGridSlot.targetedByWorker = false;
+      this.targetGridSlot = null;
       return;
     }
 
     if (this.actionTimer.tick(delta)) {
       this.savedDrop = drop;
       this.savedDrop.hide();
-      this.targetCellSlot.targetedByWorker = false;
-      this.targetCellSlot.drop = null;
-      this.targetCellSlot = null;
+      this.targetGridSlot.targetedByWorker = false;
+      this.targetGridSlot.drop = null;
+      this.targetGridSlot = null;
 
       const isCatDrop = drop.type === DropType.CAT;
       this.state = isCatDrop ? WorkerState.MOVE_TO_CAT_BASE : WorkerState.MOVE_TO_BASE;

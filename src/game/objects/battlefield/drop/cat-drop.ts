@@ -1,8 +1,8 @@
-import { Drop, DropType } from './drop';
+import { DropType, type Drop } from './drop';
 import { FreeCatAnimation } from '../../animations/free-cat-animation';
 
-export class CatDrop extends Drop {
-  public override readonly type: DropType = DropType.CAT;
+export class CatDrop implements Drop {
+  public readonly type: DropType = DropType.CAT;
 
   private readonly catAnimation: FreeCatAnimation;
 
@@ -14,12 +14,12 @@ export class CatDrop extends Drop {
     height: number,
     depth: number,
   ) {
-    super();
-
     this.catAnimation = new FreeCatAnimation(scene, x, y, width, height, depth);
   }
 
-  public override destroy(): void {
+  public update(_delta: number): void {}
+
+  public destroy(): void {
     this.catAnimation.destroy();
   }
 
@@ -29,9 +29,5 @@ export class CatDrop extends Drop {
 
   public show(): void {
     this.catAnimation.show();
-  }
-
-  public setPosition(x: number, y: number): void {
-    this.catAnimation.setPosition(x, y);
   }
 }

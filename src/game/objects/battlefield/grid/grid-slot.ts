@@ -1,16 +1,16 @@
 import type { Drop } from '../drop/drop';
-import { CellState, type Cell } from './cell';
+import { EnemyState, type Enemy } from './enemy';
 import type { MinMax } from '@game/common/types';
-import type { CellDropGenerator } from './cell-drop-generator';
+import type { DropGenerator } from './drop-generator';
 
-export class CellSlot {
-  public cell: Cell | null = null;
+export class GridSlot {
+  public cell: Enemy | null = null;
   public drop: Drop | null = null;
   public targetedByMole = false;
   public targetedByWorker = false;
 
   constructor(
-    private readonly cellDropGenerator: CellDropGenerator,
+    private readonly dropGenerator: DropGenerator,
     public readonly index: number,
     public readonly row: number,
     public readonly column: number,
@@ -30,9 +30,9 @@ export class CellSlot {
       return;
     }
 
-    if (this.cell.state === CellState.READY_TO_DESTROY) {
+    if (this.cell.state === EnemyState.READY_TO_DESTROY) {
       if (this.drop === null) {
-        this.drop = this.cellDropGenerator.generate(
+        this.drop = this.dropGenerator.generate(
           this.cell.type,
           this.x,
           this.y,
@@ -41,10 +41,10 @@ export class CellSlot {
         );
       }
 
-      this.cell.state = CellState.DESTROING;
+      this.cell.state = EnemyState.DESTROING;
     }
 
-    if (this.cell.state === CellState.DESTROYED) {
+    if (this.cell.state === EnemyState.DESTROYED) {
       this.cell = null;
       return;
     }

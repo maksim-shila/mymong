@@ -1,5 +1,5 @@
 import type { Bounds } from '@game/common/types';
-import type { CellsGrid } from '../battlefield/cell/cells-grid';
+import type { Grid } from '../battlefield/grid/grid';
 import { Mole, MoleState } from './mole';
 import { MoleBaseHud } from './mole-base-hud';
 import { CollectionsUtils } from '@game/common/helpers/collections-utils';
@@ -18,7 +18,7 @@ const MOLE_QUEUE_OFFSET_Y = 20;
 
 export class MoleBase {
   private readonly scene: Phaser.Scene;
-  private readonly grid: CellsGrid;
+  private readonly grid: Grid;
   private readonly hud: MoleBaseHud;
 
   private readonly moles: Mole[] = [];
@@ -27,7 +27,7 @@ export class MoleBase {
 
   private readonly molesDequeueCooldownTimer = new Timer(MOLES_DEQUEUE_COOLDOWN_MS);
 
-  constructor(scene: Phaser.Scene, grid: CellsGrid, bounds: Bounds, battleContext: BattleContext) {
+  constructor(scene: Phaser.Scene, grid: Grid, bounds: Bounds, battleContext: BattleContext) {
     this.scene = scene;
     this.grid = grid;
     this.hud = new MoleBaseHud(this.scene, bounds);
@@ -52,8 +52,8 @@ export class MoleBase {
         (slot) => slot.cell === null && !slot.targetedByMole,
       );
       if (freeSlots.length > 0) {
-        const cellSlot = Phaser.Math.RND.pick(freeSlots);
-        mole.askBuild(cellSlot);
+        const gridSlot = Phaser.Math.RND.pick(freeSlots);
+        mole.askBuild(gridSlot);
       }
     }
 

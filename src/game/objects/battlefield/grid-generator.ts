@@ -1,8 +1,8 @@
 import { CollectionsUtils } from '@game/common/helpers/collections-utils';
-import { CellsGrid } from './cell/cells-grid';
-import { CellFactory } from './cell/cell-factory';
+import { Grid } from './grid/grid';
+import { EnemyFactory } from './grid/enemy-factory';
 import type { BattleContext } from './battle-context';
-import { CellDropGenerator } from './cell/cell-drop-generator';
+import { DropGenerator } from './grid/drop-generator';
 
 const GRID_LEFT_PADDING = 40;
 const GRID_RIGHT_PADDING = GRID_LEFT_PADDING;
@@ -18,15 +18,15 @@ const CATS_COUNT_MIN = 1;
 const CATS_COUNT_MAX = 4;
 
 export class GridGenerator {
-  private readonly cellFactory: CellFactory;
+  private readonly enemyFactory: EnemyFactory;
   private readonly battleContext: BattleContext;
 
   constructor(scene: Phaser.Scene, battleContext: BattleContext) {
     this.battleContext = battleContext;
-    this.cellFactory = new CellFactory(scene, battleContext);
+    this.enemyFactory = new EnemyFactory(scene, battleContext);
   }
 
-  public createGrid(): CellsGrid {
+  public createGrid(): Grid {
     const { bounds } = this.battleContext;
     const availableWidth = bounds.width - GRID_LEFT_PADDING - GRID_RIGHT_PADDING;
     const availableHeight = bounds.height - GRID_TOP_PADDING - GRID_BOTTOM_PADDING;
@@ -40,9 +40,9 @@ export class GridGenerator {
     const startY = bounds.y.max - GRID_TOP_PADDING - CELL_HEIGHT / 2;
     const catsCount = Phaser.Math.RND.between(CATS_COUNT_MIN, CATS_COUNT_MAX);
 
-    const cellDropGenerator = new CellDropGenerator(this.cellFactory.scene);
-    const grid = new CellsGrid(
-      cellDropGenerator,
+    const enemyDropGenerator = new DropGenerator(this.enemyFactory.scene);
+    const grid = new Grid(
+      enemyDropGenerator,
       columns,
       rows,
       CELL_WIDTH,
@@ -56,7 +56,7 @@ export class GridGenerator {
 
     for (const slot of grid.slots) {
       if (catCageSlotIndices.has(slot.index)) {
-        this.cellFactory.createCatCage(slot);
+        this.enemyFactory.createCatCage(slot);
         continue;
       }
 
@@ -64,7 +64,7 @@ export class GridGenerator {
         continue;
       }
 
-      this.cellFactory.createMoleBuilding(slot);
+      this.enemyFactory.createMoleBuilding(slot);
     }
 
     return grid;

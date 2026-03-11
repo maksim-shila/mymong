@@ -1,20 +1,20 @@
-const BULLET_RADIUS = 17;
-const BULLET_COLOR = 0x03fcca;
-const BULLET_STROKE_COLOR = 0x164239;
-const BULLET_STROKE_WIDTH = 2;
-const BULLET_Z_INDEX = 940;
+const PROJECTILE_RADIUS = 17;
+const PROJECTILE_COLOR = 0x03fcca;
+const PROJECTILE_STROKE_COLOR = 0x164239;
+const PROJECTILE_STROKE_WIDTH = 2;
+const PROJECTILE_Z_INDEX = 940;
 
-export enum CellBulletState {
+export enum EnemyProjectileState {
   ACTIVE,
   DESTROYED,
 }
 
-export class CellBullet {
+export class EnemyProjectile {
   private readonly arcadeBody: Phaser.Physics.Arcade.Body;
   private readonly sprite: Phaser.GameObjects.Arc;
 
   public readonly damage = 1;
-  public state: CellBulletState = CellBulletState.ACTIVE;
+  public state: EnemyProjectileState = EnemyProjectileState.ACTIVE;
 
   public constructor(
     scene: Phaser.Scene,
@@ -28,9 +28,9 @@ export class CellBullet {
     const dy = toY - fromY;
     const distance = Math.hypot(dx, dy);
     const factor = speed / distance;
-    const sprite = scene.add.circle(fromX, fromY, BULLET_RADIUS, BULLET_COLOR, 1);
-    sprite.setStrokeStyle(BULLET_STROKE_WIDTH, BULLET_STROKE_COLOR, 1);
-    sprite.setDepth(BULLET_Z_INDEX);
+    const sprite = scene.add.circle(fromX, fromY, PROJECTILE_RADIUS, PROJECTILE_COLOR, 1);
+    sprite.setStrokeStyle(PROJECTILE_STROKE_WIDTH, PROJECTILE_STROKE_COLOR, 1);
+    sprite.setDepth(PROJECTILE_Z_INDEX);
 
     scene.physics.add.existing(sprite);
     const arcadeBody = sprite.body as Phaser.Physics.Arcade.Body;
@@ -58,7 +58,7 @@ export class CellBullet {
   }
 
   public update(): void {
-    if (this.state === CellBulletState.DESTROYED) {
+    if (this.state === EnemyProjectileState.DESTROYED) {
       return;
     }
 
@@ -66,11 +66,11 @@ export class CellBullet {
   }
 
   public destroy(): void {
-    if (this.state === CellBulletState.DESTROYED) {
+    if (this.state === EnemyProjectileState.DESTROYED) {
       return;
     }
 
-    this.state = CellBulletState.DESTROYED;
+    this.state = EnemyProjectileState.DESTROYED;
     this.arcadeBody.destroy();
     this.sprite.destroy();
   }

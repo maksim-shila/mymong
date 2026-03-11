@@ -1,9 +1,9 @@
-import { CellFactory } from '../battlefield/cell/cell-factory';
-import type { CellSlot } from '../battlefield/cell/cell-slot';
-import { Drop, DropType } from '../battlefield/drop/drop';
+import { EnemyFactory } from '../battlefield/grid/enemy-factory';
+import type { GridSlot } from '../battlefield/grid/grid-slot';
+import { DropType, type Drop } from '../battlefield/drop/drop';
 import { Timer } from '@game/common/helpers/timer';
 import type { BattleContext } from '../battlefield/battle-context';
-import { CellState } from '../battlefield/cell/cell';
+import { EnemyState } from '../battlefield/grid/enemy';
 
 export enum MoleState {
   IDLE,
@@ -29,7 +29,7 @@ const STEAL_INDICATOR_Z_INDEX = 60;
 const MOLE_LIVES = 3;
 
 export class Mole {
-  private readonly cellFactory: CellFactory;
+  private readonly enemyFactory: EnemyFactory;
   private readonly debugCollider: Phaser.GameObjects.Rectangle;
   private readonly debugColliderBody: Phaser.Physics.Arcade.Body;
   private readonly stealDropIndicator: Phaser.GameObjects.Arc;
@@ -41,7 +41,7 @@ export class Mole {
   private readonly homeX: number;
   private readonly homeY: number;
 
-  private targetCellSlot: CellSlot | null = null;
+  private targetGridSlot: GridSlot | null = null;
   private stolenDrop: Drop | null = null;
 
   private state = MoleState.IDLE;
@@ -57,7 +57,7 @@ export class Mole {
     height: number,
     battleContext: BattleContext,
   ) {
-    this.cellFactory = new CellFactory(scene, battleContext);
+    this.enemyFactory = new EnemyFactory(scene, battleContext);
 
     this.debugCollider = scene.add.rectangle(x, y, width, height, 0xffffff, 0);
     scene.physics.add.existing(this.debugCollider);
@@ -99,27 +99,27 @@ export class Mole {
     return this.state;
   }
 
-  public askBuild(cellSlot: CellSlot): void {
+  public askBuild(slot: GridSlot): void {
     if (this.state !== MoleState.IDLE) {
       return;
     }
 
     this.state = MoleState.MOVE_TO_CELL;
-    cellSlot.targetedByMole = true;
-    this.targetCellSlot = cellSlot;
+    slot.targetedByMole = true;
+    this.targetGridSlot = slot;
   }
 
   public moveToCell(delta: number): void {
-    if (this.targetCellSlot === null) {
+    if (this.targetGridSlot === null) {
       this.state = MoleState.MOVE_TO_BASE;
       return;
     }
 
     const step = SPEED * (delta / 1000);
-    const hasArrived = this.move(this.targetCellSlot.x, this.targetCellSlot.y, step);
+    const hasArrived = this.move(this.targetGridSlot.x, this.targetGridSlot.y, step);
     if (hasArrived) {
       // If cell slot has drop - try steel it
-      const drop = this.targetCellSlot.drop;
+      const drop = this.targetGridSlot.drop;
       if (drop) {
         this.state = MoleState.STEAL_DROP;
         this.stealDropTimer.reset();
@@ -130,14 +130,14 @@ export class Mole {
   }
 
   public stealDrop(delta: number): void {
-    if (!this.targetCellSlot) {
+    if (!this.targetGridSlot) {
       this.stealDropIndicator.setVisible(false);
       this.stealDropTimer.set(0);
       this.state = MoleState.MOVE_TO_BASE;
       return;
     }
 
-    const drop = this.targetCellSlot.drop;
+    const drop = this.targetGridSlot.drop;
     if (!drop) {
       this.stealDropIndicator.setVisible(false);
       this.stealDropTimer.set(0);
@@ -147,43 +147,43 @@ export class Mole {
 
     if (!this.stealDropTimer.tick(delta)) {
       const progress = this.stealDropTimer.remaining / STEAL_DROP_TIME_MS;
-      const baseRadius = Math.min(this.targetCellSlot.width, this.targetCellSlot.height) / 2;
+      const baseRadius = Math.min(this.targetGridSlot.width, this.targetGridSlot.height) / 2;
       this.stealDropIndicator.setVisible(true);
-      this.stealDropIndicator.setPosition(this.targetCellSlot.x, this.targetCellSlot.y);
+      this.stealDropIndicator.setPosition(this.targetGridSlot.x, this.targetGridSlot.y);
       this.stealDropIndicator.setRadius(baseRadius * progress);
     } else {
       this.stealDropIndicator.setVisible(false);
       this.stolenDrop = drop;
       this.stolenDrop.hide();
-      this.targetCellSlot.drop = null;
+      this.targetGridSlot.drop = null;
       this.state = MoleState.BUILD;
     }
   }
 
   public build(delta: number): void {
     // Just safe-check: if, by some reason, target slot is null - return to base
-    if (!this.targetCellSlot) {
+    if (!this.targetGridSlot) {
       this.state = MoleState.MOVE_TO_BASE;
       return;
     }
 
     // If slot is empty (no build started) create new cell
-    if (this.targetCellSlot.cell === null) {
+    if (this.targetGridSlot.cell === null) {
       const isCatStolen = this.stolenDrop?.type === DropType.CAT;
       const cell = isCatStolen
-        ? this.cellFactory.createCatCage(this.targetCellSlot)
-        : this.cellFactory.createMoleBuilding(this.targetCellSlot);
-      cell.state = CellState.CONSTRUCTING;
+        ? this.enemyFactory.createCatCage(this.targetGridSlot)
+        : this.enemyFactory.createMoleBuilding(this.targetGridSlot);
+      cell.state = EnemyState.CONSTRUCTING;
       this.buildingCellLives = cell.lives;
       cell.lives = 1;
       this.buildingTimer.reset();
       return;
     }
 
-    const buildingCell = this.targetCellSlot.cell;
+    const buildingEnemy = this.targetGridSlot.cell;
 
     // If cell destroyed until building - mole takes hit
-    if (!buildingCell.isActive) {
+    if (!buildingEnemy.isActive) {
       this.lives--;
       const isDead = this.lives <= 0;
 
@@ -191,8 +191,8 @@ export class Mole {
       if (isDead) {
         this.state = MoleState.DEAD;
         if (this.stolenDrop) {
-          if (this.targetCellSlot.drop === null) {
-            this.targetCellSlot.drop = this.stolenDrop;
+          if (this.targetGridSlot.drop === null) {
+            this.targetGridSlot.drop = this.stolenDrop;
             this.stolenDrop.show();
           } else {
             this.stolenDrop.destroy();
@@ -206,8 +206,8 @@ export class Mole {
         }
       }
 
-      this.targetCellSlot.targetedByMole = false;
-      this.targetCellSlot = null;
+      this.targetGridSlot.targetedByMole = false;
+      this.targetGridSlot = null;
       this.stolenDrop = null;
       this.buildingTimer.reset();
       return;
@@ -219,12 +219,12 @@ export class Mole {
     }
 
     this.buildingTimer.reset();
-    buildingCell.lives += 1;
-    const buildingCompleted = buildingCell.lives === this.buildingCellLives;
+    buildingEnemy.lives += 1;
+    const buildingCompleted = buildingEnemy.lives === this.buildingCellLives;
     if (buildingCompleted) {
-      buildingCell.state = CellState.ALIVE;
-      this.targetCellSlot.targetedByMole = false;
-      this.targetCellSlot = null;
+      buildingEnemy.state = EnemyState.ALIVE;
+      this.targetGridSlot.targetedByMole = false;
+      this.targetGridSlot = null;
 
       this.stolenDrop?.destroy();
       this.stolenDrop = null;
@@ -255,8 +255,8 @@ export class Mole {
 
     this.destroyed = true;
     this.state = MoleState.DEAD;
-    if (this.targetCellSlot) {
-      this.targetCellSlot.targetedByMole = false;
+    if (this.targetGridSlot) {
+      this.targetGridSlot.targetedByMole = false;
     }
 
     this.stealDropIndicator.destroy();

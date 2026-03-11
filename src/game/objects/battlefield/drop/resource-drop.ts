@@ -1,17 +1,18 @@
 import { ResourceDropAnimation } from '../../animations/resource-drop-animation';
-import { Drop, DropType } from './drop';
+import { DropType, type Drop } from './drop';
 
-export class ResourceDrop extends Drop {
-  public override readonly type: DropType = DropType.RESOURCE;
+export class ResourceDrop implements Drop {
+  public readonly type: DropType = DropType.RESOURCE;
 
   private readonly animation: ResourceDropAnimation;
   public readonly amount: number;
 
   constructor(scene: Phaser.Scene, x: number, y: number, amount: number) {
-    super();
     this.animation = new ResourceDropAnimation(scene, x, y);
     this.amount = amount;
   }
+
+  public update(_delta: number): void {}
 
   public hide(): void {
     this.animation.hide();
@@ -21,11 +22,7 @@ export class ResourceDrop extends Drop {
     this.animation.show();
   }
 
-  public override destroy(): void {
+  public destroy(): void {
     this.animation.destroy();
-  }
-
-  public setPosition(x: number, y: number): void {
-    this.animation.setPosition(x, y);
   }
 }

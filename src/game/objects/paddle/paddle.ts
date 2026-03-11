@@ -9,7 +9,7 @@ import type { Bounds } from '@game/common/types';
 import type { EnergyTank } from '../energy-tank';
 import { PaddleHitAnimation } from './paddle-hit-animation';
 import { PaddleShield } from './paddle-shield';
-import { MAX_LIVES } from '../battlefield/cell/cat-cage-cell';
+import { MAX_LIVES } from '../battlefield/grid/cat-cage-cell';
 import { Cheats } from '@game/cheats';
 import { PaddleLivesUI } from './paddle-lives-ui';
 import { GameSaveManager } from '@game/settings/game-save';

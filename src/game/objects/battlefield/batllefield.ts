@@ -1,7 +1,7 @@
 import type { Bounds, MinMax } from '@game/common/types';
 import { GridGenerator } from './grid-generator';
 import type { ResolutionViewport } from '@game/settings/resolution';
-import type { CellsGrid } from './cell/cells-grid';
+import type { Grid } from './grid/grid';
 import { MoleBase } from '../mole/mole-base';
 import { Paddle } from '../paddle/paddle';
 import { CollisionHandler } from '../collisions/collision-handler';
@@ -33,7 +33,7 @@ export class Battlefield {
   private readonly controls: Controls;
   private readonly paddle: Paddle;
   private readonly collisionHandler: CollisionHandler;
-  public readonly grid: CellsGrid;
+  public readonly grid: Grid;
   public readonly energyTank: EnergyTank;
 
   public readonly bounds: Bounds;

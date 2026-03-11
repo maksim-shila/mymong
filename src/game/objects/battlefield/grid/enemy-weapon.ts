@@ -1,14 +1,14 @@
-import { CellBullet, CellBulletState } from './cell-bullet';
+import { EnemyProjectile, EnemyProjectileState } from './enemy-projectile';
 import { AUDIO } from '@game/assets/common-assets';
 import { SoundManager } from '@game/settings/sound';
 import type { BattleContext } from '../battle-context';
 
 const BULLET_SPEED = 300;
 
-export class CellWeapon {
+export class EnemyWeapon {
   private readonly scene: Phaser.Scene;
   private readonly battleContext: BattleContext;
-  private readonly bullets: CellBullet[] = [];
+  private readonly projectiles: EnemyProjectile[] = [];
 
   constructor(scene: Phaser.Scene, battleContext: BattleContext) {
     this.scene = scene;
@@ -22,33 +22,33 @@ export class CellWeapon {
     }
   }
 
-  public getBullets(): readonly CellBullet[] {
-    return this.bullets;
+  public getProjectiles(): readonly EnemyProjectile[] {
+    return this.projectiles;
   }
 
   public update(_delta: number): void {
-    for (let i = this.bullets.length - 1; i >= 0; i -= 1) {
-      const bullet = this.bullets[i];
-      if (bullet.state === CellBulletState.DESTROYED) {
-        this.bullets.splice(i, 1);
+    for (let i = this.projectiles.length - 1; i >= 0; i -= 1) {
+      const projectile = this.projectiles[i];
+      if (projectile.state === EnemyProjectileState.DESTROYED) {
+        this.projectiles.splice(i, 1);
         continue;
       }
 
-      bullet.update();
+      projectile.update();
 
-      if (!this.isInBounds(bullet.x, bullet.y)) {
-        bullet.destroy();
-        this.bullets.splice(i, 1);
+      if (!this.isInBounds(projectile.x, projectile.y)) {
+        projectile.destroy();
+        this.projectiles.splice(i, 1);
       }
     }
   }
 
   public destroy(): void {
-    for (const bullet of this.bullets) {
-      bullet.destroy();
+    for (const projectile of this.projectiles) {
+      projectile.destroy();
     }
 
-    this.bullets.length = 0;
+    this.projectiles.length = 0;
   }
 
   private spawnBullet(fromX: number, fromY: number, toX: number, toY: number): boolean {
@@ -58,8 +58,8 @@ export class CellWeapon {
       return false;
     }
 
-    const bullet = new CellBullet(this.scene, fromX, fromY, toX, toY, BULLET_SPEED);
-    this.bullets.push(bullet);
+    const projectile = new EnemyProjectile(this.scene, fromX, fromY, toX, toY, BULLET_SPEED);
+    this.projectiles.push(projectile);
     return true;
   }
 

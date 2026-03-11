@@ -1,4 +1,4 @@
-import { CellBase, CellType } from './cell';
+import { EnemyBase, EnemyType } from './enemy';
 import type { MinMax } from '@game/common/types';
 import type { BattleContext } from '../battle-context';
 
@@ -15,8 +15,8 @@ const LIVES_COLOR: Record<number, number> = {
   5: 0x12464f,
 };
 
-export class MoleBuildingCell extends CellBase {
-  public override readonly type: CellType = CellType.MOLE_BUILDING;
+export class MoleBuildingCell extends EnemyBase {
+  public override readonly type: EnemyType = EnemyType.MOLE_BUILDING;
 
   constructor(
     scene: Phaser.Scene,

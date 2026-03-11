@@ -1,6 +1,6 @@
 import { Timer } from '@game/common/helpers/timer';
 import { CagedCatAnimation } from '../../animations/caged-cat-animation';
-import { CellBase, CellType } from './cell';
+import { EnemyBase, EnemyType } from './enemy';
 import type { BattleContext } from '../battle-context';
 
 export const MAX_LIVES = 30;
@@ -8,8 +8,8 @@ export const MAX_LIVES = 30;
 const FILL_COLOR = 0xf5e6a6;
 const HEAL_CD_MS = 2000;
 
-export class CatCageCell extends CellBase {
-  public override readonly type: CellType = CellType.CAT_CAGE;
+export class CatCageCell extends EnemyBase {
+  public override readonly type: EnemyType = EnemyType.CAT_CAGE;
 
   private readonly catAnimation: CagedCatAnimation;
   private readonly healTimer = new Timer();

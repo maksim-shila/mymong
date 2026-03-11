@@ -1,7 +1,7 @@
 import type { Bounds } from '@game/common/types';
-import type { CellsGrid } from '../battlefield/cell/cells-grid';
+import type { Grid } from '../battlefield/grid/grid';
 import { Worker, WorkerState } from './worker';
-import type { CellSlot } from '../battlefield/cell/cell-slot';
+import type { GridSlot } from '../battlefield/grid/grid-slot';
 import { DropType } from '../battlefield/drop/drop';
 import type { EnergyTank } from '../energy-tank';
 import { WorkerBaseHud } from './worker-base-hud';
@@ -34,7 +34,7 @@ type CatPlace = {
 
 export class WorkersBase {
   private readonly scene: Phaser.Scene;
-  private readonly grid: CellsGrid;
+  private readonly grid: Grid;
   private readonly hud: WorkerBaseHud;
   private readonly energyTank: EnergyTank;
 
@@ -49,7 +49,7 @@ export class WorkersBase {
 
   private fillEnergyTankRequested = false;
 
-  constructor(scene: Phaser.Scene, grid: CellsGrid, bounds: Bounds, energyTank: EnergyTank) {
+  constructor(scene: Phaser.Scene, grid: Grid, bounds: Bounds, energyTank: EnergyTank) {
     this.scene = scene;
     this.grid = grid;
     this.energyTank = energyTank;
@@ -163,7 +163,7 @@ export class WorkersBase {
     this.resources += amount;
   }
 
-  private tryGiveTask(worker: Worker, dropSlots: CellSlot[]): boolean {
+  private tryGiveTask(worker: Worker, dropSlots: GridSlot[]): boolean {
     const catSlot = dropSlots.find((slot) => slot.drop?.type === DropType.CAT);
     const resourceSlot = dropSlots.find((slot) => slot.drop?.type === DropType.RESOURCE);
 
