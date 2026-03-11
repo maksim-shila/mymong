@@ -1,5 +1,4 @@
-import { CollectionsUtils } from '@game/common/helpers/collections-utils';
-import { CellBullet } from './cell-bullet';
+import { CellBullet, CellBulletState } from './cell-bullet';
 import { AUDIO } from '@game/assets/common-assets';
 import { SoundManager } from '@game/settings/sound';
 import type { BattleContext } from '../battle-context';
@@ -27,18 +26,19 @@ export class CellWeapon {
     return this.bullets;
   }
 
-  public destroyBullet(target: CellBullet): void {
-    const removed = CollectionsUtils.remove(this.bullets, target);
-    removed?.destroy();
-  }
-
   public update(_delta: number): void {
     for (let i = this.bullets.length - 1; i >= 0; i -= 1) {
       const bullet = this.bullets[i];
+      if (bullet.state === CellBulletState.DESTROYED) {
+        this.bullets.splice(i, 1);
+        continue;
+      }
+
       bullet.update();
 
       if (!this.isInBounds(bullet.x, bullet.y)) {
-        this.destroyBullet(bullet);
+        bullet.destroy();
+        this.bullets.splice(i, 1);
       }
     }
   }

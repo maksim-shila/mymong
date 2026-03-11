@@ -49,7 +49,6 @@ export interface Cell {
   readonly bullets: readonly CellBullet[];
 
   update(delta: number, shotAreaX: MinMax, shotAreaY: MinMax): void;
-  destroyBullet(bullet: CellBullet): void;
   onHit(damage: number): void;
 }
 
@@ -134,10 +133,6 @@ export abstract class CellBase extends Phaser.GameObjects.Rectangle implements C
     }
 
     this.weapon.update(delta);
-  }
-
-  public destroyBullet(bullet: CellBullet): void {
-    this.weapon.destroyBullet(bullet);
   }
 
   public shouldShoot(delta: number): boolean {

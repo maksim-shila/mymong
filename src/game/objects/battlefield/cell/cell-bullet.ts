@@ -4,11 +4,17 @@ const BULLET_STROKE_COLOR = 0x164239;
 const BULLET_STROKE_WIDTH = 2;
 const BULLET_Z_INDEX = 940;
 
+export enum CellBulletState {
+  ACTIVE,
+  DESTROYED,
+}
+
 export class CellBullet {
   private readonly arcadeBody: Phaser.Physics.Arcade.Body;
   private readonly sprite: Phaser.GameObjects.Arc;
 
   public readonly damage = 1;
+  public state: CellBulletState = CellBulletState.ACTIVE;
 
   public constructor(
     scene: Phaser.Scene,
@@ -52,10 +58,19 @@ export class CellBullet {
   }
 
   public update(): void {
+    if (this.state === CellBulletState.DESTROYED) {
+      return;
+    }
+
     this.sprite.setPosition(this.arcadeBody.center.x, this.arcadeBody.center.y);
   }
 
   public destroy(): void {
+    if (this.state === CellBulletState.DESTROYED) {
+      return;
+    }
+
+    this.state = CellBulletState.DESTROYED;
     this.arcadeBody.destroy();
     this.sprite.destroy();
   }
