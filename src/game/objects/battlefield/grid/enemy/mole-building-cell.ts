@@ -1,7 +1,7 @@
-import { Enemy } from './enemy';
-import { GridEntityType } from './grid-entity';
+import { Enemy } from '../enemy';
+import { GridEntityType } from '../grid-entity';
 import type { MinMax } from '@game/common/types';
-import type { BattleContext } from '../battle-context';
+import type { BattleContext } from '../../battle-context';
 
 export const MOLE_BUILDING_MIN_LIVES = 5;
 export const MOLE_BUILDING_MAX_LIVES = 25;

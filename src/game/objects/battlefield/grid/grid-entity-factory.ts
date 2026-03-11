@@ -3,7 +3,7 @@ import {
   MOLE_BUILDING_MAX_LIVES,
   MOLE_BUILDING_MIN_LIVES,
   MoleBuildingCell,
-} from './mole-building-cell';
+} from './enemy/mole-building-cell';
 import type { GridSlot } from './grid-slot';
 import type { BattleContext } from '../battle-context';
 
