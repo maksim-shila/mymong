@@ -48,12 +48,14 @@ export class GridGenerator {
       catsCount,
     );
 
-    const catCageSlotIndices = this.pickCatCageIndices(catsCount, rows, columns);
     const moleStatueSlotIndices = new Set([0, columns - 1]);
     const smokeHealerSlotIndices = new Set([
       this.getSlotIndex(3, 3, columns),
       this.getSlotIndex(7, 3, columns),
     ]);
+
+    const reserved = new Set([...moleStatueSlotIndices, ...smokeHealerSlotIndices]);
+    const catCageSlotIndices = this.pickCatCageIndices(catsCount, rows, columns, reserved);
 
     for (const slot of grid.slots) {
       if (moleStatueSlotIndices.has(slot.index)) {
@@ -81,13 +83,23 @@ export class GridGenerator {
     return grid;
   }
 
-  private pickCatCageIndices(catsCount: number, rows: number, columns: number): Set<number> {
+  private pickCatCageIndices(
+    catsCount: number,
+    rows: number,
+    columns: number,
+    reserved: Set<number>,
+  ): Set<number> {
     const indices: number[] = [];
 
     // Skip first/last rows and first/last columns
     for (let row = 1; row < rows - 1; row += 1) {
       for (let col = 1; col < columns - 1; col += 1) {
-        indices.push(row * columns + col);
+        const index = row * columns + col;
+        if (reserved.has(index)) {
+          continue;
+        }
+
+        indices.push(index);
       }
     }
 
