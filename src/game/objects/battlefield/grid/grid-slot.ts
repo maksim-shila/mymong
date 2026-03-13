@@ -25,6 +25,13 @@ export class GridSlot {
     this.updateDrop(delta);
   }
 
+  public destroy(): void {
+    this.cell?.destroy();
+    this.drop?.destroy();
+    this.cell = null;
+    this.drop = null;
+  }
+
   private updateCell(delta: number, shipX: number, shipY: number) {
     if (this.cell === null) {
       return;

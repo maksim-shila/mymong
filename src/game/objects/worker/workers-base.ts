@@ -163,6 +163,21 @@ export class WorkersBase {
     this.resources += amount;
   }
 
+  public destroy(): void {
+    for (const worker of this.workers) {
+      worker.destroy();
+    }
+
+    for (const savedCat of this.savedCats) {
+      savedCat.destroy();
+    }
+
+    this.hud.destroy();
+    this.workers.length = 0;
+    this.savedCats.length = 0;
+    this.catPlaces.length = 0;
+  }
+
   private tryGiveTask(worker: Worker, dropSlots: GridSlot[]): boolean {
     const catSlot = dropSlots.find((slot) => slot.drop?.type === DropType.CAT);
     const resourceSlot = dropSlots.find((slot) => slot.drop?.type === DropType.RESOURCE);

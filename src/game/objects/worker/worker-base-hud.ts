@@ -21,4 +21,8 @@ export class WorkerBaseHud {
   public update(resources: number): void {
     this.text.setText(`Resources: ${resources}`);
   }
+
+  public destroy(): void {
+    this.text.destroy();
+  }
 }

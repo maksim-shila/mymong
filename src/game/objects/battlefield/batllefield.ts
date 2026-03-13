@@ -38,6 +38,7 @@ export class Battlefield {
 
   private readonly moleBase: MoleBase;
   private readonly workersBase: WorkersBase;
+  private readonly boundsOutline: Phaser.GameObjects.Rectangle;
 
   private readonly viewport: ResolutionViewport;
 
@@ -84,7 +85,7 @@ export class Battlefield {
     this.workersBase = new WorkersBase(scene, this.grid, this.bounds, this.energyTank);
 
     // Draw bounds
-    scene.add
+    this.boundsOutline = scene.add
       .rectangle(worldWidth / 2, worldHeight / 2, this.width, worldHeight)
       .setOrigin(0.5)
       .setFillStyle(0x000000, 0)
@@ -141,6 +142,15 @@ export class Battlefield {
       .reduce((acc, current) => acc + current, 0);
 
     this.workersBase.addResources(fieldResources);
+  }
+
+  public destroy(): void {
+    this.workersBase.destroy();
+    this.moleBase.destroy();
+    this.grid.destroy();
+    this.paddle.destroy();
+    this.energyTank.destroy();
+    this.boundsOutline.destroy();
   }
 
   private updateDifficulty(delta: number): void {

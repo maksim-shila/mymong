@@ -3,11 +3,6 @@ export interface MinMax {
   max: number;
 }
 
-export interface Offset {
-  x: number;
-  y: number;
-}
-
 export interface Position {
   x: number;
   y: number;

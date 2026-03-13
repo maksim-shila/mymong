@@ -27,7 +27,9 @@ const PLATFORM_Z_INDEX = 1119;
 
 export class EnergyTank {
   private readonly scene: Phaser.Scene;
+  private readonly tankOutline: Phaser.GameObjects.Rectangle;
   private readonly fuelFill: Phaser.GameObjects.Rectangle;
+  private readonly platform: Phaser.GameObjects.Rectangle;
 
   private readonly fuelMax: number;
   private fuel: number;
@@ -43,7 +45,7 @@ export class EnergyTank {
     const tankX = bounds.x.min - TANK_OFFSET_X;
     const tankY = bounds.y.min + TANK_OFFSET_Y;
 
-    scene.add
+    this.tankOutline = scene.add
       .rectangle(tankX, tankY, TANK_WIDTH, TANK_HEIGHT, OUTLINE_COLOR, OUTLINE_ALPHA)
       .setOrigin(0.5, 0)
       .setDepth(TANK_Z_INDEX);
@@ -65,7 +67,7 @@ export class EnergyTank {
     this.platformX = tankX;
     this.platformY = tankY + TANK_HEIGHT + PLATFORM_OFFSET_Y;
 
-    scene.add
+    this.platform = scene.add
       .rectangle(this.platformX, this.platformY, PLATFORM_WIDTH, PLATFORM_HEIGHT, PLATFORM_COLOR, 1)
       .setStrokeStyle(TANK_BORDER_WIDTH, OUTLINE_COLOR, OUTLINE_ALPHA)
       .setDepth(PLATFORM_Z_INDEX);
@@ -128,5 +130,11 @@ export class EnergyTank {
     }
 
     this.fuel = Math.min(this.fuelMax, this.fuel + amount);
+  }
+
+  public destroy(): void {
+    this.tankOutline.destroy();
+    this.fuelFill.destroy();
+    this.platform.destroy();
   }
 }

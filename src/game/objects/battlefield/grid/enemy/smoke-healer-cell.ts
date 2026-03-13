@@ -14,7 +14,7 @@ const STROKE_ALPHA = 0.7;
 const SMOKE_RELEASE_CD_MIN_MS = 3000;
 const SMOKE_RELEASE_CD_MAX_MS = 7000;
 const HEALER_SMOKE_VOLUME = 4;
-export const SMOKE_HEALER_LIVES = 50;
+const SMOKE_HEALER_LIVES = 50;
 
 export class SmokeHealerCell extends GridEntityBase {
   public override readonly type: GridEntityType = GridEntityType.SMOKE_HEALER;

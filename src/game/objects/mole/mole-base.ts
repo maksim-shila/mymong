@@ -100,6 +100,16 @@ export class MoleBase {
     return this.moles.length;
   }
 
+  public destroy(): void {
+    for (const mole of this.moles) {
+      mole.destroy();
+    }
+
+    this.moles.length = 0;
+    this.molesQueue.length = 0;
+    this.hud.destroy();
+  }
+
   private tryAddToQueue(mole: Mole): boolean {
     if (this.molesQueue.includes(mole)) {
       return false;

@@ -134,6 +134,7 @@ export class BattleScene extends Phaser.Scene {
   private goHome(): void {
     this.hasShownCatsSavedMessage = false;
     this.hasShownMolesDestroyedMessage = false;
+    this.battlefield.destroy();
     this.scene.start(SCENE.HOME);
   }
 }

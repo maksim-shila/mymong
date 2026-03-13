@@ -31,6 +31,7 @@ export interface GridEntity {
 
   update(delta: number, shipX: number, shipY: number): void;
   onHit(damage: number): void;
+  destroy(): void;
 }
 
 export abstract class GridEntityBase extends Phaser.GameObjects.Rectangle implements GridEntity {

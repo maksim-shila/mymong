@@ -21,4 +21,8 @@ export class MoleBaseHud {
   public update(molesCount: number): void {
     this.text.setText(`Moles left: ${molesCount}`);
   }
+
+  public destroy(): void {
+    this.text.destroy();
+  }
 }
