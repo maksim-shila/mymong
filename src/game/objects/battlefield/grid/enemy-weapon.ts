@@ -2,6 +2,7 @@ import { EnemyProjectile, EnemyProjectileState } from './enemy-projectile';
 import { AUDIO } from '@game/assets/common-assets';
 import { SoundManager } from '@game/settings/sound';
 import type { BattleContext } from '../battle-context';
+import type { EnemyProjectileAppearance } from './enemy-projectile';
 
 const BULLET_SPEED = 300;
 
@@ -9,10 +10,16 @@ export class EnemyWeapon {
   private readonly scene: Phaser.Scene;
   private readonly battleContext: BattleContext;
   private readonly projectiles: EnemyProjectile[] = [];
+  private readonly projectileAppearance?: EnemyProjectileAppearance;
 
-  constructor(scene: Phaser.Scene, battleContext: BattleContext) {
+  constructor(
+    scene: Phaser.Scene,
+    battleContext: BattleContext,
+    projectileAppearance?: EnemyProjectileAppearance,
+  ) {
     this.scene = scene;
     this.battleContext = battleContext;
+    this.projectileAppearance = projectileAppearance;
   }
 
   public shoot(fromX: number, fromY: number, targetX: number, targetY: number): void {
@@ -58,7 +65,15 @@ export class EnemyWeapon {
       return false;
     }
 
-    const projectile = new EnemyProjectile(this.scene, fromX, fromY, toX, toY, BULLET_SPEED);
+    const projectile = new EnemyProjectile(
+      this.scene,
+      fromX,
+      fromY,
+      toX,
+      toY,
+      BULLET_SPEED,
+      this.projectileAppearance,
+    );
     this.projectiles.push(projectile);
     return true;
   }

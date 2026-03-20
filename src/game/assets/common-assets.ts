@@ -26,6 +26,22 @@ import smoke7Image from '@assets/image/smoke-1-7.png';
 import smoke8Image from '@assets/image/smoke-1-8.png';
 import smoke9Image from '@assets/image/smoke-1-9.png';
 import heartImage from '@assets/image/heart.png';
+import catGhost1Image from '@assets/image/cat-ghost-1.png';
+import catGhost2Image from '@assets/image/cat-ghost-2.png';
+import catGhost3Image from '@assets/image/cat-ghost-3.png';
+import catGhost4Image from '@assets/image/cat-ghost-4.png';
+import catGhost5Image from '@assets/image/cat-ghost-5.png';
+import catGhost6Image from '@assets/image/cat-ghost-6.png';
+import catGhost7Image from '@assets/image/cat-ghost-7.png';
+import catGhost8Image from '@assets/image/cat-ghost-8.png';
+import catGhost9Image from '@assets/image/cat-ghost-9.png';
+import catGhost10Image from '@assets/image/cat-ghost-10.png';
+import catGhost11Image from '@assets/image/cat-ghost-11.png';
+import catGhost12Image from '@assets/image/cat-ghost-12.png';
+import energyBall1Image from '@assets/image/energy-ball-1.png';
+import energyBall2Image from '@assets/image/energy-ball-2.png';
+import energyBall3Image from '@assets/image/energy-ball-3.png';
+import energyBall4Image from '@assets/image/energy-ball-4.png';
 import menuSwitchAudio from '@assets/audio/menu-switch.mp3';
 import menuSelectAudio from '@assets/audio/menu-select.mp3';
 import explosionAudio from '@assets/audio/explosion.mp3';
@@ -67,6 +83,22 @@ export const TEXTURE = {
   SMOKE_8: 'smoke-8',
   SMOKE_9: 'smoke-9',
   HEART: 'heart',
+  CAT_GHOST_1: 'cat-ghost-1',
+  CAT_GHOST_2: 'cat-ghost-2',
+  CAT_GHOST_3: 'cat-ghost-3',
+  CAT_GHOST_4: 'cat-ghost-4',
+  CAT_GHOST_5: 'cat-ghost-5',
+  CAT_GHOST_6: 'cat-ghost-6',
+  CAT_GHOST_7: 'cat-ghost-7',
+  CAT_GHOST_8: 'cat-ghost-8',
+  CAT_GHOST_9: 'cat-ghost-9',
+  CAT_GHOST_10: 'cat-ghost-10',
+  CAT_GHOST_11: 'cat-ghost-11',
+  CAT_GHOST_12: 'cat-ghost-12',
+  ENERGY_BALL_1: 'energy-ball-1',
+  ENERGY_BALL_2: 'energy-ball-2',
+  ENERGY_BALL_3: 'energy-ball-3',
+  ENERGY_BALL_4: 'energy-ball-4',
 } as const;
 
 export const AUDIO = {
@@ -109,6 +141,22 @@ export class CommonAssets {
     scene.load.image(TEXTURE.SMOKE_8, smoke8Image);
     scene.load.image(TEXTURE.SMOKE_9, smoke9Image);
     scene.load.image(TEXTURE.HEART, heartImage);
+    scene.load.image(TEXTURE.CAT_GHOST_1, catGhost1Image);
+    scene.load.image(TEXTURE.CAT_GHOST_2, catGhost2Image);
+    scene.load.image(TEXTURE.CAT_GHOST_3, catGhost3Image);
+    scene.load.image(TEXTURE.CAT_GHOST_4, catGhost4Image);
+    scene.load.image(TEXTURE.CAT_GHOST_5, catGhost5Image);
+    scene.load.image(TEXTURE.CAT_GHOST_6, catGhost6Image);
+    scene.load.image(TEXTURE.CAT_GHOST_7, catGhost7Image);
+    scene.load.image(TEXTURE.CAT_GHOST_8, catGhost8Image);
+    scene.load.image(TEXTURE.CAT_GHOST_9, catGhost9Image);
+    scene.load.image(TEXTURE.CAT_GHOST_10, catGhost10Image);
+    scene.load.image(TEXTURE.CAT_GHOST_11, catGhost11Image);
+    scene.load.image(TEXTURE.CAT_GHOST_12, catGhost12Image);
+    scene.load.image(TEXTURE.ENERGY_BALL_1, energyBall1Image);
+    scene.load.image(TEXTURE.ENERGY_BALL_2, energyBall2Image);
+    scene.load.image(TEXTURE.ENERGY_BALL_3, energyBall3Image);
+    scene.load.image(TEXTURE.ENERGY_BALL_4, energyBall4Image);
 
     scene.load.image(TEXTURE.SHIP_EXPLOSION_1, shipExplosion1Image);
     scene.load.image(TEXTURE.SHIP_EXPLOSION_2, shipExplosion2Image);

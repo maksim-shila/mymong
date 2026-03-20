@@ -117,6 +117,14 @@ export class Paddle extends Phaser.GameObjects.Rectangle {
     return this;
   }
 
+  public get aimX(): number {
+    return this.arcadeBody.center.x;
+  }
+
+  public get aimY(): number {
+    return this.arcadeBody.center.y;
+  }
+
   public get isDead(): boolean {
     return this.lives <= 0;
   }

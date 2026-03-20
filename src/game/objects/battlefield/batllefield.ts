@@ -13,6 +13,7 @@ import { GameSaveManager } from '@game/settings/game-save';
 import { DropType } from './drop/drop';
 import type { ResourceDrop } from './drop/resource-drop';
 import { BattleContext } from './battle-context';
+import { GhostCatSpawner } from './ghost-cat-spawner';
 
 const INITIAL_WIDTH = 1200;
 
@@ -38,6 +39,7 @@ export class Battlefield {
 
   private readonly moleBase: MoleBase;
   private readonly workersBase: WorkersBase;
+  private readonly ghostCatSpawner: GhostCatSpawner;
   private readonly boundsOutline: Phaser.GameObjects.Rectangle;
 
   private readonly viewport: ResolutionViewport;
@@ -83,6 +85,7 @@ export class Battlefield {
 
     this.moleBase = new MoleBase(scene, this.grid, this.bounds, this.battleContext);
     this.workersBase = new WorkersBase(scene, this.grid, this.bounds, this.energyTank);
+    this.ghostCatSpawner = new GhostCatSpawner(scene, this.grid, this.battleContext);
 
     // Draw bounds
     this.boundsOutline = scene.add
@@ -127,8 +130,9 @@ export class Battlefield {
     this.workersBase.update(delta);
     this.moleBase.update(delta);
     this.paddle.update(delta);
+    this.ghostCatSpawner.update(delta);
 
-    this.grid.update(delta, this.paddle.x, this.paddle.y);
+    this.grid.update(delta, this.paddle.aimX, this.paddle.aimY);
 
     this.energyTank.update();
     this.collisionHandler.update();
@@ -147,6 +151,7 @@ export class Battlefield {
   public destroy(): void {
     this.workersBase.destroy();
     this.moleBase.destroy();
+    this.ghostCatSpawner.destroy();
     this.grid.destroy();
     this.paddle.destroy();
     this.energyTank.destroy();
