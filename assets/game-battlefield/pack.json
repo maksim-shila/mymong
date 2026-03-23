@@ -1,0 +1,42 @@
+{
+  "images": {
+    "path": "assets/game-battlefield/image/",
+    "files": [
+      {
+        "type": "image",
+        "key": "background",
+        "url": "battlefield-background.png"
+      },
+      {
+        "type": "image",
+        "key": "mole-statue",
+        "url": "mole-statue.png"
+      },
+      {
+        "type": "image",
+        "key": "mole-tower-ball",
+        "url": "mole-tower-ball.png"
+      },
+      {
+        "type": "image",
+        "key": "mole-tower",
+        "url": "mole-tower.png"
+      },
+      {
+        "type": "image",
+        "key": "ship",
+        "url": "ship.png"
+      }
+    ]
+  },
+  "audio": {
+    "path": "assets/game-battlefield/audio/",
+    "files": [
+      {
+        "type": "audio",
+        "key": "statue-hit",
+        "url": "statue-hit.mp3"
+      }
+    ]
+  }
+}

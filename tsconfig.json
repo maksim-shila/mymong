@@ -9,10 +9,11 @@
 
     /* Bundler mode */
     "moduleResolution": "bundler",
-    "baseUrl": ".",
     "paths": {
-      "@game/*": ["src/game/*"],
-      "@assets/*": ["assets/*"]
+      "@game/*": ["./src/game/*"],
+      "@assets/*": ["./assets/*"],
+      "@core/*": ["./src/core/*"],
+      "@game-battlefield/*": ["./src/game-battlefield/*"]
     },
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
@@ -22,7 +23,7 @@
 
     /* Linting */
     "strict": true,
-    "isolatedDeclarations": true,
+    "isolatedDeclarations": false,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
