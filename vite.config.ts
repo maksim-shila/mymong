@@ -7,6 +7,9 @@ export default defineConfig({
     alias: {
       '@game': resolve(__dirname, 'src/game'),
       '@assets': resolve(__dirname, 'assets'),
+      '@core': resolve(__dirname, 'src/v2/core'),
+      '@v2': resolve(__dirname, 'src/v2'),
+      '@game-battlefield': resolve(__dirname, 'src/v2/game-battlefield'),
     },
   },
   server: {

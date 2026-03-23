@@ -1,7 +1,7 @@
-import { Controls } from '@game/input/controls';
+import { Controls } from '@game/input-old/controls';
 import type { ResolutionViewport } from '@game/settings/resolution';
 import { AUDIO } from '@game/assets/common-assets';
-import { SoundManager } from '@game/settings/sound';
+import { SoundManagerOld } from '@game/settings/sound';
 
 const DEFEAT_SLOWDOWN_DURATION_MS = 3000;
 const DEFEAT_OVERLAY_ALPHA = 0.55;
@@ -61,7 +61,7 @@ export class DefeatScreen {
     }
 
     this.defeatSequenceStarted = true;
-    SoundManager.playEffect(this.scene, AUDIO.GAME_OVER);
+    SoundManagerOld.playEffect(this.scene, AUDIO.GAME_OVER);
     this.defeatOverlay.setVisible(true);
     this.defeatTitleText.setVisible(true);
 

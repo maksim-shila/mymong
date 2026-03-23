@@ -1,5 +1,5 @@
-import { Controls } from '@game/input/controls';
-import { Key } from '@game/input/key';
+import { Controls } from '@game/input-old/controls';
+import { Key } from '@game/input-old/key';
 import { Battlefield } from '@game/objects/battlefield/batllefield';
 import { applyResolutionCamera, type ResolutionViewport } from '@game/settings/resolution';
 import { SCENE } from '../../scenes';
@@ -138,6 +138,3 @@ export class BattleScene extends Phaser.Scene {
     this.scene.start(SCENE.HOME);
   }
 }
-
-
-

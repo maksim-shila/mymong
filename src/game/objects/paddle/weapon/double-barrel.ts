@@ -1,6 +1,6 @@
 import type { Bounds } from '@game/common/types';
-import type { Controls } from '@game/input/controls';
-import type { EnergyTank } from '@game/objects/energy-tank';
+import type { Controls } from '@game/input-old/controls';
+import type { EnergyTank } from '@game/objects/worker/energy-tank';
 import type { Paddle } from '../paddle';
 import { Weapon } from './weapon';
 

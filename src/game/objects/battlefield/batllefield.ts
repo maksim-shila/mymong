@@ -5,8 +5,8 @@ import type { Grid } from './grid/grid';
 import { MoleBase } from '../mole/mole-base';
 import { Paddle } from '../paddle/paddle';
 import { CollisionHandler } from '../collisions/collision-handler';
-import { EnergyTank } from '../energy-tank';
-import { Controls } from '@game/input/controls';
+import { EnergyTank } from '../worker/energy-tank';
+import { Controls } from '@game/input-old/controls';
 import { WorkersBase } from '../worker/workers-base';
 import { Timer } from '@game/common/helpers/timer';
 import { GameSaveManager } from '@game/settings/game-save';
@@ -27,6 +27,7 @@ const STROKE_ALPHA = 0.45;
 
 const DIFFICULTY_STEP_INTERVAL_MS = 1000;
 const MAX_DIFFICULTY_STEPS = 20;
+
 export class Battlefield {
   private readonly controls: Controls;
   private readonly paddle: Paddle;

@@ -80,13 +80,13 @@ export const saveVSyncEnabled = (enabled: boolean): void => {
   }
 };
 
-export const getResolutionZoom = (width: number, height: number): number => {
+const getResolutionZoom = (width: number, height: number): number => {
   const zoomX = width / BASE_WORLD_WIDTH;
   const zoomY = height / BASE_WORLD_HEIGHT;
   return Math.min(zoomX, zoomY);
 };
 
-export const getResolutionViewport = (width: number, height: number): ResolutionViewport => {
+const getResolutionViewport = (width: number, height: number): ResolutionViewport => {
   const zoom = getResolutionZoom(width, height);
   const viewWidth = width / zoom;
   const viewHeight = height / zoom;

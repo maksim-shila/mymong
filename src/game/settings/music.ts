@@ -1,4 +1,4 @@
-import { SoundManager } from '@game/settings/sound';
+import { SoundManagerOld } from '@game/settings/sound';
 
 export class MusicManager {
   private static currentTrackKey: string | null = null;
@@ -19,7 +19,7 @@ export class MusicManager {
 
     const track = scene.sound.add(key, {
       loop: true,
-      volume: SoundManager.getMusicVolume(),
+      volume: SoundManagerOld.getMusicVolume(),
     }) as Phaser.Sound.HTML5AudioSound | Phaser.Sound.WebAudioSound;
     track.play();
 
@@ -39,6 +39,6 @@ export class MusicManager {
       return;
     }
 
-    this.currentTrack.setVolume(SoundManager.getMusicVolume());
+    this.currentTrack.setVolume(SoundManagerOld.getMusicVolume());
   }
 }

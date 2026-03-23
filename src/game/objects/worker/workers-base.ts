@@ -3,7 +3,7 @@ import type { Grid } from '../battlefield/grid/grid';
 import { Worker, WorkerState } from './worker';
 import type { GridSlot } from '../battlefield/grid/grid-slot';
 import { DropType } from '../battlefield/drop/drop';
-import type { EnergyTank } from '../energy-tank';
+import type { EnergyTank } from './energy-tank';
 import { WorkerBaseHud } from './worker-base-hud';
 import { CollectionsUtils } from '@game/common/helpers/collections-utils';
 import { GameSaveManager } from '@game/settings/game-save';

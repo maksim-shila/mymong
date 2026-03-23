@@ -1,6 +1,6 @@
 import { TEXTURE } from '@game/assets/common-assets';
 import { Timer } from '@game/common/helpers/timer';
-import type { EnergyTank } from '../energy-tank';
+import type { EnergyTank } from './energy-tank';
 import type { GridSlot } from '../battlefield/grid/grid-slot';
 import { DropType, type Drop } from '../battlefield/drop/drop';
 import { ResourceDrop } from '../battlefield/drop/resource-drop';

@@ -1,12 +1,12 @@
-import type { Controls } from '@game/input/controls';
-import { Key } from '@game/input/key';
+import type { Controls } from '@game/input-old/controls';
+import { Key } from '@game/input-old/key';
 import { PaddleUI } from './paddle-ui';
 import { Weapon, WeaponType } from './weapon/weapon';
 import { SingleBarrel } from './weapon/single-barrel';
 import { DoubleBarrel } from './weapon/double-barrel';
 import { TripleBarrel } from './weapon/triple-barrel';
 import type { Bounds } from '@game/common/types';
-import type { EnergyTank } from '../energy-tank';
+import type { EnergyTank } from '../worker/energy-tank';
 import { PaddleHitAnimation } from './paddle-hit-animation';
 import { PaddleShield } from './paddle-shield';
 import { MAX_LIVES } from '../battlefield/grid/cat-cage-cell';

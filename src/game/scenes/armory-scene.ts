@@ -1,8 +1,12 @@
-import { Controls } from '@game/input/controls';
-import { Key } from '@game/input/key';
-import { MENU_COLOR_DEFAULT, MENU_COLOR_SELECTED, MenuComponent } from '@game/scenes/menu/menu-component';
+import { Controls } from '@game/input-old/controls';
+import { Key } from '@game/input-old/key';
+import {
+  MENU_COLOR_DEFAULT,
+  MENU_COLOR_SELECTED,
+  MenuComponent,
+} from '@game/scenes/menu/menu-component';
 import { WeaponType } from '@game/objects/paddle/weapon/weapon';
-import { ENERGY_TANK_MAX_LEVEL } from '@game/objects/energy-tank';
+import { ENERGY_TANK_MAX_LEVEL } from '@game/objects/worker/energy-tank';
 import { GameSaveManager, type GameSave } from '@game/settings/game-save';
 import { applyResolutionCamera } from '@game/settings/resolution';
 import { SCENE } from '../../scenes';
@@ -515,7 +519,3 @@ export class ArmoryScene extends Phaser.Scene {
     this.dirty = false;
   }
 }
-
-
-
-

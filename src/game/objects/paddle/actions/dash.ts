@@ -1,7 +1,7 @@
 import type { Bounds, Direction } from '@game/common/types';
-import type { Controls } from '@game/input/controls';
-import { Key } from '@game/input/key';
-import type { EnergyTank } from '@game/objects/energy-tank';
+import type { Controls } from '@game/input-old/controls';
+import { Key } from '@game/input-old/key';
+import type { EnergyTank } from '@game/objects/worker/energy-tank';
 import type { Paddle } from '../paddle';
 
 const DASH_DISTANCE_PX = 180;

@@ -1,6 +1,6 @@
-import { Controls } from '@game/input/controls';
-import { Key } from '@game/input/key';
-import { SoundManager, type SoundSettings } from '@game/settings/sound';
+import { Controls } from '@game/input-old/controls';
+import { Key } from '@game/input-old/key';
+import { SoundManagerOld, type SoundSettings } from '@game/settings/sound';
 import { SCENE } from '../../../scenes';
 import { Slider } from './components/slider';
 import { OptionsMenuBase, type MenuOptions } from './options-menu-base';
@@ -17,7 +17,7 @@ const MUSIC_INDEX = 1;
 const EFFECTS_INDEX = 2;
 
 export class SoundMenu extends OptionsMenuBase {
-  private pendingSettings: SoundSettings = SoundManager.load();
+  private pendingSettings: SoundSettings = SoundManagerOld.load();
 
   private masterSlider?: Slider;
   private musicSlider?: Slider;
@@ -68,7 +68,7 @@ export class SoundMenu extends OptionsMenuBase {
       initialValue: this.pendingSettings.master,
       onChange: (value) => {
         this.pendingSettings.master = value;
-        SoundManager.save(this.pendingSettings);
+        SoundManagerOld.save(this.pendingSettings);
         MusicManager.syncVolume();
       },
     });
@@ -79,7 +79,7 @@ export class SoundMenu extends OptionsMenuBase {
       initialValue: this.pendingSettings.music,
       onChange: (value) => {
         this.pendingSettings.music = value;
-        SoundManager.save(this.pendingSettings);
+        SoundManagerOld.save(this.pendingSettings);
         MusicManager.syncVolume();
       },
     });
@@ -90,7 +90,7 @@ export class SoundMenu extends OptionsMenuBase {
       initialValue: this.pendingSettings.effects,
       onChange: (value) => {
         this.pendingSettings.effects = value;
-        SoundManager.save(this.pendingSettings);
+        SoundManagerOld.save(this.pendingSettings);
       },
     });
 
@@ -140,9 +140,3 @@ export class SoundMenu extends OptionsMenuBase {
     this.effectsSlider?.setSelected(this.selectedIndex === EFFECTS_INDEX);
   }
 }
-
-
-
-
-
-

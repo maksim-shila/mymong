@@ -1,6 +1,6 @@
 import { EnemyProjectile, EnemyProjectileState } from './enemy-projectile';
 import { AUDIO } from '@game/assets/common-assets';
-import { SoundManager } from '@game/settings/sound';
+import { SoundManagerOld } from '@game/settings/sound';
 import type { BattleContext } from '../battle-context';
 import type { EnemyProjectileAppearance } from './enemy-projectile';
 
@@ -25,7 +25,7 @@ export class EnemyWeapon {
   public shoot(fromX: number, fromY: number, targetX: number, targetY: number): void {
     const shotDone = this.spawnBullet(fromX, fromY, targetX, targetY);
     if (shotDone) {
-      SoundManager.playEffect(this.scene, AUDIO.CELL_SHOT);
+      SoundManagerOld.playEffect(this.scene, AUDIO.CELL_SHOT);
     }
   }
 
@@ -80,11 +80,6 @@ export class EnemyWeapon {
 
   private isInBounds(x: number, y: number): boolean {
     const { bounds } = this.battleContext;
-    return (
-      x >= bounds.x.min &&
-      x <= bounds.x.max &&
-      y >= bounds.y.min &&
-      y <= bounds.y.max
-    );
+    return x >= bounds.x.min && x <= bounds.x.max && y >= bounds.y.min && y <= bounds.y.max;
   }
 }

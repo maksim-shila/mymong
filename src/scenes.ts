@@ -13,6 +13,8 @@ import { ResolutionMenu } from '@game/scenes/menu/resolution-menu';
 import { SoundMenu } from '@game/scenes/menu/sound-menu';
 import { ControlsMenu } from '@game/scenes/menu/controls-menu';
 import { ReadyScene } from '@game/scenes/ready-scene';
+import { BootScene } from '@v2/boot-scene';
+import { BattlefieldScene } from '@v2/game-battlefield/battlefield-scene';
 
 export const SCENE = {
   MAIN_MENU: 'MainMenuScene',
@@ -42,10 +44,13 @@ export const SCENES: Phaser.Scene[] = [
   new ControlsMenu(SCENE.CONTROLS_MENU),
   new LoadingScene(SCENE.LOADING),
   new ReadyScene(SCENE.READY),
+  new BootScene(BootScene.NAME),
   new BattleScene(SCENE.BATTLE),
   new HomeScene(SCENE.HOME),
   new ArmoryScene(SCENE.ARMORY),
   new CatoratoriaScene(SCENE.CATORATORIA),
   new FinalScene(SCENE.FINAL),
   new CreditsScene(SCENE.CREDITS),
+
+  new BattlefieldScene(),
 ];
