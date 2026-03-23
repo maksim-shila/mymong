@@ -1,5 +1,5 @@
-import { Controls } from '@game/input/controls';
-import { Key } from '@game/input/key';
+import { Controls } from '@game/input-old/controls';
+import { Key } from '@game/input-old/key';
 import { GameMenu } from '@game/scenes/menu/game-menu';
 import { applyResolutionCamera, type ResolutionViewport } from '@game/settings/resolution';
 import { GameSaveManager } from '@game/settings/game-save';
@@ -118,9 +118,9 @@ export class HomeScene extends Phaser.Scene {
           ? () => this.scene.start(SCENE.LOADING)
           : label === 'Catoratoria'
             ? () => this.scene.start(SCENE.CATORATORIA)
-          : label === 'Armory'
-            ? () => this.scene.start(SCENE.ARMORY)
-            : undefined;
+            : label === 'Armory'
+              ? () => this.scene.start(SCENE.ARMORY)
+              : undefined;
       this.cards.push(
         this.createCard(x, y, cardWidth, cardHeight, label, label !== 'Coming Soon', onSelect),
       );
@@ -303,10 +303,4 @@ export class HomeScene extends Phaser.Scene {
 
     this.cards[this.selectedCardIndex]?.onSelect?.();
   }
-
 }
-
-
-
-
-

@@ -24,17 +24,7 @@ export class Grid {
 
         const slotIndex = rowIndex * columns + colIndex;
         const depth = (rows - rowIndex - 1) * columns + colIndex;
-        const gridSlot = new GridSlot(
-          dropGenerator,
-          slotIndex,
-          rowIndex,
-          colIndex,
-          depth,
-          cellWidth,
-          cellHeight,
-          x,
-          y,
-        );
+        const gridSlot = new GridSlot(dropGenerator, slotIndex, depth, cellWidth, cellHeight, x, y);
         this.slots.push(gridSlot);
       }
     }

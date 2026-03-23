@@ -1,5 +1,5 @@
 import { AUDIO, TEXTURE } from '@game/assets/common-assets';
-import { SoundManager } from '@game/settings/sound';
+import { SoundManagerOld } from '@game/settings/sound';
 import { GridEntityBase, GridEntityType } from '../grid-entity';
 
 const IMG_Y_OFFSET = -3;
@@ -30,7 +30,7 @@ export class MoleStatueCell extends GridEntityBase {
       return;
     }
 
-    SoundManager.playEffect(this.scene, AUDIO.STATUE_HIT);
+    SoundManagerOld.playEffect(this.scene, AUDIO.STATUE_HIT);
   }
 
   public override destroy(): void {

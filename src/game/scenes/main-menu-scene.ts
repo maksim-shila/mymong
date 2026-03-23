@@ -4,6 +4,7 @@ import { MenuComponent } from '@game/scenes/menu/menu-component';
 import { GameSaveManager } from '@game/settings/game-save';
 import { preloadSoundtrackAssets, SOUNDTRACK } from '@game/assets/soundtrack-assets';
 import { MusicManager } from '@game/settings/music';
+import { BootScene } from '@v2/boot-scene';
 
 const MENU_GAME_TITLE_Y = 0.34;
 const MENU_GAME_TITLE_FONT_SIZE = '80px';
@@ -40,7 +41,7 @@ export class MainMenuScene extends Phaser.Scene {
         label: 'New Game',
         onSelect: () => {
           GameSaveManager.startNewGame();
-          this.scene.start(SCENE.LOADING);
+          this.scene.start(BootScene.NAME);
         },
       },
       {
@@ -87,6 +88,3 @@ export class MainMenuScene extends Phaser.Scene {
     this.game.destroy(true);
   }
 }
-
-
-

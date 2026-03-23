@@ -1,7 +1,7 @@
-import { Controls } from '@game/input/controls';
-import { Key } from '@game/input/key';
+import { Controls } from '@game/input-old/controls';
+import { Key } from '@game/input-old/key';
 import { AUDIO } from '@game/assets/common-assets';
-import { SoundManager } from '@game/settings/sound';
+import { SoundManagerOld } from '@game/settings/sound';
 import menuSwitchAudio from '@assets/audio/menu-switch.mp3';
 import menuSelectAudio from '@assets/audio/menu-select.mp3';
 
@@ -120,7 +120,7 @@ export class MenuComponent {
       return;
     }
 
-    SoundManager.playEffect(this.scene, AUDIO.MENU_SELECT);
+    SoundManagerOld.playEffect(this.scene, AUDIO.MENU_SELECT);
     this.menuOptions[this.selectedIndex].onSelect();
   };
 
@@ -144,7 +144,7 @@ export class MenuComponent {
       return;
     }
 
-    SoundManager.playEffect(this.scene, AUDIO.MENU_SWITCH);
+    SoundManagerOld.playEffect(this.scene, AUDIO.MENU_SWITCH);
     this.onSelectedIndexChanged?.(this.selectedIndex);
     this.renderSelection();
   }
@@ -156,4 +156,3 @@ export class MenuComponent {
     }
   }
 }
-

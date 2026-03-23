@@ -20,7 +20,7 @@ const normalize = (settings: Partial<SoundSettings>): SoundSettings => ({
   effects: clampPercent(settings.effects ?? DEFAULT_SOUND_SETTINGS.effects),
 });
 
-export class SoundManager {
+export class SoundManagerOld {
   public static load(): SoundSettings {
     try {
       const raw = localStorage.getItem(SOUND_SETTINGS_STORAGE_KEY);
@@ -43,11 +43,11 @@ export class SoundManager {
     }
   }
 
-  public static getEffectsVolume(settings: SoundSettings = SoundManager.load()): number {
+  public static getEffectsVolume(settings: SoundSettings = SoundManagerOld.load()): number {
     return (settings.master / 100) * (settings.effects / 100);
   }
 
-  public static getMusicVolume(settings: SoundSettings = SoundManager.load()): number {
+  public static getMusicVolume(settings: SoundSettings = SoundManagerOld.load()): number {
     return (settings.master / 100) * (settings.music / 100);
   }
 
@@ -60,8 +60,8 @@ export class SoundManager {
       return;
     }
 
-    const settings = SoundManager.load();
-    const volume = SoundManager.getEffectsVolume(settings) * (config?.volume ?? 1);
+    const settings = SoundManagerOld.load();
+    const volume = SoundManagerOld.getEffectsVolume(settings) * (config?.volume ?? 1);
     if (volume <= 0) {
       return;
     }

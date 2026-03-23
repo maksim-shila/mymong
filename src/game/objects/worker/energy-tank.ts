@@ -1,7 +1,7 @@
 import { Cheats } from '@game/cheats';
 import type { Bounds } from '@game/common/types';
 import { AUDIO } from '@game/assets/common-assets';
-import { SoundManager } from '@game/settings/sound';
+import { SoundManagerOld } from '@game/settings/sound';
 
 export const ENERGY_TANK_BASE_FUEL = 100;
 export const ENERGY_TANK_LEVEL_STEP = 20;
@@ -105,7 +105,7 @@ export class EnergyTank {
     const consumed = Math.min(this.fuel, amount);
     this.fuel -= consumed;
     if (fuelBefore > 0 && this.fuel <= 0) {
-      SoundManager.playEffect(this.scene, AUDIO.OUT_OF_ENERGY);
+      SoundManagerOld.playEffect(this.scene, AUDIO.OUT_OF_ENERGY);
     }
 
     return true;
@@ -119,7 +119,7 @@ export class EnergyTank {
     const fuelBefore = this.fuel;
     this.fuel -= amount;
     if (fuelBefore > 0 && this.fuel <= 0) {
-      SoundManager.playEffect(this.scene, AUDIO.OUT_OF_ENERGY);
+      SoundManagerOld.playEffect(this.scene, AUDIO.OUT_OF_ENERGY);
     }
     return true;
   }

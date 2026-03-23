@@ -1,4 +1,4 @@
-import { Controls } from '@game/input/controls';
+import { Controls } from '@game/input-old/controls';
 import type { ResolutionViewport } from '@game/settings/resolution';
 
 const PHASE_MESSAGE_DURATION_MS = 3000;

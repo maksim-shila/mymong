@@ -1,6 +1,6 @@
 import type { PaddleUI } from './paddle-ui';
 import { AUDIO } from '@game/assets/common-assets';
-import { SoundManager } from '@game/settings/sound';
+import { SoundManagerOld } from '@game/settings/sound';
 
 const SHAKE_DURATION_MS = 240;
 const SHAKE_AMPLITUDE_X_PX = 20;
@@ -33,7 +33,7 @@ export class PaddleHitAnimation {
   }
 
   public start(onComplete?: () => void): void {
-    SoundManager.playEffect(this.scene, AUDIO.SHIP_HIT);
+    SoundManagerOld.playEffect(this.scene, AUDIO.SHIP_HIT);
 
     this.durationMs = SHAKE_DURATION_MS;
     this.elapsedMs = 0;

@@ -1,6 +1,6 @@
 import { Color } from '@game/common/color';
 import { Timer } from '@game/common/helpers/timer';
-import type { EnergyTank } from '../energy-tank';
+import type { EnergyTank } from '../worker/energy-tank';
 
 const SHIELD_DURATION_MS = 2000;
 const SHIELD_ENERGY_COST = 10;

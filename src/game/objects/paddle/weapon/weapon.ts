@@ -1,12 +1,12 @@
 import type { Bounds } from '@game/common/types';
-import type { Controls } from '@game/input/controls';
-import { Key } from '@game/input/key';
-import type { EnergyTank } from '@game/objects/energy-tank';
+import type { Controls } from '@game/input-old/controls';
+import { Key } from '@game/input-old/key';
+import type { EnergyTank } from '@game/objects/worker/energy-tank';
 import { Timer } from '@game/common/helpers/timer';
 import type { Paddle } from '../paddle';
 import { Bullet } from './bullet';
 import { AUDIO } from '@game/assets/common-assets';
-import { SoundManager } from '@game/settings/sound';
+import { SoundManagerOld } from '@game/settings/sound';
 
 const DEFAULT_SHOOT_COOLDOWN_MS = 200;
 
@@ -61,7 +61,7 @@ export abstract class Weapon {
     if (shootPressed && this.shootCooldownTimer.done) {
       if (this.energyTank.tryConsume(this.shotCost)) {
         this.shoot();
-        SoundManager.playEffect(this.scene, AUDIO.SHOT);
+        SoundManagerOld.playEffect(this.scene, AUDIO.SHOT);
         this.shootCooldownTimer.reset();
       }
     }

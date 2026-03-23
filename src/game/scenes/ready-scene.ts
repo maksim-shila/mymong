@@ -1,4 +1,4 @@
-import { Controls } from '@game/input/controls';
+import { Controls } from '@game/input-old/controls';
 import { applyResolutionCamera, type ResolutionViewport } from '@game/settings/resolution';
 import { SCENE } from '../../scenes';
 

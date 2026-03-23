@@ -1,5 +1,5 @@
 import { AUDIO } from '@game/assets/common-assets';
-import { SoundManager } from '@game/settings/sound';
+import { SoundManagerOld } from '@game/settings/sound';
 import { Timer } from '@game/common/helpers/timer';
 import { SmokeAnimation } from '../../../animations/smoke-animation';
 import { GridEntityBase, GridEntityState, GridEntityType } from '../grid-entity';
@@ -52,7 +52,7 @@ export class SmokeHealerCell extends GridEntityBase {
 
     if (this.smokeTimer.tick(delta)) {
       this.smokeTimer.set(this.getNextSmokeDelay());
-      SoundManager.playEffect(this.scene, AUDIO.HEALER_SMOKE, {
+      SoundManagerOld.playEffect(this.scene, AUDIO.HEALER_SMOKE, {
         volume: HEALER_SMOKE_VOLUME,
       });
       this.smokeAnimation.show(this.x, this.y);

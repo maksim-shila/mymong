@@ -11,8 +11,6 @@ export class GridSlot {
   constructor(
     private readonly dropGenerator: DropGenerator,
     public readonly index: number,
-    public readonly row: number,
-    public readonly column: number,
     public readonly depth: number,
     public readonly width: number,
     public readonly height: number,
