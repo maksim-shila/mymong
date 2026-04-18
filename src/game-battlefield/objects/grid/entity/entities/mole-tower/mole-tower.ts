@@ -1,10 +1,10 @@
 import { GridEntity } from '../../grid-entity';
 import { MoleTowerProjectile } from './mole-tower-projectile';
-import { Timer } from '@core/utils/timer';
 import { MMObjectState } from '@core/mm-object-state';
 import type { BattlefieldScene } from '@game-battlefield/battlefield-scene';
 import type { Ship } from '@game-battlefield/objects/ship/ship';
-import { Math } from '@core/utils/math';
+import { MMMath } from '@core/utils/mm-math';
+import { MMTimer } from '@core/utils/mm-timer';
 
 const HITBOX_SCALE_X = 0.6;
 const HITBOX_SCALE_Y = 0.9;
@@ -15,7 +15,6 @@ const IMG_SCALE = 0.15;
 
 const BALL_OFFSET_X = -2;
 const BALL_OFFSET_Y = -135;
-const BALL_RADIUS = 18;
 
 const SHOT_CD_MIN_MS = 500;
 const SHOT_CD_MAX_MS = 3000;
@@ -28,8 +27,8 @@ export class MoleTower extends GridEntity {
   private readonly image: Phaser.GameObjects.Image;
   private projectile: MoleTowerProjectile | null;
 
-  private readonly shotTimer = new Timer(this.nextShotCdMs(), false);
-  private readonly projectileCdTimer = new Timer();
+  private readonly shotCdTimer: MMTimer;
+  private readonly projectileRespawnTimer: MMTimer;
 
   private readonly target: Ship;
 
@@ -43,8 +42,8 @@ export class MoleTower extends GridEntity {
   ) {
     super(
       scene,
-      x + Math.rnd.next(-15, 15),
-      y + Math.rnd.next(-15, 15),
+      x + MMMath.rnd.next(-15, 15),
+      y + MMMath.rnd.next(-15, 15),
       width * HITBOX_SCALE_X,
       height * HITBOX_SCALE_Y,
       depth,
@@ -52,13 +51,12 @@ export class MoleTower extends GridEntity {
     this.scene = scene;
     this.battlefieldScene = scene;
 
-    this.image = scene.add.image(
-      this.x + IMG_X_OFFSET,
-      this.y + IMG_Y_OFFSET,
-      'mole-tower',
-    );
+    this.image = scene.add.image(this.x + IMG_X_OFFSET, this.y + IMG_Y_OFFSET, 'mole-tower');
     this.image.setScale(IMG_SCALE);
     this.image.setDepth(depth);
+
+    this.shotCdTimer = new MMTimer(scene);
+    this.projectileRespawnTimer = new MMTimer(scene);
 
     this.target = scene.battlefield.context.ship;
     this.projectile = this.createProjectile();
@@ -66,20 +64,23 @@ export class MoleTower extends GridEntity {
 
   public override update(deltaMs: number): void {
     if (this.projectile == null) {
-      if (!this.projectileCdTimer.tick(deltaMs)) {
+      if (this.projectileRespawnTimer.active) {
         return;
       }
 
       this.projectile = this.createProjectile();
     }
 
-    if (
-      this.projectile.ready() &&
-      this.shotTimer.tick(deltaMs) &&
-      this.projectile.state === MMObjectState.IDLE
-    ) {
+    if (this.projectile.state === MMObjectState.READY) {
+      this.projectile.state = MMObjectState.IDLE;
+      var shotCd = Phaser.Math.RND.between(SHOT_CD_MIN_MS, SHOT_CD_MAX_MS);
+      this.shotCdTimer.start(shotCd);
+      return;
+    }
+
+    if (this.shotCdTimer.done && this.projectile.state === MMObjectState.IDLE) {
       this.projectile.setTarget(this.target.x, this.target.y);
-      this.shotTimer.set(this.nextShotCdMs());
+      return;
     }
 
     if (
@@ -87,23 +88,21 @@ export class MoleTower extends GridEntity {
       this.projectile.state === MMObjectState.DESTROYING
     ) {
       this.projectile = null;
-      this.projectileCdTimer.set(this.nextProjectileCdMs());
+      this.projectileRespawnTimer.start(this.nextProjectileCdMs());
       return;
     }
+
+    this.projectile.update(deltaMs);
   }
 
   public override destroy(fromScene?: boolean): void {
     this.image.destroy(fromScene);
-    if (this.projectile?.state === MMObjectState.IDLE) {
+    if (this.projectile !== null && this.projectile.state !== MMObjectState.ACTIVE) {
       this.projectile.destroy(fromScene);
     }
 
     this.projectile = null;
     super.destroy(fromScene);
-  }
-
-  private nextShotCdMs(): number {
-    return Phaser.Math.RND.between(SHOT_CD_MIN_MS, SHOT_CD_MAX_MS);
   }
 
   private nextProjectileCdMs(): number {
@@ -115,7 +114,6 @@ export class MoleTower extends GridEntity {
       this.battlefieldScene,
       this.x + BALL_OFFSET_X,
       this.y + BALL_OFFSET_Y,
-      BALL_RADIUS,
     );
   }
 }

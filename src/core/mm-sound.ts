@@ -1,9 +1,7 @@
-import type { MMScene } from './mm-scene';
-
 export class MMSound {
-  private static scene: MMScene | null = null;
+  private static scene: Phaser.Scene | null = null;
 
-  public static attachTo(scene: MMScene): void {
+  public static attachTo(scene: Phaser.Scene): void {
     MMSound.scene = scene;
   }
 

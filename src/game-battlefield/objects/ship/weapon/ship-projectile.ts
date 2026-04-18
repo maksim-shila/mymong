@@ -1,18 +1,21 @@
-import type { MMScene } from '@core/mm-scene';
+import { Color } from '@core/color';
 import { MMObjectState } from '@core/mm-object-state';
-import { ShipProjectileUI } from './ship-projectile-ui';
+import { Depth } from '@game-battlefield/depth';
 
 const BULLET_WIDTH = 10;
 const BULLET_HEIGHT = 28;
 const BULLET_SPEED = 1200;
 
+const STROKE_WIDTH = 2;
+const STROKE_COLOR = 0x352861;
+const STROKE_ALPHA = 0.85;
+
 export class ShipProjectile extends Phaser.GameObjects.Rectangle {
   private readonly arcadeBody: Phaser.Physics.Arcade.Body;
-  private readonly ui: ShipProjectileUI;
 
   public damage = 1;
 
-  constructor(scene: MMScene, x: number, y: number) {
+  constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, BULLET_WIDTH, BULLET_HEIGHT);
 
     scene.add.existing(this);
@@ -23,12 +26,13 @@ export class ShipProjectile extends Phaser.GameObjects.Rectangle {
     this.arcadeBody.setAllowGravity(false);
     this.arcadeBody.setVelocityY(-BULLET_SPEED);
 
-    this.ui = new ShipProjectileUI(scene, this.arcadeBody, this.width, this.height);
+    this.setDepth(Depth.PROJECTILE);
+    this.setFillStyle(Color.WHITE);
+    this.setStrokeStyle(STROKE_WIDTH, STROKE_COLOR, STROKE_ALPHA);
   }
 
   public override update(_deltaMs: number): void {
     this.arcadeBody.setVelocityY(-BULLET_SPEED);
-    this.ui.draw();
   }
 
   public override destroy(fromScene?: boolean): void {
@@ -37,7 +41,6 @@ export class ShipProjectile extends Phaser.GameObjects.Rectangle {
     }
 
     this.state = MMObjectState.DESTROYED;
-    this.ui.destroy();
     super.destroy(fromScene);
   }
 }

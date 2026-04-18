@@ -1,5 +1,5 @@
-import { Action } from './action';
-import type { MMInput } from './mm-input';
+import { Action } from '../action';
+import type { MMInput } from '../mm-input';
 
 const AXIS_DEAD_ZONE = 0.5;
 const TRIGGER_THRESHOLD = 0.5;
@@ -19,23 +19,23 @@ const BINDINGS: Record<Action, KeyDown> = {
 };
 
 export class MMGamePad implements MMInput {
-  private readonly gamepadPlugin: Phaser.Input.Gamepad.GamepadPlugin;
+  readonly #gamepadPlugin: Phaser.Input.Gamepad.GamepadPlugin;
 
-  private keysDown = new Set<Action>();
-  private keysJustDown = new Set<Action>();
+  readonly #keysDown = new Set<Action>();
+  readonly #keysJustDown = new Set<Action>();
 
   constructor(gamepadPlugin: Phaser.Input.Gamepad.GamepadPlugin) {
-    this.gamepadPlugin = gamepadPlugin;
+    this.#gamepadPlugin = gamepadPlugin;
   }
 
   private get activeGamepads(): Phaser.Input.Gamepad.Gamepad[] {
-    return this.gamepadPlugin.getAll().filter((p) => p.connected);
+    return this.#gamepadPlugin.getAll().filter((p) => p.connected);
   }
 
-  public update(): void {
-    const prevKeysDown = new Set<Action>(this.keysDown);
-    this.keysJustDown.clear();
-    this.keysDown.clear();
+  update(): void {
+    const prevKeysDown = new Set<Action>(this.#keysDown);
+    this.#keysJustDown.clear();
+    this.#keysDown.clear();
 
     const pads = this.activeGamepads;
     for (const action of ACTIONS) {
@@ -44,18 +44,18 @@ export class MMGamePad implements MMInput {
         continue;
       }
 
-      this.keysDown.add(action);
+      this.#keysDown.add(action);
       if (!prevKeysDown.has(action)) {
-        this.keysJustDown.add(action);
+        this.#keysJustDown.add(action);
       }
     }
   }
 
-  public keyDown(action: Action): boolean {
-    return this.keysDown.has(action);
+  keyDown(action: Action): boolean {
+    return this.#keysDown.has(action);
   }
 
-  public keyJustDown(action: Action): boolean {
-    return this.keysJustDown.has(action);
+  keyJustDown(action: Action): boolean {
+    return this.#keysJustDown.has(action);
   }
 }

@@ -5,6 +5,7 @@ import type { Ship } from '../objects/ship/ship';
 import type { ShipProjectile } from '../objects/ship/weapon/ship-projectile';
 import { MMObjectState } from '@core/mm-object-state';
 
+
 type ArcadeCallbackObject =
   | Phaser.Types.Physics.Arcade.GameObjectWithBody
   | Phaser.Physics.Arcade.Body

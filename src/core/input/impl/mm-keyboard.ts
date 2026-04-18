@@ -1,5 +1,5 @@
-import { Action } from './action';
-import type { MMInput } from './mm-input';
+import { Action } from '../action';
+import type { MMInput } from '../mm-input';
 
 export class MMKeyboard implements MMInput {
   private readonly bindings: Record<Action, Phaser.Input.Keyboard.Key[]>;

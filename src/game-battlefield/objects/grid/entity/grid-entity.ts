@@ -1,10 +1,16 @@
-import { MMScene } from '@core/mm-scene';
 import { MMObjectState } from '@core/mm-object-state';
 
 export class GridEntity extends Phaser.GameObjects.Rectangle {
   protected lives = 5;
 
-  constructor(scene: MMScene, x: number, y: number, width: number, height: number, depth: number) {
+  constructor(
+    scene: Phaser.Scene,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    depth: number,
+  ) {
     super(scene, x, y, width, height);
 
     scene.add.existing(this);

@@ -24,8 +24,8 @@ export class Battlefield {
 
   public context!: BattlefieldContext;
 
-  private ship!: Ship;
   private grid!: Grid;
+  private ship!: Ship;
 
   constructor(scene: BattlefieldScene) {
     this.scene = scene;
@@ -44,8 +44,8 @@ export class Battlefield {
   }
 
   public update(deltaMs: number): void {
-    this.ship.update(deltaMs);
     this.grid.update(deltaMs);
+    this.ship.update(deltaMs);
   }
 
   private createGrid(): Grid {

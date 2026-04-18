@@ -1,7 +1,6 @@
-import { MMScene } from '@core/mm-scene';
 import { BattlefieldScene } from './battlefield-scene';
 
-export class BattlefieldPreloadScene extends MMScene {
+export class BattlefieldPreloadScene extends Phaser.Scene {
   public static readonly NAME = 'battlefield-preload-scene';
 
   constructor() {
@@ -12,8 +11,7 @@ export class BattlefieldPreloadScene extends MMScene {
     this.load.pack('assets', 'assets/game-battlefield/pack.json');
   }
 
-  public override create(): void {
-    super.create();
+  public create(): void {
     this.scene.start(BattlefieldScene.NAME);
   }
 }

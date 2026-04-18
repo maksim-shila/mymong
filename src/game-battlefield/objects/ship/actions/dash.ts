@@ -1,48 +1,52 @@
-import { Timer } from '@core/utils/timer';
-import type { Direction } from '@game/common/types';
+import type { Direction } from '@core/types';
+import { MMTimer } from '@core/utils/mm-timer';
 
-const DURATION_MS = 200;
+const DISTANCE = 300;
+const DURATION_MS = 150;
+const BOOST_VELOCITY = DISTANCE / (DURATION_MS / 1000);
 const COOLDOWN_MS = 1000;
-const BOOST_VELOCITY = 2500;
 
 export class Dash {
-  private readonly durationTimer = new Timer();
-  private readonly cooldownTimer = new Timer();
-
+  private readonly durationTimer: MMTimer;
+  private readonly cdTimer: MMTimer;
   private direction: Direction = 0;
+  private callback: (() => any) | null = null;
 
-  public get vx(): number {
+  constructor(scene: Phaser.Scene) {
+    this.durationTimer = new MMTimer(scene);
+    this.cdTimer = new MMTimer(scene);
+  }
+
+  get boostVelocity(): number {
+    if (!this.durationTimer.active || this.direction === 0) {
+      return 0;
+    }
+
     return BOOST_VELOCITY * this.direction;
   }
 
-  public get active(): boolean {
+  get active(): boolean {
     return this.durationTimer.active;
   }
 
-  public get canDash(): boolean {
-    return this.cooldownTimer.done && this.durationTimer.done;
+  get canDash(): boolean {
+    return !this.durationTimer.active && !this.cdTimer.active;
   }
 
-  public update(deltaMs: number): void {
-    if (!this.active) {
-      this.cooldownTimer.tick(deltaMs);
-      return;
-    }
-
-    this.durationTimer.tick(deltaMs);
-
-    if (!this.active) {
-      this.direction = 0;
-      this.cooldownTimer.set(COOLDOWN_MS);
-    }
+  onFinish(callback: () => any): void {
+    this.callback = callback;
   }
 
-  public start(direction: Direction): void {
-    if (direction === 0) {
+  start(direction: Direction): void {
+    if (!this.canDash || direction === 0) {
       return;
     }
 
     this.direction = direction;
-    this.durationTimer.set(DURATION_MS);
+    this.durationTimer.start(DURATION_MS, () => {
+      this.direction = 0;
+      this.cdTimer.start(COOLDOWN_MS);
+      this.callback?.();
+    });
   }
 }

@@ -1,8 +1,11 @@
 import type { EnemyProjectile } from '../../../enemy-projectile';
 import { MMObjectState } from '@core/mm-object-state';
-import { MoleTowerProjectileUI } from './mole-tower-projectile-ui';
-import { Timer } from '@core/utils/timer';
+import { MMTimer } from '@core/utils/mm-timer';
 import type { BattlefieldScene } from '@game-battlefield/battlefield-scene';
+import { Depth } from '@game-battlefield/depth';
+
+const SPAWN_TIME_MS = 2000;
+const RADIUS = 18;
 
 const IDLE_BOB_AMPLITUDE_PX = 10;
 const IDLE_BOB_PERIOD_MS = 1600;
@@ -10,39 +13,41 @@ const PROJECTILE_MAX_FLIGHT_DURATION_MS = 3000;
 const PROJECTILE_ACCELERATION = 850;
 const PROJECTILE_MAX_SPEED = 1000;
 const IDLE_RELEASE_VELOCITY_SCALE = 12;
-const PROJECTILE_SPAWN_DURATION_MS = 1000;
 const MIN_TARGET_DISTANCE = 1;
 const PROJECTILE_LAUNCH_RAMP_MS = 650;
 const PROJECTILE_INITIAL_SPEED_LIMIT = 220;
 
-export class MoleTowerProjectile extends Phaser.GameObjects.Rectangle implements EnemyProjectile {
+export class MoleTowerProjectile extends Phaser.GameObjects.Image implements EnemyProjectile {
   private readonly arcadeBody: Phaser.Physics.Arcade.Body;
   private readonly idleAnimation: IdleAnimation;
-  private readonly spawnAnimation: ProjectileSpawnAnimation;
-  private readonly ui: MoleTowerProjectileUI;
+  private readonly spawnTimer: MMTimer;
+
   private flight: ProjectileFlight | null = null;
 
   public override state: MMObjectState = MMObjectState.IDLE;
   public readonly damage = 1;
 
-  constructor(scene: BattlefieldScene, x: number, y: number, radius: number) {
-    super(scene, x, y, radius * 2, radius * 2);
+  constructor(scene: BattlefieldScene, x: number, y: number) {
+    super(scene, x, y, 'mole-tower-ball');
+
+    this.setDisplaySize(RADIUS * 2, RADIUS * 2);
+    this.setDepth(Depth.PROJECTILE);
 
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
     this.arcadeBody = this.body as Phaser.Physics.Arcade.Body;
     this.arcadeBody.setAllowGravity(false);
-    this.arcadeBody.setCircle(radius);
-    this.setVisible(false);
+    this.arcadeBody.setCircle(this.width / 2);
 
     scene.collisions.enemyProjectiles.add(this);
 
     this.idleAnimation = new IdleAnimation(this);
-    this.ui = new MoleTowerProjectileUI(scene, this.arcadeBody, radius);
-    this.spawnAnimation = new ProjectileSpawnAnimation(this.ui);
 
-    scene.events.on(Phaser.Scenes.Events.UPDATE, this.updateFromScene, this);
+    this.state = MMObjectState.SPAWN;
+    this.spawnTimer = new MMTimer(scene);
+    this.setAlpha(0);
+    this.spawnTimer.start(SPAWN_TIME_MS, () => (this.state = MMObjectState.READY));
   }
 
   public override update(deltaMs: number): void {
@@ -50,41 +55,33 @@ export class MoleTowerProjectile extends Phaser.GameObjects.Rectangle implements
       case MMObjectState.DESTROYED:
       case MMObjectState.DESTROYING:
         return;
+      case MMObjectState.SPAWN:
+        this.setAlpha(this.spawnTimer.progress);
+        break;
+      case MMObjectState.READY:
       case MMObjectState.IDLE:
         this.idleAnimation.update(deltaMs);
-        this.spawnAnimation.update(deltaMs);
         break;
       case MMObjectState.ACTIVE:
         this.flight?.update(deltaMs);
         break;
     }
-
-    this.ui.draw();
-  }
-
-  public ready(): boolean {
-    return this.spawnAnimation.done;
   }
 
   public setTarget(x: number, y: number): void {
-    this.flight = new ProjectileFlight(this, x, y, this.idleAnimation.velocityY);
     this.state = MMObjectState.ACTIVE;
+    this.flight = new ProjectileFlight(this, x, y, this.idleAnimation.velocityY);
   }
 
-  public setIdleY(y: number): void {
-    this.setY(y);
-    this.arcadeBody.updateFromGameObject();
-  }
-
-  public setFlightVelocity(x: number, y: number): void {
+  public setSpeed(x: number, y: number): void {
     this.arcadeBody.setVelocity(x, y);
   }
 
-  public setFlightAcceleration(x: number, y: number): void {
+  public setAcceleration(x: number, y: number): void {
     this.arcadeBody.setAcceleration(x, y);
   }
 
-  public setFlightMaxSpeed(speed: number): void {
+  public setMaxSpeed(speed: number): void {
     this.arcadeBody.setMaxVelocity(speed, speed);
   }
 
@@ -97,36 +94,7 @@ export class MoleTowerProjectile extends Phaser.GameObjects.Rectangle implements
     this.flight = null;
     this.arcadeBody.setVelocity(0, 0);
     this.arcadeBody.setAcceleration(0, 0);
-    this.scene.events.off(Phaser.Scenes.Events.UPDATE, this.updateFromScene, this);
-    this.ui.destroy(fromScene);
     super.destroy(fromScene);
-  }
-
-  private updateFromScene(_time: number, deltaMs: number): void {
-    this.update(deltaMs);
-  }
-}
-
-class ProjectileSpawnAnimation {
-  private readonly ui: MoleTowerProjectileUI;
-  private readonly timer = new Timer(PROJECTILE_SPAWN_DURATION_MS, false);
-
-  constructor(ui: MoleTowerProjectileUI) {
-    this.ui = ui;
-    this.ui.setAlpha(0);
-  }
-
-  get done(): boolean {
-    return this.timer.done;
-  }
-
-  update(deltaMs: number): void {
-    if (this.done) {
-      return;
-    }
-
-    this.timer.tick(deltaMs);
-    this.ui.setAlpha(this.timer.progress);
   }
 }
 
@@ -141,8 +109,8 @@ class ProjectileFlight {
     this.toX = toX;
     this.toY = toY;
 
-    projectile.setFlightMaxSpeed(PROJECTILE_INITIAL_SPEED_LIMIT);
-    projectile.setFlightVelocity(0, idleVelocityY * IDLE_RELEASE_VELOCITY_SCALE);
+    projectile.setMaxSpeed(PROJECTILE_INITIAL_SPEED_LIMIT);
+    projectile.setSpeed(0, idleVelocityY * IDLE_RELEASE_VELOCITY_SCALE);
     this.updateAcceleration();
   }
 
@@ -173,9 +141,9 @@ class ProjectileFlight {
       launchProgress,
     );
 
-    this.projectile.setFlightMaxSpeed(maxSpeed);
+    this.projectile.setMaxSpeed(maxSpeed);
 
-    this.projectile.setFlightAcceleration(
+    this.projectile.setAcceleration(
       directionX * PROJECTILE_ACCELERATION * accelerationScale,
       directionY * PROJECTILE_ACCELERATION * accelerationScale,
     );
@@ -185,7 +153,7 @@ class ProjectileFlight {
 class IdleAnimation {
   private readonly projectile: MoleTowerProjectile;
   private readonly baseY: number;
-  private elapsedMs = Math.random() * 1000;
+  private elapsedMs = 0;
 
   constructor(projectile: MoleTowerProjectile) {
     this.projectile = projectile;
@@ -201,6 +169,6 @@ class IdleAnimation {
     this.elapsedMs += deltaMs;
 
     const phase = (this.elapsedMs / IDLE_BOB_PERIOD_MS) * Math.PI * 2;
-    this.projectile.setIdleY(this.baseY + Math.sin(phase) * IDLE_BOB_AMPLITUDE_PX);
+    this.projectile.setY(this.baseY + Math.sin(phase) * IDLE_BOB_AMPLITUDE_PX);
   }
 }

@@ -26,6 +26,15 @@
         "type": "image",
         "key": "ship",
         "url": "ship.png"
+      },
+      {
+        "type": "spritesheet",
+        "key": "ship-hit-animation",
+        "url": "ship-hit.png",
+        "frameConfig": {
+          "frameWidth": 512,
+          "frameHeight": 512
+        }
       }
     ]
   },

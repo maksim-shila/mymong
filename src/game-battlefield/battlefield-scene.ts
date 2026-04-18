@@ -1,9 +1,9 @@
-import { MMScene } from '@core/mm-scene';
 import { Battlefield } from './objects/battlefield';
 import { BattlefieldBackground } from './battlefield-background';
 import type { BattlefieldCollisionsHandler } from './collisions/battlefield-collisions-handler';
+import { MMSound } from '@core/mm-sound';
 
-export class BattlefieldScene extends MMScene {
+export class BattlefieldScene extends Phaser.Scene {
   public static readonly NAME = 'battlefield-scene';
 
   public battlefield!: Battlefield;
@@ -16,12 +16,11 @@ export class BattlefieldScene extends MMScene {
     return this.battlefield.context.collisions;
   }
 
-  public override create(): void {
-    super.create();
-
+  public create(): void {
     this.battlefield = new Battlefield(this);
     this.battlefield.init();
     new BattlefieldBackground(this);
+    MMSound.attachTo(this);
   }
 
   public override update(time: number, deltaMs: number): void {
