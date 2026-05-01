@@ -1,0 +1,65 @@
+{
+  "images": {
+    "path": "assets/game-battlefield/image/",
+    "files": [
+      {
+        "type": "image",
+        "key": "background",
+        "url": "battlefield-background.png"
+      },
+      {
+        "type": "image",
+        "key": "mole-statue",
+        "url": "mole-statue.png"
+      },
+      {
+        "type": "image",
+        "key": "mole-tower-ball",
+        "url": "mole-tower-ball.png"
+      },
+      {
+        "type": "image",
+        "key": "mole-tower",
+        "url": "mole-tower.png"
+      },
+      {
+        "type": "image",
+        "key": "default-tower",
+        "url": "default-tower.png"
+      },
+      {
+        "type": "image",
+        "key": "ship",
+        "url": "ship.png"
+      },
+      {
+        "type": "spritesheet",
+        "key": "ship-hit-animation",
+        "url": "ship-hit.png",
+        "frameConfig": {
+          "frameWidth": 512,
+          "frameHeight": 512
+        }
+      },
+      {
+        "type": "spritesheet",
+        "key": "ship-stun-animation",
+        "url": "ship-stun.png",
+        "frameConfig": {
+          "frameWidth": 512,
+          "frameHeight": 512
+        }
+      }
+    ]
+  },
+  "audio": {
+    "path": "assets/game-battlefield/audio/",
+    "files": [
+      {
+        "type": "audio",
+        "key": "statue-hit",
+        "url": "statue-hit.mp3"
+      }
+    ]
+  }
+}

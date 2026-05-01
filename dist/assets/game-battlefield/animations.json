@@ -1,0 +1,21 @@
+[
+  {
+    "key": "ship-hit",
+    "assetKey": "ship-hit-animation",
+    "frameRate": 24,
+    "repeat": 0
+  },
+  {
+    "key": "ship-stun-init",
+    "assetKey": "ship-stun-animation",
+    "frameRate": 25,
+    "repeat": 0
+  },
+  {
+    "key": "ship-stun",
+    "frames": [7, 8, 9],
+    "assetKey": "ship-stun-animation",
+    "frameRate": 10,
+    "repeat": -1
+  }
+]
